@@ -209,7 +209,7 @@ def build_message(stock_name: str, warn: dict, thresholds: dict | None) -> str:
         if thresholds['allMet']:
             lines.append('→ 3가지 모두 충족 · 경고 유지 중 🔴')
         else:
-            lines.append(f'→ {unmet}가지 미충족 · 내일 해제 가능 🟢')
+            lines.append(f'→ {unmet}가지 미충족 · {sd(release)} 해제 가능 🟢')
     else:
         block = '\n'.join([
             f'지정일  {sd(d_date)}  →  해제가능  {sd(release)}',
