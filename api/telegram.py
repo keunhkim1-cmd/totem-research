@@ -153,6 +153,31 @@ def sd(d: date) -> str:
     """date → M/D 형식"""
     return f'{d.month}/{d.day}'
 
+def vlen(s: str) -> int:
+    """모바일 모노스페이스 시각 너비 (한글·원문자·이모지=2, ASCII=1)"""
+    w = 0
+    for c in s:
+        cp = ord(c)
+        if (0xAC00 <= cp <= 0xD7AF or  # 한글 음절
+            0x1100 <= cp <= 0x11FF or  # 한글 자모
+            0x3000 <= cp <= 0x9FFF or  # CJK + 호환
+            0xF900 <= cp <= 0xFAFF or  # CJK 호환
+            0x2460 <= cp <= 0x24FF or  # 원문자 ①②③
+            0x2700 <= cp <= 0x27BF or  # 딩벳 ❌✅
+            cp >= 0x1F000):            # 이모지
+            w += 2
+        else:
+            w += 1
+    return w
+
+def vpad_l(s: str, width: int) -> str:
+    """시각 너비 기준 좌측 정렬 (우측 공백 패딩)"""
+    return s + ' ' * max(0, width - vlen(s))
+
+def vpad_r(s: str, width: int) -> str:
+    """시각 너비 기준 우측 정렬 (좌측 공백 패딩)"""
+    return ' ' * max(0, width - vlen(s)) + s
+
 def build_message(stock_name: str, warn: dict, thresholds: dict | None) -> str:
     d_str   = warn['designationDate']
     d_date  = date.fromisoformat(d_str)
@@ -183,23 +208,24 @@ def build_message(stock_name: str, warn: dict, thresholds: dict | None) -> str:
         p1 = f"{thresholds['thresh1']:,}원"
         p2 = f"{thresholds['thresh2']:,}원"
         p3 = f"{thresholds['thresh3']:,}원"
-        # 가격 우측 정렬 기준폭
-        pw = max(len(p1), len(p2), len(p3))
-        # 라벨 명시적 고정 (한글 2바이트 보정: 고점=4자지만 시각폭=T-15와 동일)
-        L1 = '① T-5 '   # 6자 → T-5(3) 보정용 공백 포함
-        L2 = '② T-15'   # 6자
-        L3 = '③ 고점'   # 4자지만 한글 시각폭으로 T-15와 유사
+        # 시각 너비 기준 정렬
+        lw   = max(vlen('① T-5'), vlen('② T-15'), vlen('③ 고점')) + 1  # 라벨 열 너비
+        pw_v = max(vlen(p1), vlen(p2), vlen(p3))                         # 가격 열 너비
+        sep  = lw + 2 + pw_v + 3 + vlen('결과')                         # 구분선 길이
+
+        def row(label, price, icon):
+            return vpad_l(label, lw) + '  ' + vpad_r(price, pw_v) + '   ' + icon
 
         block = '\n'.join([
             f'현재가  {cur:,}원  ({sd(t_d)})',
             f'지정일  {sd(d_date)}  →  해제 판단일  {sd(release)}',
             f'경과    {elapsed} / 10 거래일',
             '',
-            f'조건      {"기준가":>{pw}}   결과',
-            '─' * (8 + pw + 5),
-            f'{L1}  {p1:>{pw}}   {ci(c1)}',
-            f'{L2}  {p2:>{pw}}   {ci(c2)}',
-            f'{L3}  {p3:>{pw}}   {ci(c3)}',
+            vpad_l('조건', lw) + '  ' + vpad_r('기준가', pw_v) + '   결과',
+            '─' * sep,
+            row('① T-5',  p1, ci(c1)),
+            row('② T-15', p2, ci(c2)),
+            row('③ 고점', p3, ci(c3)),
         ])
         lines.append(f'```\n{block}\n```')
         lines.append('')
