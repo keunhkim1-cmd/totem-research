@@ -9,7 +9,6 @@ class handler(BaseHTTPRequestHandler):
         token = os.environ.get('TELEGRAM_BOT_TOKEN', '')
         result = {
             'token_set': bool(token),
-            'token_prefix': token[:10] + '...' if token else '(없음)',
         }
 
         # 토큰이 있으면 실제 Telegram API 호출 테스트
