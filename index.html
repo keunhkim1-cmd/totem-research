@@ -466,7 +466,7 @@
   </div>
 
   <!-- 해제 요건 (시장경보 단계 안내 바로 위) -->
-  <div class="card" style="margin-bottom:16px;">
+  <div class="card" id="conditionCard" style="margin-bottom:16px; display:none;">
     <h2>📋 투자경고 해제 요건</h2>
     <div class="conditions-title" style="margin-bottom:12px;">아래 3가지가 <em>모두</em> 충족될 때 경고 <strong>유지</strong> — 1가지라도 미충족이면 다음 거래일 <strong>해제</strong></div>
     <div id="conditionList"></div>
@@ -640,9 +640,9 @@ async function doSearch() {
     if (results.length === 0) {
       resultsEl.innerHTML = `
         <div class="result-empty">
-          "${escHtml(query)}" 종목의 투자경고/위험 지정 이력이 없습니다.<br/>
-          <small style="color:#334155">최근 1년 이내 지정 이력이 없거나 종목명을 확인해주세요.</small>
+          현재 투자경고가 아님.
         </div>`;
+      hideWarningCards();
       return;
     }
 
@@ -692,17 +692,88 @@ document.getElementById('searchResults').addEventListener('click', (e) => {
   }
 });
 
+function hideWarningCards() {
+  document.getElementById('resultCard').classList.remove('show');
+  document.getElementById('priceCard').classList.remove('show');
+  document.getElementById('conditionCard').style.display = 'none';
+}
+
+function showNotWarning() {
+  const resultsEl = document.getElementById('searchResults');
+  resultsEl.innerHTML = `<div class="result-empty">현재 투자경고가 아님.</div>`;
+  resultsEl.classList.add('show');
+  hideWarningCards();
+}
+
 function selectResult(r) {
   document.getElementById('stockName').value = r.stockName || document.getElementById('searchInput').value;
   document.getElementById('designationDate').value = r.designationDate;
   document.getElementById('warningType').value = r.level === '투자위험' ? 'risk' : 'warning_normal';
   document.getElementById('searchResults').classList.remove('show');
 
-  calculate();
-
-  // 기준가 조회와 공시 연동을 병렬 실행
-  fetchPriceThresholds(r.stockName);
+  // 기준가 조회 → 해제 여부 판별 후 결과 표시
+  checkAndDisplay(r);
   syncDartCorp(r.stockName);
+}
+
+async function checkAndDisplay(r) {
+  await holidaysReady;
+
+  const designationDate = new Date(r.designationDate + 'T00:00:00');
+  const today = new Date(); today.setHours(0, 0, 0, 0);
+  const elapsed = countTradingDays(designationDate, today) - 1;
+
+  // 10거래일 미경과 → 아직 경고 기간 내, 바로 표시
+  if (elapsed < 10) {
+    calculate();
+    fetchPriceThresholds(r.stockName);
+    return;
+  }
+
+  // 10거래일 경과 → 가격 조건으로 해제 여부 판별
+  try {
+    const codeResp = await fetch(`/api/stock-code?name=${encodeURIComponent(r.stockName)}`);
+    const codeData = await codeResp.json();
+    if (codeData.error || !codeData.items || codeData.items.length === 0) {
+      // 종목코드 조회 실패 시 기존대로 표시
+      calculate();
+      fetchPriceThresholds(r.stockName);
+      return;
+    }
+    const code = codeData.items[0].code;
+
+    const priceResp = await fetch(`/api/stock-price?code=${code}`);
+    const priceData = await priceResp.json();
+    if (priceData.error || priceData.thresholds?.error) {
+      calculate();
+      fetchPriceThresholds(r.stockName);
+      return;
+    }
+
+    const t = priceData.thresholds;
+    const allMet = t.cond1 && t.cond2 && t.cond3;
+
+    if (!allMet) {
+      // 10거래일 경과 + 조건 미충족 → 해제된 상태
+      showNotWarning();
+      return;
+    }
+
+    // 조건 모두 충족 → 아직 경고 유지 중, 전체 표시
+    calculate();
+    // 이미 가격 데이터를 가져왔으므로 직접 렌더링
+    const card = document.getElementById('priceCard');
+    const meta = document.getElementById('priceMeta');
+    card.classList.add('show');
+    const item = codeData.items[0];
+    meta.innerHTML = `종목코드: <strong>${code}</strong> (${item.market}) &nbsp;|&nbsp; 판단일(T): <strong>${t.tDate}</strong> &nbsp;|&nbsp; 현재 종가: <strong>${t.tClose.toLocaleString()}원</strong>`;
+    renderThresholds(t);
+
+  } catch (e) {
+    // 오류 시 기존대로 표시
+    calculate();
+    fetchPriceThresholds(r.stockName);
+  }
 }
 
 // ────────────────────────────────────────────────
@@ -986,6 +1057,7 @@ async function calculate() {
   ).join('');
 
   document.getElementById('resultCard').classList.add('show');
+  document.getElementById('conditionCard').style.display = '';
   document.getElementById('resultCard').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
 }
 

@@ -57,7 +57,7 @@ def parse_kind_html(html: str, level_name: str) -> list:
             results.append({
                 'level': level_name,
                 'stockName': name_m.group(1).strip(),
-                'designationDate': dates[0],
+                'designationDate': dates[-1],
             })
     return results
 
