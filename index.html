@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>KRX 투자 도구</title>
+  <title>Shamanism Research</title>
   <!-- SF Pro: system font on macOS/iOS, fallbacks for other platforms -->
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -99,9 +99,15 @@
       height: 48px;
       position: sticky; top: 0; z-index: 100;
     }
+    .nav-title {
+      font-family: var(--font-display);
+      font-size: 21px; font-weight: 600; color: #ffffff;
+      letter-spacing: -0.4px; white-space: nowrap;
+      margin-right: 32px;
+    }
     .nav-inner {
       max-width: 980px; margin: 0 auto; padding: 0 24px;
-      display: flex; align-items: center; justify-content: center;
+      display: flex; align-items: center; justify-content: flex-start;
       height: 100%;
     }
     .nav-item {
@@ -614,8 +620,9 @@
 <!-- Nav Bar — full-width outside container -->
 <nav class="nav-bar">
   <div class="nav-inner">
-    <button class="nav-item" onclick="switchPage('dashboard', this)">DASHBOARD</button>
-    <button class="nav-item active" onclick="switchPage('warning', this)">투자경고 해제일 계산기</button>
+    <span class="nav-title">Shamanism Research</span>
+    <button class="nav-item active" onclick="switchPage('dashboard', this)">DASHBOARD</button>
+    <button class="nav-item" onclick="switchPage('warning', this)">투자경고 해제일 계산기</button>
     <button class="nav-item" onclick="switchPage('dart', this)">공시 분석기</button>
   </div>
 </nav>
