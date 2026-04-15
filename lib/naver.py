@@ -53,7 +53,6 @@ def fetch_prices(code: str, count: int = 20) -> list:
                     continue
                 d = parts[0]
                 prices.append({'date': f'{d[:4]}-{d[4:6]}-{d[6:8]}', 'close': int(parts[4])})
-            prices.reverse()
             return prices
 
         return retry(_call)
