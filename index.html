@@ -112,7 +112,10 @@
       max-width: 980px; margin: 0 auto; padding: 0 24px;
       display: flex; align-items: center; justify-content: flex-start;
       height: 100%;
+      overflow-x: auto; -webkit-overflow-scrolling: touch;
+      scrollbar-width: none;
     }
+    .nav-inner::-webkit-scrollbar { display: none; }
     .nav-item {
       flex: none; text-align: center; padding: 0 20px; height: 48px;
       font-size: 12px; font-weight: 400; color: rgba(255,255,255,0.8);
