@@ -13,7 +13,7 @@ import urllib.parse
 
 from lib.krx import search_kind
 from lib.naver import stock_code as naver_stock_code, fetch_prices, calc_thresholds, fetch_stock_overview
-from lib.dart import search_disclosure, fetch_financial
+from lib.dart import search_disclosure
 from lib.financial_model import build_model
 
 PORT = 5173
@@ -94,18 +94,6 @@ class Handler(http.server.SimpleHTTPRequestHandler):
                     page_no=int(qs.get('page_no', ['1'])[0]),
                     page_count=min(int(qs.get('page_count', ['20'])[0]), 100),
                     pblntf_ty=qs.get('pblntf_ty', [''])[0].strip(),
-                )
-                self.send_json(data)
-            except Exception as e:
-                self.send_json({'error': str(e)}, 500)
-            return
-
-        if parsed.path == '/api/dart-financial':
-            try:
-                data = fetch_financial(
-                    corp_code=qs.get('corp_code', [''])[0].strip(),
-                    bsns_year=qs.get('bsns_year', [''])[0].strip(),
-                    reprt_code=qs.get('reprt_code', ['11011'])[0].strip(),
                 )
                 self.send_json(data)
             except Exception as e:

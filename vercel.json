@@ -33,6 +33,6 @@
     "api/warn-search.py": { "maxDuration": 30 },
     "api/stock-price.py": { "maxDuration": 30 },
     "api/dart-search.py": { "maxDuration": 30 },
-    "api/dart-financial.py": { "maxDuration": 30 }
+    "api/financial-model.py": { "maxDuration": 60 }
   }
 }

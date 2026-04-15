@@ -423,21 +423,6 @@
       letter-spacing: -0.12px;
     }
 
-    /* 재무제표 */
-    .fin-table { width: 100%; border-collapse: collapse; font-size: 14px; letter-spacing: -0.224px; }
-    .fin-table th, .fin-table td { padding: 10px 8px; text-align: right; font-family: var(--mono); }
-    .fin-table th {
-      color: var(--text-muted); font-weight: 600; border-bottom: 1px solid var(--border);
-      font-size: 12px; letter-spacing: -0.12px;
-      font-family: var(--font-text);
-    }
-    .fin-table td { color: var(--text); border-bottom: 1px solid rgba(255,255,255,0.06); }
-    .fin-table td:first-child, .fin-table th:first-child { text-align: left; font-family: var(--font-text); }
-    .fin-table tr:last-child td { border-bottom: none; }
-    .fin-label { color: var(--text-secondary); font-weight: 600; }
-    .fin-positive { color: var(--up); }
-    .fin-negative { color: var(--down); }
-
     /* 재무 모델 (Model 시트 양식) — DESIGN.md 준수 */
     .model-table {
       width: 100%; border-collapse: collapse; min-width: 1100px;
@@ -535,17 +520,6 @@
       font-size: 12px; font-weight: 400; letter-spacing: -0.12px;
       color: rgba(0,0,0,0.48);
     }
-    .fin-ratio-bar {
-      display: flex; align-items: center; gap: 10px;
-      background: var(--surface2); border: none;
-      border-radius: 8px; padding: 14px; margin-top: 12px;
-    }
-    .fin-ratio-label { font-size: 12px; color: var(--text-muted); white-space: nowrap; letter-spacing: -0.12px; }
-    .fin-ratio-value { font-size: 17px; font-weight: 600; font-family: var(--mono); letter-spacing: -0.374px; }
-    .fin-year-select {
-      background: var(--surface2); border: none; color: var(--text);
-      border-radius: 6px; padding: 4px 8px; font-size: 14px; cursor: pointer;
-    }
 
     /* 기업 개요 */
     .overview-grid {
@@ -624,11 +598,6 @@
     .section-light .overview-grid .ov-item { background: var(--bg-alt); }
     .section-light .ov-label { color: rgba(0,0,0,0.48); }
     .section-light .ov-value { color: var(--text-dark); }
-    .section-light .fin-table th { color: rgba(0,0,0,0.48); border-bottom: 1px solid rgba(0,0,0,0.1); }
-    .section-light .fin-table td { color: var(--text-dark); border-bottom: 1px solid rgba(0,0,0,0.06); }
-    .section-light .fin-ratio-bar { background: var(--bg-alt); }
-    .section-light .fin-ratio-label { color: rgba(0,0,0,0.48); }
-    .section-light .fin-ratio-value { color: var(--text-dark); }
 
     @media (max-width: 480px) {
       .date-grid { grid-template-columns: 1fr; }
@@ -683,13 +652,6 @@
       <div class="card" id="overviewCard" style="display:none;">
         <h2>기업 개요</h2>
         <div id="overviewContent"></div>
-      </div>
-
-      <!-- 재무제표 핵심 지표 -->
-      <div class="card" id="financialCard" style="display:none;">
-        <h2>재무제표 핵심 지표</h2>
-        <div id="financialMeta" style="font-size:12px;color:rgba(0,0,0,0.48);margin-bottom:14px;font-family:var(--mono);letter-spacing:-0.12px;"></div>
-        <div id="financialContent"></div>
       </div>
 
       <!-- 재무 모델 (Model 시트) -->
@@ -1565,8 +1527,7 @@ function selectDashCorp(corpCode, corpName, stockCode) {
   document.getElementById('dashSelectedCorp').style.display = 'block';
   document.getElementById('dashSelectedCorp').innerHTML =
     `<span class="auto-filled-tag">선택: <strong>${escHtml(corpName)}</strong> (${escHtml(stockCode || corpCode)})</span>`;
-  // 기업 개요 + 재무제표 + 재무 모델 병렬 조회
-  fetchFinancial(corpCode);
+  // 기업 개요 + 재무 모델 병렬 조회
   fetchModel(corpCode);
   if (stockCode) fetchOverview(stockCode);
 }
@@ -1778,158 +1739,6 @@ async function fetchOverview(stockCode) {
   } catch (e) {
     content.innerHTML = `<div class="dart-empty">${escHtml(e.message)}</div>`;
   }
-}
-
-// ────────────────────────────────────────────────
-// 재무제표 핵심 지표
-// ────────────────────────────────────────────────
-async function fetchFinancial(corpCode, year) {
-  if (!year) {
-    year = String(new Date().getFullYear() - 1);
-  }
-  const card = document.getElementById('financialCard');
-  const meta = document.getElementById('financialMeta');
-  const content = document.getElementById('financialContent');
-
-  card.style.display = 'block';
-  content.innerHTML = '<div class="search-loading">재무제표를 불러오는 중...</div>';
-  meta.textContent = '';
-
-  try {
-    // 당해/전년 두 해를 병렬 요청하여 대기 시간 단축
-    const prevYear = String(Number(year) - 1);
-    const [resp, resp2] = await Promise.all([
-      fetch(`/api/dart-financial?corp_code=${corpCode}&bsns_year=${year}&reprt_code=11011`),
-      fetch(`/api/dart-financial?corp_code=${corpCode}&bsns_year=${prevYear}&reprt_code=11011`),
-    ]);
-    const data = await resp.json();
-
-    if (data.status === '000') {
-      renderFinancial(data, corpCode);
-      return;
-    }
-    if (data.status === '013') {
-      const data2 = await resp2.json();
-      if (data2.status !== '000') {
-        content.innerHTML = `<div class="dart-empty">재무제표 데이터가 없습니다.</div>`;
-        return;
-      }
-      renderFinancial(data2, corpCode);
-      return;
-    }
-    content.innerHTML = `<div class="dart-empty">${escHtml(data.message || '조회 실패')}</div>`;
-  } catch (e) {
-    content.innerHTML = `<div class="dart-empty">${escHtml(e.message)}</div>`;
-  }
-}
-
-function renderFinancial(data, corpCode) {
-  const meta = document.getElementById('financialMeta');
-  const content = document.getElementById('financialContent');
-  const list = data.list || [];
-
-  // 연결재무제표(CFS) 우선, 없으면 별도재무제표(OFS)
-  const fsDiv = list.some(i => i.fs_div === 'CFS') ? 'CFS' : 'OFS';
-  const items = list.filter(i => i.fs_div === fsDiv);
-
-  const targets = ['매출액','영업이익','당기순이익','자산총계','부채총계','자본총계'];
-  const found = {};
-  for (const item of items) {
-    if (targets.includes(item.account_nm)) {
-      found[item.account_nm] = item;
-    }
-  }
-
-  if (Object.keys(found).length === 0) {
-    content.innerHTML = '<div class="dart-empty">주요 계정 데이터가 없습니다.</div>';
-    return;
-  }
-
-  const sample = Object.values(found)[0];
-  const fsLabel = fsDiv === 'CFS' ? '연결재무제표' : '별도재무제표';
-  meta.innerHTML = `${fsLabel} · ${sample.thstrm_nm} (${sample.thstrm_dt})`;
-
-  function parseAmt(s) {
-    if (!s || s === '') return null;
-    return Number(s.replace(/,/g, ''));
-  }
-
-  function fmtAmt(n) {
-    if (n === null) return '-';
-    const absN = Math.abs(n);
-    if (absN >= 1e12) return (n / 1e12).toFixed(1) + '조';
-    if (absN >= 1e8) return (n / 1e8).toFixed(0) + '억';
-    if (absN >= 1e4) return (n / 1e4).toFixed(0) + '만';
-    return n.toLocaleString();
-  }
-
-  function growthRate(cur, prev) {
-    if (cur === null || prev === null || prev === 0) return null;
-    return ((cur - prev) / Math.abs(prev) * 100).toFixed(1);
-  }
-
-  function growthBadge(rate) {
-    if (rate === null) return '';
-    const cls = Number(rate) >= 0 ? 'fin-positive' : 'fin-negative';
-    const sign = Number(rate) >= 0 ? '+' : '';
-    return `<span class="${cls}">${sign}${rate}%</span>`;
-  }
-
-  let rows = '';
-  for (const name of targets) {
-    const item = found[name];
-    if (!item) continue;
-    const cur = parseAmt(item.thstrm_amount);
-    const prev = parseAmt(item.frmtrm_amount);
-    const prev2 = parseAmt(item.bfefrmtrm_amount);
-    const rate = growthRate(cur, prev);
-    rows += `<tr>
-      <td class="fin-label">${name}</td>
-      <td>${fmtAmt(prev2)}</td>
-      <td>${fmtAmt(prev)}</td>
-      <td><strong>${fmtAmt(cur)}</strong></td>
-      <td>${growthBadge(rate)}</td>
-    </tr>`;
-  }
-
-  // 부채비율 계산
-  const debt = parseAmt(found['부채총계']?.thstrm_amount);
-  const equity = parseAmt(found['자본총계']?.thstrm_amount);
-  let ratioHtml = '';
-  if (debt !== null && equity !== null && equity !== 0) {
-    const debtRatio = (debt / equity * 100).toFixed(1);
-    const cls = Number(debtRatio) > 200 ? 'fin-negative' : (Number(debtRatio) > 100 ? 'color:#ff9f0a' : '');
-    ratioHtml = `
-      <div class="fin-ratio-bar">
-        <span class="fin-ratio-label">부채비율</span>
-        <span class="fin-ratio-value" style="color:${Number(debtRatio) > 200 ? 'var(--up)' : Number(debtRatio) > 100 ? '#ff9f0a' : 'var(--text)'}">${debtRatio}%</span>
-        <span class="fin-ratio-label" style="margin-left:auto;">영업이익률</span>
-        <span class="fin-ratio-value" style="color:${(() => {
-          const rev = parseAmt(found['매출액']?.thstrm_amount);
-          const op = parseAmt(found['영업이익']?.thstrm_amount);
-          if (!rev || !op) return 'var(--text-muted)';
-          return op >= 0 ? 'var(--text)' : 'var(--up)';
-        })()}">${(() => {
-          const rev = parseAmt(found['매출액']?.thstrm_amount);
-          const op = parseAmt(found['영업이익']?.thstrm_amount);
-          if (!rev || rev === 0) return '-';
-          return (op / rev * 100).toFixed(1) + '%';
-        })()}</span>
-      </div>`;
-  }
-
-  const thPrev2 = found[targets[0]]?.bfefrmtrm_nm || '전전기';
-  const thPrev = found[targets[0]]?.frmtrm_nm || '전기';
-  const thCur = found[targets[0]]?.thstrm_nm || '당기';
-
-  content.innerHTML = `
-    <table class="fin-table">
-      <thead><tr>
-        <th></th><th>${thPrev2}</th><th>${thPrev}</th><th>${thCur}</th><th>YoY</th>
-      </tr></thead>
-      <tbody>${rows}</tbody>
-    </table>
-    ${ratioHtml}`;
 }
 
 const CLS_NAMES = { Y: '유가', K: '코스닥', N: '코넥스', E: '기타' };

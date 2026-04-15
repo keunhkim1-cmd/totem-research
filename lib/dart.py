@@ -14,25 +14,6 @@ def _get_api_key() -> str:
     return key
 
 
-def fetch_financial(corp_code: str, bsns_year: str, reprt_code: str = '11011') -> dict:
-    """재무제표 주요계정 조회. reprt_code: 11011=사업보고서, 11014=반기, 11012=1분기, 11013=3분기"""
-    api_key = _get_api_key()
-    params = urllib.parse.urlencode({
-        'crtfc_key': api_key,
-        'corp_code': corp_code,
-        'bsns_year': bsns_year,
-        'reprt_code': reprt_code,
-    })
-    url = f'{DART_BASE}/fnlttSinglAcnt.json?{params}'
-
-    def _call():
-        req = urllib.request.Request(url, headers=HEADERS)
-        with urllib.request.urlopen(req, timeout=10) as r:
-            return json.loads(r.read().decode('utf-8'))
-
-    return retry(_call)
-
-
 def search_disclosure(corp_code: str = '', bgn_de: str = '', end_de: str = '',
                       page_no: int = 1, page_count: int = 20,
                       pblntf_ty: str = '') -> dict:
