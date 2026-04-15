@@ -437,6 +437,104 @@
     .fin-label { color: var(--text-secondary); font-weight: 600; }
     .fin-positive { color: var(--up); }
     .fin-negative { color: var(--down); }
+
+    /* 재무 모델 (Model 시트 양식) — DESIGN.md 준수 */
+    .model-table {
+      width: 100%; border-collapse: collapse; min-width: 1100px;
+      font-family: var(--mono);
+    }
+    .model-table th, .model-table td {
+      padding: 8px 10px; text-align: right; vertical-align: baseline;
+    }
+    .model-table th:first-child, .model-table td:first-child {
+      text-align: left; font-family: var(--font-text);
+    }
+    /* 컬럼 그룹 헤더 (Annual / Quarterly) — Caption 14/400/-0.224 */
+    .model-table thead th.mt-group {
+      font-family: var(--font-text);
+      font-size: 14px; font-weight: 400; letter-spacing: -0.224px;
+      color: rgba(0,0,0,0.48); text-align: center;
+      padding-bottom: 4px;
+    }
+    /* 연도/분기 컬럼 라벨 — Micro Bold 12/600/-0.12 */
+    .model-table thead th.mt-period {
+      font-family: var(--font-text);
+      font-size: 12px; font-weight: 600; letter-spacing: -0.12px;
+      color: rgba(0,0,0,0.48);
+      padding-bottom: 10px; border-bottom: 1px solid rgba(0,0,0,0.12);
+    }
+    .model-table thead th.mt-corner {
+      font-family: var(--font-text);
+      font-size: 12px; font-weight: 400; letter-spacing: -0.12px;
+      color: rgba(0,0,0,0.48);
+      border-bottom: 1px solid rgba(0,0,0,0.12);
+    }
+    /* 섹션 구분 행 — Body Emphasis 17/600/-0.374 */
+    .model-table tr.mt-section td {
+      font-family: var(--font-text);
+      font-size: 17px; font-weight: 600; letter-spacing: -0.374px;
+      color: var(--text-dark);
+      padding-top: 28px; padding-bottom: 10px;
+      border-bottom: 1px solid rgba(0,0,0,0.12);
+    }
+    /* 일반 행 — Caption 14/400/-0.224 */
+    .model-table tbody td {
+      font-family: var(--mono);
+      font-size: 14px; font-weight: 400; letter-spacing: -0.224px;
+      color: rgba(0,0,0,0.8);
+      border-bottom: 1px solid rgba(0,0,0,0.06);
+    }
+    .model-table tbody td.mt-label {
+      font-family: var(--font-text);
+      font-size: 14px; font-weight: 400; letter-spacing: -0.224px;
+      color: rgba(0,0,0,0.8);
+    }
+    /* 강조(합계) 행 — Caption Bold 14/600 + 상단 hairline */
+    .model-table tr.mt-total td {
+      font-weight: 600;
+      border-top: 1px solid rgba(0,0,0,0.12);
+      background: rgba(0,0,0,0.015);
+    }
+    .model-table tr.mt-total td.mt-label { color: var(--text-dark); }
+    /* 하위 비율 행 — Caption 14/400 + 들여쓰기 + 흐린 색 */
+    .model-table tr.mt-sub td {
+      font-size: 13px;
+      color: rgba(0,0,0,0.48);
+    }
+    .model-table tr.mt-sub td.mt-label {
+      padding-left: 24px;
+      color: rgba(0,0,0,0.48);
+    }
+    /* 음수 / 빈값 */
+    .model-table .mt-neg { color: var(--text-dark); }
+    .model-table .mt-empty { color: rgba(0,0,0,0.24); }
+
+    /* 푸트노트 — Micro 12/400/-0.12 */
+    .model-foot {
+      font-family: var(--font-text);
+      font-size: 12px; font-weight: 400; letter-spacing: -0.12px;
+      color: rgba(0,0,0,0.48);
+      line-height: 1.7; margin-top: 16px;
+    }
+    /* 컨트롤 (회계 구분 select) */
+    .model-controls {
+      display: flex; gap: 12px; align-items: baseline; margin-bottom: 16px;
+    }
+    .model-controls label {
+      font-family: var(--font-text);
+      font-size: 12px; font-weight: 600; letter-spacing: -0.12px;
+      color: rgba(0,0,0,0.48);
+    }
+    .model-controls select {
+      font-family: var(--font-text);
+      font-size: 14px; font-weight: 400; letter-spacing: -0.224px;
+      padding: 6px 10px; border-radius: 8px;
+    }
+    .model-meta {
+      font-family: var(--font-text);
+      font-size: 12px; font-weight: 400; letter-spacing: -0.12px;
+      color: rgba(0,0,0,0.48);
+    }
     .fin-ratio-bar {
       display: flex; align-items: center; gap: 10px;
       background: var(--surface2); border: none;
@@ -596,17 +694,17 @@
 
       <!-- 재무 모델 (Model 시트) -->
       <div class="card" id="modelCard" style="display:none;">
-        <h2>재무 모델 <span style="font-size:12px;color:rgba(0,0,0,0.48);font-weight:400;letter-spacing:-0.12px;">DART 사업·분기보고서</span></h2>
-        <div style="display:flex;gap:8px;align-items:center;margin-bottom:12px;">
-          <label style="font-size:13px;color:rgba(0,0,0,0.6);">회계 구분</label>
-          <select id="modelFsDiv" onchange="fetchModel()" style="padding:6px 10px;border-radius:8px;">
+        <h2>재무 모델 <span class="model-meta" style="margin-left:8px;">DART 사업·분기보고서</span></h2>
+        <div class="model-controls">
+          <label>회계 구분</label>
+          <select id="modelFsDiv" onchange="fetchModel()">
             <option value="CFS">연결</option>
             <option value="OFS">별도</option>
           </select>
-          <span id="modelMeta" style="font-size:12px;color:rgba(0,0,0,0.48);font-family:var(--mono);"></span>
+          <span id="modelMeta" class="model-meta"></span>
         </div>
         <div id="modelContent" style="overflow-x:auto;"></div>
-        <div id="modelFootnote" style="font-size:11px;color:rgba(0,0,0,0.48);margin-top:10px;line-height:1.6;"></div>
+        <div id="modelFootnote" class="model-foot"></div>
       </div>
 
       <div class="footnote">
@@ -1500,48 +1598,45 @@ function renderModel(data) {
   const content = document.getElementById('modelContent');
   const foot = document.getElementById('modelFootnote');
 
-  const years = data.meta.years; // ['2020',...]
+  const years = data.meta.years;
   const quarters = [];
-  // 최근 2년치 분기만 표시 (1Q23~4Q24 형식)
   const lastTwo = years.slice(-2);
   for (const y of lastTwo) for (const q of ['1Q','2Q','3Q','4Q']) quarters.push(`${q}${y.slice(2)}`);
 
-  meta.textContent = `${data.meta.fs_div === 'CFS' ? '연결' : '별도'} · ${years[0]}~${years[years.length-1]} 연간 + 최근 ${lastTwo.length}년 분기`;
+  meta.textContent = `${data.meta.fs_div === 'CFS' ? '연결' : '별도'} · ${years[0]}–${years[years.length-1]} 연간 + 최근 ${lastTwo.length}년 분기`;
 
-  // 십억원 단위 변환 (원 → /1e9)
   function fmtBn(v) {
-    if (v === null || v === undefined) return '<span style="color:rgba(0,0,0,0.3);">—</span>';
+    if (v === null || v === undefined) return '<span class="mt-empty">—</span>';
     const n = v / 1e9;
     return n.toLocaleString('en-US', { minimumFractionDigits: 1, maximumFractionDigits: 1 });
   }
   function fmtPct(v) {
-    if (v === null || v === undefined) return '<span style="color:rgba(0,0,0,0.3);">—</span>';
-    const cls = v < 0 ? 'fin-negative' : '';
-    return `<span class="${cls}">${(v * 100).toFixed(1)}%</span>`;
+    if (v === null || v === undefined) return '<span class="mt-empty">—</span>';
+    return (v * 100).toFixed(1) + '%';
   }
 
-  // Model 시트 행 정의: [라벨, 키, 포맷터, 강조여부]
+  // [라벨, 키, 포맷터, 행유형] — 행유형: 'total'(합계), 'sub'(하위 비율), undefined(일반)
   const ROWS = [
-    ['__SECTION__', '손익계산서', null],
-    ['매출액', 'revenue', fmtBn, true],
-    ['  YoY (%)', 'revenue_yoy', fmtPct],
+    ['__SECTION__', '손익계산서'],
+    ['매출액', 'revenue', fmtBn, 'total'],
+    ['YoY', 'revenue_yoy', fmtPct, 'sub'],
     ['매출원가', 'cogs', fmtBn],
     ['매출총이익', 'gross_profit', fmtBn],
-    ['  GPM (%)', 'gpm', fmtPct],
+    ['GPM', 'gpm', fmtPct, 'sub'],
     ['판매비와관리비', 'sga', fmtBn],
-    ['영업이익', 'operating_income', fmtBn, true],
-    ['  OPM (%)', 'opm', fmtPct],
+    ['영업이익', 'operating_income', fmtBn, 'total'],
+    ['OPM', 'opm', fmtPct, 'sub'],
     ['금융수익', 'finance_income', fmtBn],
     ['금융비용', 'finance_cost', fmtBn],
     ['세전이익', 'pretax_income', fmtBn],
     ['법인세', 'income_tax', fmtBn],
-    ['  Tax Rate (%)', 'tax_rate', fmtPct],
-    ['당기순이익', 'net_income', fmtBn, true],
+    ['Tax Rate', 'tax_rate', fmtPct, 'sub'],
+    ['당기순이익', 'net_income', fmtBn, 'total'],
     ['지배주주순이익', 'net_income_owner', fmtBn],
-    ['  NPM (%)', 'npm', fmtPct],
+    ['NPM', 'npm', fmtPct, 'sub'],
 
-    ['__SECTION__', '재무상태표', null],
-    ['순현금', 'net_cash', fmtBn],
+    ['__SECTION__', '재무상태표'],
+    ['순현금', 'net_cash', fmtBn, 'total'],
     ['차입금', 'total_borrowings', fmtBn],
     ['매출채권', 'trade_receivables', fmtBn],
     ['재고자산', 'inventories', fmtBn],
@@ -1549,23 +1644,23 @@ function renderModel(data) {
     ['유형자산', 'ppe', fmtBn],
     ['무형자산', 'intangible', fmtBn],
     ['영업권', 'goodwill', fmtBn],
-    ['자본총계', 'total_equity', fmtBn],
+    ['자본총계', 'total_equity', fmtBn, 'total'],
     ['자본잉여금', 'capital_surplus', fmtBn],
     ['이익잉여금', 'retained_earnings', fmtBn],
 
-    ['__SECTION__', '현금흐름표', null],
-    ['영업활동현금흐름', 'cfo', fmtBn, true],
-    ['  감가상각비', 'depreciation', fmtBn],
-    ['  무형자산상각비', 'amortization', fmtBn],
-    ['투자활동현금흐름', 'cfi', fmtBn],
-    ['  CAPEX', 'capex', fmtBn],
-    ['재무활동현금흐름', 'cff', fmtBn],
+    ['__SECTION__', '현금흐름표'],
+    ['영업활동현금흐름', 'cfo', fmtBn, 'total'],
+    ['감가상각비', 'depreciation', fmtBn, 'sub'],
+    ['무형자산상각비', 'amortization', fmtBn, 'sub'],
+    ['투자활동현금흐름', 'cfi', fmtBn, 'total'],
+    ['CAPEX', 'capex', fmtBn, 'sub'],
+    ['재무활동현금흐름', 'cff', fmtBn, 'total'],
   ];
 
   function cellsFor(key, fmt) {
-    const annualCells = years.map(y => `<td>${fmt(data.annual[y]?.[key] ?? null)}</td>`).join('');
-    const qCells = quarters.map(q => `<td>${fmt(data.quarterly[q]?.[key] ?? null)}</td>`).join('');
-    return annualCells + qCells;
+    const a = years.map(y => `<td>${fmt(data.annual[y]?.[key] ?? null)}</td>`).join('');
+    const q = quarters.map(p => `<td>${fmt(data.quarterly[p]?.[key] ?? null)}</td>`).join('');
+    return a + q;
   }
 
   const colCount = years.length + quarters.length + 1;
@@ -1573,23 +1668,23 @@ function renderModel(data) {
   let body = '';
   for (const row of ROWS) {
     if (row[0] === '__SECTION__') {
-      body += `<tr><td colspan="${colCount}" style="background:rgba(0,0,0,0.04);font-weight:700;padding:8px 12px;">${escHtml(row[1])}</td></tr>`;
+      body += `<tr class="mt-section"><td colspan="${colCount}">${escHtml(row[1])}</td></tr>`;
       continue;
     }
-    const [label, key, fmt, bold] = row;
-    const labelStyle = bold ? 'font-weight:700;' : '';
-    body += `<tr><td class="fin-label" style="${labelStyle}">${escHtml(label)}</td>${cellsFor(key, fmt)}</tr>`;
+    const [label, key, fmt, type] = row;
+    const trCls = type === 'total' ? 'mt-total' : (type === 'sub' ? 'mt-sub' : '');
+    body += `<tr class="${trCls}"><td class="mt-label">${escHtml(label)}</td>${cellsFor(key, fmt)}</tr>`;
   }
 
-  const headAnnual = `<th colspan="${years.length}" style="text-align:center;background:rgba(0,113,227,0.06);">Annual</th>`;
-  const headQ = `<th colspan="${quarters.length}" style="text-align:center;background:rgba(0,113,227,0.06);">Quarterly</th>`;
-  const subHeadAnnual = years.map(y => `<th>${y}</th>`).join('');
-  const subHeadQ = quarters.map(q => `<th>${q}</th>`).join('');
+  const headAnnual = `<th colspan="${years.length}" class="mt-group">Annual</th>`;
+  const headQ = `<th colspan="${quarters.length}" class="mt-group">Quarterly</th>`;
+  const subHeadAnnual = years.map(y => `<th class="mt-period">${y}</th>`).join('');
+  const subHeadQ = quarters.map(p => `<th class="mt-period">${p}</th>`).join('');
 
   content.innerHTML = `
-    <table class="fin-table" style="min-width:1100px;">
+    <table class="model-table">
       <thead>
-        <tr><th rowspan="2">(십억원, %)</th>${headAnnual}${headQ}</tr>
+        <tr><th rowspan="2" class="mt-corner">(십억원, %)</th>${headAnnual}${headQ}</tr>
         <tr>${subHeadAnnual}${subHeadQ}</tr>
       </thead>
       <tbody>${body}</tbody>
@@ -1597,9 +1692,9 @@ function renderModel(data) {
 
   const unsupported = data.meta.unsupported || [];
   foot.innerHTML = `
-    <div>* 단위: 십억원 (1 = 10억원). 분기는 누적값에서 차감 산출.</div>
-    <div>* 데이터 출처: <strong>금융감독원 DART</strong> 사업·분기보고서 (fnlttSinglAcntAll).</div>
-    <div>* 미지원 필드(추후 업그레이드 예정): ${unsupported.join(', ')}</div>`;
+    <div>단위: 십억원 (1 = 10억원). 분기 IS/CF는 단일 분기(3개월), Q4는 사업보고서 - (Q1+Q2+Q3) 산출. BS는 시점값.</div>
+    <div>데이터 출처: 금융감독원 DART 사업·분기보고서 (fnlttSinglAcntAll).</div>
+    <div>미지원 필드 (추후 업그레이드 예정): ${unsupported.join(', ')}</div>`;
 }
 
 async function dartSearch(page) {
