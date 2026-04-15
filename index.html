@@ -502,6 +502,8 @@
       padding-left: 24px;
       color: rgba(0,0,0,0.48);
     }
+    /* Annual / Quarterly 구분선 */
+    .model-table .mt-q-first { border-left: 2px solid rgba(0,0,0,0.18); }
     /* 음수 / 빈값 */
     .model-table .mt-neg { color: var(--text-dark); }
     .model-table .mt-empty { color: rgba(0,0,0,0.24); }
@@ -1692,7 +1694,7 @@ function renderModel(data) {
 
   function cellsFor(key, fmt) {
     const a = years.map(y => `<td>${fmt(data.annual[y]?.[key] ?? null)}</td>`).join('');
-    const q = quarters.map(p => `<td>${fmt(data.quarterly[p]?.[key] ?? null)}</td>`).join('');
+    const q = quarters.map((p, i) => `<td${i === 0 ? ' class="mt-q-first"' : ''}>${fmt(data.quarterly[p]?.[key] ?? null)}</td>`).join('');
     return a + q;
   }
 
@@ -1710,9 +1712,9 @@ function renderModel(data) {
   }
 
   const headAnnual = `<th colspan="${years.length}" class="mt-group">Annual</th>`;
-  const headQ = `<th colspan="${quarters.length}" class="mt-group">Quarterly</th>`;
+  const headQ = `<th colspan="${quarters.length}" class="mt-group mt-q-first">Quarterly</th>`;
   const subHeadAnnual = years.map(y => `<th class="mt-period">${y}</th>`).join('');
-  const subHeadQ = quarters.map(p => `<th class="mt-period">${p}</th>`).join('');
+  const subHeadQ = quarters.map((p, i) => `<th class="mt-period${i === 0 ? ' mt-q-first' : ''}">${p}</th>`).join('');
 
   content.innerHTML = `
     <table class="model-table">
