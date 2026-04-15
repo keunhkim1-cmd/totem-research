@@ -651,6 +651,14 @@
           본 도구의 정보는 투자 권유가 아니며, 투자 판단의 최종 책임은 사용자 본인에게 있습니다.
         </p>
       </div>
+
+      <!-- 오늘의 샤머니즘 -->
+      <div class="card" style="max-width:640px; margin:24px auto 0; padding:32px; text-align:center;">
+        <div class="badge" style="display:inline-block; margin-bottom:12px;">오늘의 샤머니즘</div>
+        <p id="shamanism-quote" style="font-size:17px; line-height:1.6; min-height:52px;"></p>
+        <p id="shamanism-origin" style="color:var(--text-muted); font-size:13px; margin-top:8px;"></p>
+        <button onclick="showRandomShamanism()" style="margin-top:16px; padding:8px 20px; border-radius:980px; border:1px solid var(--border); background:none; color:var(--text-secondary); font-size:13px; cursor:pointer; transition:background 0.2s;">다른 미신 보기</button>
+      </div>
     </div>
   </div>
 </div><!-- /page-about -->
@@ -901,6 +909,41 @@
 </div><!-- /page-dart -->
 
 <script>
+// ────────────────────────────────────────────────
+// 오늘의 샤머니즘
+// ────────────────────────────────────────────────
+const SUPERSTITIONS = [
+  { text: "Sell in May and go away.", origin: "미국 — 5월에 팔고 떠나라. 여름철 수익률이 낮다는 속설." },
+  { text: "Super Bowl Indicator — NFC 팀이 이기면 강세장.", origin: "미국 — 슈퍼볼 승리 팀의 컨퍼런스로 시장 방향을 점친다." },
+  { text: "January Effect — 1월 수익률이 연간을 예고한다.", origin: "미국 — 1월 주가 흐름이 그 해 전체를 대변한다는 믿음." },
+  { text: "Santa Claus Rally — 12월 말~1월 초 주가가 오른다.", origin: "미국 — 연말 산타 랠리. 휴일 낙관론에 의한 상승 기대." },
+  { text: "Monday Effect — 월요일에는 주가가 떨어진다.", origin: "미국 — 주말 악재 반영으로 월요일 하락한다는 속설." },
+  { text: "October Effect — 대폭락은 항상 10월에 온다.", origin: "미국 — 1929, 1987년 폭락이 10월이라 생긴 공포." },
+  { text: "Hemline Index — 치마가 짧아지면 강세장.", origin: "미국 — 패션 트렌드와 주가의 상관관계를 주장하는 이론." },
+  { text: "대통령 임기 3년차에 주가가 가장 많이 오른다.", origin: "미국 — Presidential Election Cycle Theory." },
+  { text: "Triple Witching Day에는 변동성이 폭발한다.", origin: "미국 — 선물·옵션 동시 만기일의 변동성 과대 해석." },
+  { text: "죽음의 교차(Death Cross)가 나타나면 폭락한다.", origin: "미국 — 50일선이 200일선을 하향 돌파하면 대세 하락이라는 믿음." },
+  { text: "내가 사면 떨어지고, 팔면 오른다.", origin: "한국 — 개인 투자자의 영원한 자조. 일명 '역신'." },
+  { text: "삼성전자는 국민주, 절대 안 망한다.", origin: "한국 — 삼성전자 불패 신화에 대한 맹신." },
+  { text: "개미는 항상 물린다.", origin: "한국 — 개인 투자자는 기관·외국인에게 당한다는 패배주의." },
+  { text: "꿈에 돼지가 나오면 주식을 사라.", origin: "한국 — 돼지꿈 = 재물운이라는 전통 해몽의 투자 적용." },
+  { text: "빨간 속옷을 입으면 주가가 오른다.", origin: "한국 — 빨간색 = 상한가 색상에서 비롯된 징크스." },
+  { text: "증권사 앞을 지나가면 주식이 떨어진다.", origin: "한국 — 증권사 근처만 가도 불길하다는 미신." },
+  { text: "작전세력이 다 조종한다.", origin: "한국 — 모든 주가 움직임을 세력의 의도로 해석하는 음모론." },
+  { text: "공매도만 없으면 주가가 오른다.", origin: "한국 — 공매도를 주가 하락의 주범으로 보는 시각." },
+  { text: "대선·총선 전에는 테마주를 사라.", origin: "한국 — 정치 테마주에 대한 맹목적 기대." },
+  { text: "연말에는 배당주가 무조건 오른다.", origin: "한국 — 배당 시즌 = 배당주 상승이라는 단순 공식." },
+];
+let lastIdx = -1;
+function showRandomShamanism() {
+  let idx;
+  do { idx = Math.floor(Math.random() * SUPERSTITIONS.length); } while (idx === lastIdx);
+  lastIdx = idx;
+  document.getElementById('shamanism-quote').textContent = SUPERSTITIONS[idx].text;
+  document.getElementById('shamanism-origin').textContent = SUPERSTITIONS[idx].origin;
+}
+showRandomShamanism();
+
 // ────────────────────────────────────────────────
 // XSS 방어 유틸
 // ────────────────────────────────────────────────
