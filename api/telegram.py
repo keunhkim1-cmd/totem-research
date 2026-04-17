@@ -175,6 +175,7 @@ def do_search(chat_id: int, query: str):
 
 
 def do_info(chat_id: int, query: str):
+    import traceback
     if not query:
         tg_send_plain(chat_id, '종목명을 입력해주세요.\n예: /info 삼성전자')
         return
@@ -187,6 +188,7 @@ def do_info(chat_id: int, query: str):
     try:
         codes = naver_stock_code(query)
     except Exception as e:
+        print(f'[info] 네이버 종목조회 오류: {traceback.format_exc()}')
         tg_send_plain(chat_id, f'❌ 종목 조회 오류: {e}')
         return
 
@@ -197,14 +199,17 @@ def do_info(chat_id: int, query: str):
     target = codes[0]
     stock_code = target['code']
     stock_name = target['name']
+    print(f'[info] 대상 종목: {stock_name} ({stock_code})')
 
     try:
         result = summarize_business_report(stock_code, stock_name)
     except Exception as e:
+        print(f'[info] summarize 예외: {traceback.format_exc()}')
         tg_send_plain(chat_id, f'❌ 사업보고서 요약 실패: {e}')
         return
 
     if 'error' in result:
+        print(f'[info] 요약 실패: {result["error"]}')
         tg_send_plain(chat_id, f'❌ {result["error"]}')
         return
 
@@ -288,7 +293,15 @@ def process_update(update: dict):
 
     if text.startswith('/info'):
         query = re.sub(r'^/\S+\s*', '', text).strip()
-        do_info(chat_id, query)
+        try:
+            do_info(chat_id, query)
+        except Exception as e:
+            import traceback
+            print(f'[info] do_info 최상위 예외: {traceback.format_exc()}')
+            try:
+                tg_send_plain(chat_id, f'❌ 처리 중 오류: {e}')
+            except Exception:
+                pass
         return
 
     if text.startswith('/web'):
@@ -317,22 +330,18 @@ class handler(BaseHTTPRequestHandler):
         length = int(self.headers.get('Content-Length', 0))
         body   = self.rfile.read(length)
 
-        # 텔레그램이 200 OK를 기다리다 타임아웃 시 재시도 폭주하므로,
-        # 처리 시작 전에 즉시 200을 돌려준다. Vercel은 do_POST가 리턴할 때까지
-        # 함수 인스턴스를 유지하므로 process_update는 응답 후에도 계속 실행된다.
-        self.send_response(200)
-        self.end_headers()
-        try:
-            self.wfile.write(b'OK')
-            self.wfile.flush()
-        except Exception:
-            pass
-
+        # Vercel Python runtime은 HTTP 응답 완료 후 함수를 suspend하므로
+        # 처리를 먼저 끝낸 뒤 200 OK를 반환해야 한다.
+        # 60초 초과 시 텔레그램이 재시도를 보내지만 update_id 중복 차단으로 방어.
         try:
             update = json.loads(body)
             process_update(update)
         except Exception as e:
             print(f'Update error: {e}')
+
+        self.send_response(200)
+        self.end_headers()
+        self.wfile.write(b'OK')
 
     def do_GET(self):
         self.send_response(200)

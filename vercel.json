@@ -29,7 +29,7 @@
     }
   ],
   "functions": {
-    "api/telegram.py": { "maxDuration": 60 },
+    "api/telegram.py": { "maxDuration": 300 },
     "api/warn-search.py": { "maxDuration": 30 },
     "api/stock-price.py": { "maxDuration": 30 },
     "api/dart-search.py": { "maxDuration": 30 },
