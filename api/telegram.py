@@ -12,6 +12,10 @@ from lib.holidays import add_trading_days, count_trading_days
 from lib.krx import search_kind
 from lib.naver import stock_code as naver_stock_code, fetch_prices, calc_thresholds
 from lib.dart_report import summarize_business_report
+from lib.cache import TTLCache
+
+# 동일 update_id 중복 처리 차단 (텔레그램 재시도 방어)
+_seen_updates = TTLCache(ttl=600)
 
 BOT_TOKEN = os.environ.get('TELEGRAM_BOT_TOKEN', '')
 TG_API    = f'https://api.telegram.org/bot{BOT_TOKEN}'
@@ -230,6 +234,13 @@ def do_info(chat_id: int, query: str):
 
 
 def process_update(update: dict):
+    update_id = update.get('update_id')
+    if update_id is not None:
+        key = f'upd:{update_id}'
+        if _seen_updates.get(key):
+            return  # 이미 처리한 update — 텔레그램 재시도 중복 방지
+        _seen_updates.set(key, True)
+
     msg = update.get('message') or update.get('edited_message')
     if not msg:
         return
@@ -305,14 +316,23 @@ class handler(BaseHTTPRequestHandler):
                 return
         length = int(self.headers.get('Content-Length', 0))
         body   = self.rfile.read(length)
+
+        # 텔레그램이 200 OK를 기다리다 타임아웃 시 재시도 폭주하므로,
+        # 처리 시작 전에 즉시 200을 돌려준다. Vercel은 do_POST가 리턴할 때까지
+        # 함수 인스턴스를 유지하므로 process_update는 응답 후에도 계속 실행된다.
+        self.send_response(200)
+        self.end_headers()
+        try:
+            self.wfile.write(b'OK')
+            self.wfile.flush()
+        except Exception:
+            pass
+
         try:
             update = json.loads(body)
             process_update(update)
         except Exception as e:
             print(f'Update error: {e}')
-        self.send_response(200)
-        self.end_headers()
-        self.wfile.write(b'OK')
 
     def do_GET(self):
         self.send_response(200)
