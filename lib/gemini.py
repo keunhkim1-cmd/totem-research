@@ -4,7 +4,8 @@ import urllib.request, urllib.parse, json, os
 from lib.retry import retry
 
 GEMINI_BASE = 'https://generativelanguage.googleapis.com/v1beta'
-DEFAULT_MODEL = 'gemini-2.5-flash'
+# Flash-Lite: 요약 태스크에 충분하고 Flash보다 훨씬 빠름
+DEFAULT_MODEL = 'gemini-2.5-flash-lite'
 
 
 def _api_key() -> str:
@@ -14,14 +15,16 @@ def _api_key() -> str:
     return key
 
 
-def generate(prompt: str, model: str = DEFAULT_MODEL, max_output_tokens: int = 1024) -> str:
-    """Gemini generateContent — 단일 프롬프트 → 텍스트 응답."""
+def generate(prompt: str, model: str = DEFAULT_MODEL, max_output_tokens: int = 512) -> str:
+    """Gemini generateContent — 단일 프롬프트 → 텍스트 응답.
+    thinking 비활성화로 latency 최소화 (요약 태스크는 reasoning 불필요)."""
     url = f'{GEMINI_BASE}/models/{model}:generateContent?key={_api_key()}'
     body = json.dumps({
         'contents': [{'parts': [{'text': prompt}]}],
         'generationConfig': {
             'temperature': 0.3,
             'maxOutputTokens': max_output_tokens,
+            'thinkingConfig': {'thinkingBudget': 0},
         },
     }).encode('utf-8')
 

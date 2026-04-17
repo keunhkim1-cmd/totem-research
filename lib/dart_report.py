@@ -55,7 +55,7 @@ def _find_latest_business_report(corp_code: str) -> dict | None:
 
 
 def _fetch_document_text(rcept_no: str) -> str:
-    """공시서류 원문 zip → XML 텍스트로 디코딩."""
+    """공시서류 원문 zip → 가장 큰 XML 파일만 텍스트 디코딩 (본문은 보통 메인 파일 1개에 집중)."""
     cached = _doc_cache.get(rcept_no)
     if cached is not None:
         return cached
@@ -69,24 +69,27 @@ def _fetch_document_text(rcept_no: str) -> str:
 
     raw = retry(_call)
 
-    text_chunks = []
     with zipfile.ZipFile(io.BytesIO(raw)) as zf:
-        for name in zf.namelist():
-            if not name.lower().endswith('.xml'):
-                continue
-            with zf.open(name) as f:
-                data = f.read()
-            # DART 원문 인코딩은 보통 EUC-KR
-            for enc in ('utf-8', 'euc-kr', 'cp949'):
-                try:
-                    text_chunks.append(data.decode(enc))
-                    break
-                except UnicodeDecodeError:
-                    continue
+        xml_infos = [info for info in zf.infolist()
+                     if info.filename.lower().endswith('.xml')]
+        if not xml_infos:
+            return ''
+        # 파일 크기 내림차순 — 가장 큰 XML(본문)만 파싱
+        xml_infos.sort(key=lambda i: i.file_size, reverse=True)
+        main_info = xml_infos[0]
+        with zf.open(main_info) as f:
+            data = f.read()
 
-    full = '\n'.join(text_chunks)
-    _doc_cache.set(rcept_no, full)
-    return full
+    text = ''
+    for enc in ('utf-8', 'euc-kr', 'cp949'):
+        try:
+            text = data.decode(enc)
+            break
+        except UnicodeDecodeError:
+            continue
+
+    _doc_cache.set(rcept_no, text)
+    return text
 
 
 def _strip_tags(s: str) -> str:
@@ -150,13 +153,13 @@ def summarize_business_report(stock_code: str, stock_name: str) -> dict:
     biz_content = _extract_section(full_text, [
         r'II\.\s*사업의\s*내용',
         r'2\.\s*사업의\s*내용',
-    ], max_chars=15000)
+    ], max_chars=6000)
 
     # 2. 이사의 경영진단 및 분석의견
     mgmt_analysis = _extract_section(full_text, [
         r'이사의\s*경영진단\s*및\s*분석\s*의견',
         r'경영진단\s*및\s*분석\s*의견',
-    ], max_chars=8000)
+    ], max_chars=4000)
 
     if not biz_content and not mgmt_analysis:
         return {'error': '사업보고서에서 해당 섹션을 추출할 수 없습니다.'}
@@ -180,7 +183,7 @@ def summarize_business_report(stock_code: str, stock_name: str) -> dict:
 위 내용을 10줄 이내 '-' 불릿으로 요약:"""
 
     try:
-        summary = gemini_generate(prompt, max_output_tokens=1024)
+        summary = gemini_generate(prompt, max_output_tokens=512)
     except Exception as e:
         return {'error': f'Gemini 요약 실패: {e}'}
 
