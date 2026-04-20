@@ -115,6 +115,8 @@ def build_caution_message(stock_name: str, warn: dict, escalation: dict | None) 
         lines.append(f'```\n지정일  {sd(d_date)}\n```')
         if escalation and 'error' in escalation:
             lines.append(f'⚠️ 주가 조회 불가: {escalation["error"]}')
+        lines.append('')
+        lines.append('불건전 요건은 /bulgunjeon 을 참고')
         return '\n'.join(lines)
 
     criteria = escalation['criteria']
@@ -171,6 +173,8 @@ def build_caution_message(stock_name: str, warn: dict, escalation: dict | None) 
         lines.append(f'→ 투자경고 지정 예상 (기준가 {headline_thresh:,}원) 🔴')
     else:
         lines.append('→ 투자경고 미해당 🟢')
+    lines.append('')
+    lines.append('불건전 요건은 /bulgunjeon 을 참고')
 
     return '\n'.join(lines)
 
@@ -374,6 +378,7 @@ def process_update(update: dict):
             '*명령어*\n'
             '/warning `종목명` — 종목 투자경고 조회\n'
             '/caution `종목명` — 투자경고 지정 예상 점검\n'
+            '/bulgunjeon — 불건전 요건 안내\n'
             '/info `종목명` — 사업보고서 요약\n'
             '/help — 사용법 안내\n\n'
             '또는 종목명을 바로 입력해도 됩니다.\n'
@@ -392,7 +397,9 @@ def process_update(update: dict):
             '4가지 요건 중 하나라도 충족 시 "지정 예상":\n'
             '① 초단기 3일 100% ② 단기 5일 60%\n'
             '③ 장기 15일 100% ④ 반복 15일 75% \\+ 5회\n\n'
-            '*3. 사업보고서 요약*\n'
+            '*3. 불건전 요건 안내*\n'
+            '`/bulgunjeon` — 불공정거래 판단 기준 참고용\n\n'
+            '*4. 사업보고서 요약*\n'
             '`/info 종목명` — 가장 최근 사업보고서를 10줄로 요약\n'
             '예: `/info 삼성전자`\n\n'
             '*해제 조건 안내*\n'
@@ -424,6 +431,23 @@ def process_update(update: dict):
     if text.startswith('/caution'):
         query = re.sub(r'^/\S+\s*', '', text).strip()
         do_caution(chat_id, query)
+        return
+
+    if text.startswith('/bulgunjeon'):
+        body = (
+            '📋 *불건전 요건*\n\n'
+            '*1. 5일 or 15일 상승 & 불건전요건*\n'
+            '• 최근 5일(15일) 중 전일 대비 주가 상승하고, 특정 계좌(군)이 일중 전체 최고가 매수거래량의 10% 이상 매수일수가 2일(4일) 이상\n'
+            '• 최근 5일(15일) 중 특정 계좌(군)의 시세영향력을 고려한 매수관여율이 위원장이 정하는 기준에 해당하는 일수가 2일(4일) 이상\n'
+            '• 최근 5일(15일) 중 특정계좌(군)의 시가 또는 종가의 매수관여율이 20% 이상인 일수가 2일(4일) 이상\n'
+            '→ 3가지 요건 중 하나에 해당하는 경우\n\n'
+            '*2. 1년간 상승 & 불건전요건*\n'
+            '• 최근 15일 중 시세영향력을 고려한 매수관여율 상위 10개 계좌의 관여율이 일정 수준 이상인 경우에 해당하는 일수가 4일 이상'
+        )
+        try:
+            tg_send(chat_id, body)
+        except Exception:
+            tg_send_plain(chat_id, body.replace('*', ''))
         return
 
     if text.startswith('/web'):
