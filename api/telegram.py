@@ -150,8 +150,15 @@ def build_caution_message(stock_name: str, warn: dict, escalation: dict | None) 
             return '—'
         return '✅' if c['met'] else '❌'
 
-    row_labels = ['① 초단기', '② 단기', '③ 단기&불건전', '④ 장기',
-                  '⑤ 장기&불건전', '⑥ 반복', '⑦ 초장기&불건전']
+    row_labels = [
+        '① 초단기(3일 100%)',
+        '② 단기(5일 60%)',
+        '③ 단기&불건전(5일 45%)',
+        '④ 장기(15일 100%)',
+        '⑤ 장기&불건전(15일 75%)',
+        '⑥ 반복(15일 75%)',
+        '⑦ 초장기&불건전(1년 200%)',
+    ]
     price_strs = []
     for c in criteria:
         if c.get('threshold') is None:
