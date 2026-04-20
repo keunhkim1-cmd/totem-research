@@ -17,8 +17,8 @@ HEADERS = {
 _krx_cache = TTLCache(ttl=600)
 
 
-def fetch_kind_page(menu_index: str, page: int = 1, days_back: int = 365) -> str:
-    cache_key = f'kind:{menu_index}:{page}:{days_back}:{date.today().isoformat()}'
+def fetch_kind_page(menu_index: str, page: int = 1, days_back: int = 365, page_size: int = 100) -> str:
+    cache_key = f'kind:{menu_index}:{page}:{days_back}:{page_size}:{date.today().isoformat()}'
 
     def _fetch():
         end_date = date.today().strftime('%Y%m%d')
@@ -27,7 +27,7 @@ def fetch_kind_page(menu_index: str, page: int = 1, days_back: int = 365) -> str
             'method': 'investattentwarnriskySub', 'menuIndex': menu_index,
             'marketType': '', 'searchCorpName': '',
             'startDate': start_date, 'endDate': end_date,
-            'pageIndex': str(page), 'currentPageSize': '100',
+            'pageIndex': str(page), 'currentPageSize': str(page_size),
             'orderMode': '3', 'orderStat': 'D',
         })
 
@@ -104,10 +104,10 @@ def search_kind_caution(stock_name: str) -> list:
       {'stockName', 'latestDesignationDate', 'recent15dCount', 'allDates': [YYYY-MM-DD, ...]}
     `recent15dCount`는 오늘 포함 15거래일 윈도우 안에 지정된 행 수 — 투자경고 '반복' 요건(5회)용.
     """
-    # 투자주의는 일일 지정 건수가 많아 1년치로 조회하면 페이지 1에
-    # 가장 오래된 100건만 들어온다. 최근 15거래일만 있으면 충분하므로 21일로 좁힌다.
+    # 투자주의는 일일 지정 건수가 많아(일 20~40건) 기본 pageSize=100으로는
+    # 페이지 1에 오래된 데이터만 들어온다. 21일치를 한 번에 받도록 pageSize를 키운다.
     try:
-        html = fetch_kind_page('1', days_back=21)
+        html = fetch_kind_page('1', days_back=21, page_size=1000)
     except Exception as e:
         print(f'KIND caution error: {e}', flush=True)
         return []
