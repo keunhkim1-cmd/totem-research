@@ -137,12 +137,7 @@ def build_caution_message(stock_name: str, warn: dict, escalation: dict | None) 
     cur = escalation['tClose']
     t_d = date.fromisoformat(escalation['tDate'])
 
-    if any_met and first_idx is not None:
-        headline_thresh = criteria[first_idx]['threshold']
-        lines.append(f'현재가 {cur:,}원, 기준가 {headline_thresh:,}원, 투자경고 지정 예상 🔴')
-    else:
-        lines.append(f'현재가 {cur:,}원 ({sd(t_d)})')
-        lines.append('→ 투자경고 미해당 🟢')
+    lines.append(f'현재가 {cur:,}원 ({sd(t_d)})')
     lines.append('')
 
     # 상세 표
@@ -169,6 +164,13 @@ def build_caution_message(stock_name: str, warn: dict, escalation: dict | None) 
     for lbl, p, c in zip(row_labels, price_strs, criteria):
         block_lines.append(row(lbl, p, ci(c['met'])))
     lines.append('```\n' + '\n'.join(block_lines) + '\n```')
+    lines.append('')
+
+    if any_met and first_idx is not None:
+        headline_thresh = criteria[first_idx]['threshold']
+        lines.append(f'→ 투자경고 지정 예상 (기준가 {headline_thresh:,}원) 🔴')
+    else:
+        lines.append('→ 투자경고 미해당 🟢')
 
     return '\n'.join(lines)
 
