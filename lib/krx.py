@@ -5,6 +5,7 @@ from datetime import date, timedelta
 
 from lib.retry import retry
 from lib.cache import TTLCache
+from lib.holidays import count_trading_days
 
 HEADERS = {
     'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7)',
@@ -16,12 +17,12 @@ HEADERS = {
 _krx_cache = TTLCache(ttl=600)
 
 
-def fetch_kind_page(menu_index: str, page: int = 1) -> str:
-    cache_key = f'kind:{menu_index}:{page}:{date.today().isoformat()}'
+def fetch_kind_page(menu_index: str, page: int = 1, days_back: int = 365) -> str:
+    cache_key = f'kind:{menu_index}:{page}:{days_back}:{date.today().isoformat()}'
 
     def _fetch():
         end_date = date.today().strftime('%Y%m%d')
-        start_date = (date.today() - timedelta(days=365)).strftime('%Y%m%d')
+        start_date = (date.today() - timedelta(days=days_back)).strftime('%Y%m%d')
         params = urllib.parse.urlencode({
             'method': 'investattentwarnriskySub', 'menuIndex': menu_index,
             'marketType': '', 'searchCorpName': '',
@@ -94,3 +95,58 @@ def search_kind(stock_name: str) -> list:
             seen.add(key)
             deduped.append(r)
     return deduped
+
+
+def search_kind_caution(stock_name: str) -> list:
+    """투자주의(menuIndex=1) 페이지에서 stock_name 부분일치 종목의 지정 이력 집계.
+
+    반환 각 항목:
+      {'stockName', 'latestDesignationDate', 'recent15dCount', 'allDates': [YYYY-MM-DD, ...]}
+    `recent15dCount`는 오늘 포함 15거래일 윈도우 안에 지정된 행 수 — 투자경고 '반복' 요건(5회)용.
+    """
+    # 투자주의는 일일 지정 건수가 많아 1년치로 조회하면 페이지 1에
+    # 가장 오래된 100건만 들어온다. 최근 15거래일만 있으면 충분하므로 21일로 좁힌다.
+    try:
+        html = fetch_kind_page('1', days_back=21)
+    except Exception as e:
+        print(f'KIND caution error: {e}', flush=True)
+        return []
+
+    rows_by_stock: dict[str, list[str]] = {}
+    tbody_m = re.search(r'<tbody>(.*?)</tbody>', html, re.DOTALL)
+    if not tbody_m:
+        return []
+    for row in re.findall(r'<tr[^>]*>(.*?)</tr>', tbody_m.group(1), re.DOTALL):
+        name_m = re.search(r'<td\s+title="([^"]+)"', row)
+        if not name_m or not name_m.group(1).strip():
+            continue
+        dates = re.findall(
+            r'<td[^>]*class="[^"]*txc[^"]*"[^>]*>\s*(\d{4}-\d{2}-\d{2})\s*</td>', row)
+        if not dates:
+            continue
+        name = name_m.group(1).strip()
+        if stock_name and stock_name not in name:
+            continue
+        rows_by_stock.setdefault(name, []).append(dates[-1])
+
+    today = date.today()
+    results = []
+    for name, date_list in rows_by_stock.items():
+        sorted_dates = sorted(date_list, reverse=True)
+        recent15 = 0
+        for d_str in sorted_dates:
+            try:
+                d_obj = date.fromisoformat(d_str)
+            except ValueError:
+                continue
+            if count_trading_days(d_obj, today) <= 15:
+                recent15 += 1
+        results.append({
+            'stockName': name,
+            'latestDesignationDate': sorted_dates[0],
+            'recent15dCount': recent15,
+            'allDates': sorted_dates,
+        })
+
+    results.sort(key=lambda x: x['latestDesignationDate'], reverse=True)
+    return results

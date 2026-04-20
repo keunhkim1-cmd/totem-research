@@ -9,8 +9,8 @@ from datetime import date
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from lib.holidays import add_trading_days, count_trading_days
-from lib.krx import search_kind
-from lib.naver import stock_code as naver_stock_code, fetch_prices, calc_thresholds
+from lib.krx import search_kind, search_kind_caution
+from lib.naver import stock_code as naver_stock_code, fetch_prices, calc_thresholds, calc_caution_escalation
 from lib.dart_report import summarize_business_report
 from lib.cache import TTLCache
 
@@ -101,6 +101,74 @@ def build_message(stock_name: str, warn: dict, thresholds: dict | None) -> str:
         lines.append(f'```\n{block}\n```')
         if thresholds and 'error' in thresholds:
             lines.append(f'⚠️ 주가 조회 불가: {thresholds["error"]}')
+
+    return '\n'.join(lines)
+
+
+def build_caution_message(stock_name: str, warn: dict, escalation: dict | None) -> str:
+    """투자주의 → 투자경고 격상 여부 메시지."""
+    d_str  = warn['latestDesignationDate']
+    d_date = date.fromisoformat(d_str)
+    lines  = [f'🟡 {stock_name} 투자주의', '']
+
+    if not escalation or 'error' in (escalation or {}):
+        lines.append(f'```\n지정일  {sd(d_date)}\n```')
+        if escalation and 'error' in escalation:
+            lines.append(f'⚠️ 주가 조회 불가: {escalation["error"]}')
+        return '\n'.join(lines)
+
+    criteria = escalation['criteria']
+    count15  = warn.get('recent15dCount', 0)
+
+    # 반복 조건은 가격 AND 5회 카운트
+    rep = criteria[3]
+    rep['countActual'] = count15
+    rep['met'] = rep['met'] and count15 >= rep['countRequired']
+
+    # firstMatchedIdx는 반복 제외 인덱스. 반복이 확정된 경우 업데이트.
+    first_idx = escalation.get('firstMatchedIdx')
+    if first_idx is None and rep['met']:
+        first_idx = 3
+    elif first_idx is not None:
+        # 원래 첫 매칭 유지 — 반복보다 앞선 조건이 먼저 매칭됐으면 그대로
+        pass
+
+    any_met = any(c['met'] for c in criteria)
+    cur = escalation['tClose']
+    t_d = date.fromisoformat(escalation['tDate'])
+
+    if any_met and first_idx is not None:
+        headline_thresh = criteria[first_idx]['threshold']
+        lines.append(f'현재가 {cur:,}원, 기준가 {headline_thresh:,}원, 투자경고 지정 예상 🔴')
+    else:
+        lines.append(f'현재가 {cur:,}원 ({sd(t_d)})')
+        lines.append('→ 투자경고 미해당 🟢')
+    lines.append('')
+
+    # 상세 표
+    ci = lambda c: '✅' if c else '❌'
+    row_labels = ['① 초단기', '② 단기', '③ 장기', '④ 반복']
+    price_strs = []
+    for c, label in zip(criteria, row_labels):
+        if c['name'] == '반복':
+            price_strs.append(f"{c['threshold']:,}원·{c['countActual']}/{c['countRequired']}회")
+        else:
+            price_strs.append(f"{c['threshold']:,}원")
+
+    lw   = max(vlen(lbl) for lbl in row_labels) + 1
+    pw_v = max(vlen(p) for p in price_strs)
+    sep  = lw + 2 + pw_v + 3 + vlen('결과')
+
+    def row(label, price, icon):
+        return vpad_l(label, lw) + '  ' + vpad_r(price, pw_v) + '   ' + icon
+
+    block_lines = [
+        vpad_l('조건', lw) + '  ' + vpad_r('기준가', pw_v) + '   결과',
+        '─' * sep,
+    ]
+    for lbl, p, c in zip(row_labels, price_strs, criteria):
+        block_lines.append(row(lbl, p, ci(c['met'])))
+    lines.append('```\n' + '\n'.join(block_lines) + '\n```')
 
     return '\n'.join(lines)
 
@@ -238,6 +306,46 @@ def do_info(chat_id: int, query: str):
             tg_send_plain(chat_id, f'⚠️ 결과 전송 오류: {e}')
 
 
+def do_caution(chat_id: int, query: str):
+    if not query:
+        tg_send_plain(chat_id, '종목명을 입력해주세요.\n예: /caution 코셈')
+        return
+
+    try:
+        tg_send_plain(chat_id, f'🔍 "{query}" 투자주의 조회 중...')
+    except Exception as e:
+        print(f'/caution 안내 메시지 전송 실패: {e}', flush=True)
+
+    try:
+        results = search_kind_caution(query)
+    except Exception as e:
+        tg_send_plain(chat_id, f'❌ KRX 조회 오류: {e}')
+        return
+
+    if not results:
+        tg_send_plain(chat_id, f'"{query}" — 현재 투자주의가 아님.')
+        return
+
+    warn = results[0]
+    escalation = None
+    try:
+        codes = naver_stock_code(warn['stockName'])
+        if codes:
+            prices = fetch_prices(codes[0]['code'], count=20)
+            escalation = calc_caution_escalation(prices)
+    except Exception as e:
+        print(f'주가 조회 실패: {e}', flush=True)
+        escalation = {'error': str(e)}
+
+    try:
+        tg_send(chat_id, build_caution_message(warn['stockName'], warn, escalation))
+    except Exception:
+        try:
+            tg_send_plain(chat_id, build_caution_message(warn['stockName'], warn, escalation))
+        except Exception as e:
+            tg_send_plain(chat_id, f'⚠️ 결과 전송 오류: {e}')
+
+
 def process_update(update: dict):
     update_id = update.get('update_id')
     if update_id is not None:
@@ -263,6 +371,7 @@ def process_update(update: dict):
             '투자경고/위험 종목의 해제 예상일과 기준가를 알려드립니다.\n\n'
             '*명령어*\n'
             '/warning `종목명` — 종목 투자경고 조회\n'
+            '/caution `종목명` — 투자경고 지정 예상 점검\n'
             '/info `종목명` — 사업보고서 요약\n'
             '/help — 사용법 안내\n\n'
             '또는 종목명을 바로 입력해도 됩니다.\n'
@@ -275,7 +384,13 @@ def process_update(update: dict):
             '*1. 종목 검색*\n'
             '`/warning 종목명` 또는 종목명을 직접 입력\n'
             '예: `/warning 코셈` 또는 `코셈`\n\n'
-            '*2. 사업보고서 요약*\n'
+            '*2. 투자경고 지정 예상*\n'
+            '`/caution 종목명` — 투자주의 종목의 경고 격상 요건 점검\n'
+            '예: `/caution 코셈`\n'
+            '4가지 요건 중 하나라도 충족 시 "지정 예상":\n'
+            '① 초단기 3일 100% ② 단기 5일 60%\n'
+            '③ 장기 15일 100% ④ 반복 15일 75% \\+ 5회\n\n'
+            '*3. 사업보고서 요약*\n'
             '`/info 종목명` — 가장 최근 사업보고서를 10줄로 요약\n'
             '예: `/info 삼성전자`\n\n'
             '*해제 조건 안내*\n'
@@ -302,6 +417,11 @@ def process_update(update: dict):
                 tg_send_plain(chat_id, f'❌ 처리 중 오류: {e}')
             except Exception:
                 pass
+        return
+
+    if text.startswith('/caution'):
+        query = re.sub(r'^/\S+\s*', '', text).strip()
+        do_caution(chat_id, query)
         return
 
     if text.startswith('/web'):

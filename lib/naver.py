@@ -118,3 +118,56 @@ def calc_thresholds(prices: list) -> dict:
         'max15': max15, 'max15Date': max15_date, 'thresh3': thresh3, 'cond3': cond3,
         'allMet': cond1 and cond2 and cond3,
     }
+
+
+def calc_caution_escalation(prices: list) -> dict:
+    """투자주의 → 투자경고 격상 요건 4종 점검.
+
+    prices: 오래된→최신 순 종가 리스트 (fetch_prices 결과)
+
+    요건:
+      ① 초단기: 3거래일 100% 상승  → close[-1] >= close[-4] × 2.0
+      ② 단기:   5거래일 60% 상승   → close[-1] >= close[-6] × 1.6
+      ③ 장기:   15거래일 100% 상승 → close[-1] >= close[-16] × 2.0
+      ④ 반복:   15거래일 75% 상승  → close[-1] >= close[-16] × 1.75 (AND 5회 카운트는 호출부에서 AND)
+    """
+    if len(prices) < 16:
+        return {'error': f'데이터 부족 ({len(prices)}일치, 최소 16일 필요)'}
+    t_close, t_date = prices[-1]['close'], prices[-1]['date']
+    b3  = prices[-4]
+    b5  = prices[-6]
+    b15 = prices[-16]
+
+    specs = [
+        ('초단기', 3,  b3,  2.00),
+        ('단기',   5,  b5,  1.60),
+        ('장기',   15, b15, 2.00),
+        ('반복',   15, b15, 1.75),
+    ]
+    criteria = []
+    first_matched = None
+    for idx, (name, window, base, mult) in enumerate(specs):
+        threshold = round(base['close'] * mult)
+        met = t_close >= threshold
+        entry = {
+            'name': name,
+            'windowDays': window,
+            'baseClose': base['close'],
+            'baseDate': base['date'],
+            'multiplier': mult,
+            'threshold': threshold,
+            'met': met,
+        }
+        if name == '반복':
+            entry['countRequired'] = 5
+        criteria.append(entry)
+        if met and first_matched is None and name != '반복':
+            # 반복은 카운트와 AND한 뒤에야 최종 met이 확정되므로 호출부에서 재평가
+            first_matched = idx
+
+    return {
+        'tClose': t_close,
+        'tDate': t_date,
+        'criteria': criteria,
+        'firstMatchedIdx': first_matched,
+    }
