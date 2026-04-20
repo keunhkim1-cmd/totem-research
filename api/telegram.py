@@ -5,7 +5,9 @@
 from http.server import BaseHTTPRequestHandler
 import json, os, urllib.request, re, sys, unicodedata
 from concurrent.futures import ThreadPoolExecutor
-from datetime import date
+from datetime import date, datetime, timezone, timedelta
+
+KST = timezone(timedelta(hours=9))
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from lib.holidays import add_trading_days, count_trading_days
@@ -351,7 +353,13 @@ def do_caution(chat_id: int, query: str):
         tg_send_plain(chat_id, f'"{query}" — 현재 투자주의가 아님.')
         return
 
+    # 투자주의는 1거래일 지정 — 오늘(KST) 지정분이 아니면 현재 투자주의가 아님
+    today_kst = datetime.now(KST).date().isoformat()
     warn = results[0]
+    if warn['latestDesignationDate'] != today_kst:
+        tg_send_plain(chat_id, f'"{query}" — 현재 투자주의가 아님.')
+        return
+
     escalation = None
     try:
         codes = naver_stock_code(warn['stockName'])
