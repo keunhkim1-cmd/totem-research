@@ -121,15 +121,23 @@ def calc_thresholds(prices: list) -> dict:
 
 
 def calc_caution_escalation(prices: list) -> dict:
-    """투자주의 → 투자경고 격상 요건 4종 점검.
+    """투자주의 → 투자경고 격상 요건 점검.
 
     prices: 오래된→최신 순 종가 리스트 (fetch_prices 결과)
 
+    gating 의미:
+      'none'        — 가격 요건만으로 확정
+      'count'       — 가격 + 투자주의 5회 AND (호출부에서 count 주입)
+      'bulgunjeon'  — 가격 + 불건전요건 AND (불건전요건 판정은 시스템에서 불가, 가격 결과만 표기)
+
     요건:
-      ① 초단기: 3거래일 100% 상승  → close[-1] >= close[-4] × 2.0
-      ② 단기:   5거래일 60% 상승   → close[-1] >= close[-6] × 1.6
-      ③ 장기:   15거래일 100% 상승 → close[-1] >= close[-16] × 2.0
-      ④ 반복:   15거래일 75% 상승  → close[-1] >= close[-16] × 1.75 (AND 5회 카운트는 호출부에서 AND)
+      ① 초단기         3거래일 100% 상승
+      ② 단기           5거래일 60% 상승
+      ③ 단기&불건전    5거래일 45% 상승 & 불건전
+      ④ 장기           15거래일 100% 상승
+      ⑤ 장기&불건전    15거래일 75% 상승 & 불건전
+      ⑥ 반복           15거래일 75% 상승 & 투자주의 5회
+      ⑦ 초장기&불건전  1년(≈250거래일) 200% 상승 & 불건전
     """
     if len(prices) < 16:
         return {'error': f'데이터 부족 ({len(prices)}일치, 최소 16일 필요)'}
@@ -137,37 +145,40 @@ def calc_caution_escalation(prices: list) -> dict:
     b3  = prices[-4]
     b5  = prices[-6]
     b15 = prices[-16]
+    b_year = prices[-251] if len(prices) >= 251 else None
 
     specs = [
-        ('초단기', 3,  b3,  2.00),
-        ('단기',   5,  b5,  1.60),
-        ('장기',   15, b15, 2.00),
-        ('반복',   15, b15, 1.75),
+        ('초단기',        3,   b3,     2.00, 'none'),
+        ('단기',          5,   b5,     1.60, 'none'),
+        ('단기&불건전',   5,   b5,     1.45, 'bulgunjeon'),
+        ('장기',          15,  b15,    2.00, 'none'),
+        ('장기&불건전',   15,  b15,    1.75, 'bulgunjeon'),
+        ('반복',          15,  b15,    1.75, 'count'),
+        ('초장기&불건전', 250, b_year, 3.00, 'bulgunjeon'),
     ]
     criteria = []
-    first_matched = None
-    for idx, (name, window, base, mult) in enumerate(specs):
-        threshold = round(base['close'] * mult)
-        met = t_close >= threshold
-        entry = {
-            'name': name,
-            'windowDays': window,
-            'baseClose': base['close'],
-            'baseDate': base['date'],
-            'multiplier': mult,
-            'threshold': threshold,
-            'met': met,
-        }
-        if name == '반복':
+    for name, window, base, mult, gating in specs:
+        if base is None:
+            entry = {
+                'name': name, 'windowDays': window, 'gating': gating,
+                'baseClose': None, 'baseDate': None,
+                'multiplier': mult, 'threshold': None,
+                'priceMet': False, 'note': '데이터 부족',
+            }
+        else:
+            threshold = round(base['close'] * mult)
+            entry = {
+                'name': name, 'windowDays': window, 'gating': gating,
+                'baseClose': base['close'], 'baseDate': base['date'],
+                'multiplier': mult, 'threshold': threshold,
+                'priceMet': t_close >= threshold,
+            }
+        if gating == 'count':
             entry['countRequired'] = 5
         criteria.append(entry)
-        if met and first_matched is None and name != '반복':
-            # 반복은 카운트와 AND한 뒤에야 최종 met이 확정되므로 호출부에서 재평가
-            first_matched = idx
 
     return {
         'tClose': t_close,
         'tDate': t_date,
         'criteria': criteria,
-        'firstMatchedIdx': first_matched,
     }

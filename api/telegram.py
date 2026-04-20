@@ -122,20 +122,22 @@ def build_caution_message(stock_name: str, warn: dict, escalation: dict | None) 
     criteria = escalation['criteria']
     count15  = warn.get('recent15dCount', 0)
 
-    # 반복 조건은 가격 AND 5회 카운트
-    rep = criteria[3]
-    rep['countActual'] = count15
-    rep['met'] = rep['met'] and count15 >= rep['countRequired']
+    # 각 조건의 최종 결과(met) 확정
+    for c in criteria:
+        if c['gating'] == 'count':
+            c['countActual'] = count15
+            c['met'] = bool(c['priceMet']) and count15 >= c['countRequired']
+        else:
+            # 'none' & 'bulgunjeon' 모두 가격 결과만 표기.
+            # 불건전은 시스템에서 판정 불가 — 사용자가 /bulgunjeon 로 수동 확인.
+            c['met'] = bool(c['priceMet'])
 
-    # firstMatchedIdx는 반복 제외 인덱스. 반복이 확정된 경우 업데이트.
-    first_idx = escalation.get('firstMatchedIdx')
-    if first_idx is None and rep['met']:
-        first_idx = 3
-    elif first_idx is not None:
-        # 원래 첫 매칭 유지 — 반복보다 앞선 조건이 먼저 매칭됐으면 그대로
-        pass
+    # 헤드라인 계층화: 확정 매칭(가격만/가격+카운트) vs 조건부 매칭(가격+불건전)
+    strong_idx = next((i for i, c in enumerate(criteria)
+                       if c['met'] and c['gating'] != 'bulgunjeon'), None)
+    soft_idx   = next((i for i, c in enumerate(criteria)
+                       if c['met'] and c['gating'] == 'bulgunjeon'), None)
 
-    any_met = any(c['met'] for c in criteria)
     cur = escalation['tClose']
     t_d = date.fromisoformat(escalation['tDate'])
 
@@ -143,11 +145,18 @@ def build_caution_message(stock_name: str, warn: dict, escalation: dict | None) 
     lines.append('')
 
     # 상세 표
-    ci = lambda c: '✅' if c else '❌'
-    row_labels = ['① 초단기', '② 단기', '③ 장기', '④ 반복']
+    def ci(c):
+        if c.get('threshold') is None:
+            return '—'
+        return '✅' if c['met'] else '❌'
+
+    row_labels = ['① 초단기', '② 단기', '③ 단기&불건전', '④ 장기',
+                  '⑤ 장기&불건전', '⑥ 반복', '⑦ 초장기&불건전']
     price_strs = []
-    for c, label in zip(criteria, row_labels):
-        if c['name'] == '반복':
+    for c in criteria:
+        if c.get('threshold') is None:
+            price_strs.append('—')
+        elif c['gating'] == 'count':
             price_strs.append(f"{c['threshold']:,}원·{c['countActual']}/{c['countRequired']}회")
         else:
             price_strs.append(f"{c['threshold']:,}원")
@@ -164,13 +173,16 @@ def build_caution_message(stock_name: str, warn: dict, escalation: dict | None) 
         '─' * sep,
     ]
     for lbl, p, c in zip(row_labels, price_strs, criteria):
-        block_lines.append(row(lbl, p, ci(c['met'])))
+        block_lines.append(row(lbl, p, ci(c)))
     lines.append('```\n' + '\n'.join(block_lines) + '\n```')
     lines.append('')
 
-    if any_met and first_idx is not None:
-        headline_thresh = criteria[first_idx]['threshold']
-        lines.append(f'→ 투자경고 지정 예상 (기준가 {headline_thresh:,}원) 🔴')
+    if strong_idx is not None:
+        thresh = criteria[strong_idx]['threshold']
+        lines.append(f'→ 투자경고 지정 예상 (기준가 {thresh:,}원) 🔴')
+    elif soft_idx is not None:
+        thresh = criteria[soft_idx]['threshold']
+        lines.append(f'→ 불건전 요건 시 투자경고 지정 예상 (기준가 {thresh:,}원) 🟠')
     else:
         lines.append('→ 투자경고 미해당 🟢')
     lines.append('')
@@ -337,7 +349,8 @@ def do_caution(chat_id: int, query: str):
     try:
         codes = naver_stock_code(warn['stockName'])
         if codes:
-            prices = fetch_prices(codes[0]['code'], count=20)
+            # 초장기(1년 200%) 조건 판정을 위해 250거래일 이상 필요 → 260일로 여유 있게 조회
+            prices = fetch_prices(codes[0]['code'], count=260)
             escalation = calc_caution_escalation(prices)
     except Exception as e:
         print(f'주가 조회 실패: {e}', flush=True)
