@@ -999,7 +999,7 @@ async function renderPatchNotes() {
   const container = document.getElementById('patchnotesContent');
   if (!container || container.dataset.loaded === '1') return;
   try {
-    const resp = await fetch('/data/patchnotes.json');
+    const resp = await fetch('/data/patchnotes.json', { cache: 'no-cache' });
     if (!resp.ok) throw new Error('HTTP ' + resp.status);
     const entries = await resp.json();
     const tagLabel = { feat: 'NEW', fix: 'FIX', improve: 'IMPROVE', chore: 'CHORE' };
