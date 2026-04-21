@@ -368,6 +368,44 @@
     }
     .caution-nonprice strong { color: var(--text); }
 
+    /* 패치노트 */
+    .patch-entry {
+      background: var(--surface); border-radius: 8px;
+      padding: 24px; margin-bottom: 14px;
+    }
+    .patch-entry-head {
+      display: flex; align-items: baseline; flex-wrap: wrap; gap: 10px;
+      margin-bottom: 12px;
+    }
+    .patch-entry-date {
+      font-family: var(--mono); font-size: 13px;
+      color: var(--text-muted); letter-spacing: -0.12px;
+    }
+    .patch-entry-tag {
+      font-size: 11px; font-weight: 600; padding: 2px 8px;
+      border-radius: 5px; letter-spacing: -0.12px;
+      text-transform: uppercase;
+    }
+    .patch-entry-tag.feat    { background: rgba(0,113,227,0.16); color: var(--blue-bright); }
+    .patch-entry-tag.fix     { background: rgba(255,69,58,0.16); color: var(--negative); }
+    .patch-entry-tag.improve { background: rgba(255,149,0,0.16); color: #ff9f0a; }
+    .patch-entry-tag.chore   { background: rgba(255,255,255,0.08); color: var(--text-muted); }
+    .patch-entry-title {
+      font-family: var(--font-display);
+      font-size: 17px; font-weight: 600; color: var(--text);
+      letter-spacing: -0.374px; line-height: 1.3;
+    }
+    .patch-entry-items { list-style: none; padding: 0; margin: 0; }
+    .patch-entry-items li {
+      padding: 5px 0 5px 18px; position: relative;
+      font-size: 14px; color: var(--text-secondary); line-height: 1.5;
+      letter-spacing: -0.224px;
+    }
+    .patch-entry-items li::before {
+      content: "–"; position: absolute; left: 0;
+      color: var(--text-muted);
+    }
+
     .price-loading {
       text-align: center; padding: 20px; font-size: 14px; color: var(--text-muted);
       animation: pulse 1.5s ease-in-out infinite;
@@ -630,6 +668,7 @@
     <button class="nav-item" onclick="switchPage('dashboard', this)">재무 현황</button>
     <button class="nav-item active" onclick="switchPage('warning', this)">투자경고 계산기</button>
     <button class="nav-item" onclick="switchPage('dart', this)">공시 분석기</button>
+    <button class="nav-item" onclick="switchPage('patchnotes', this)">패치노트</button>
   </div>
 </nav>
 
@@ -918,6 +957,22 @@
 
 </div><!-- /page-dart -->
 
+<!-- ═══════════════ 패치노트 ═══════════════ -->
+<div id="page-patchnotes" class="page-section">
+  <div class="section-dark">
+    <div class="section-inner">
+      <div class="header">
+        <div class="badge">Patch Notes</div>
+        <h1>패치노트</h1>
+        <p>주요 업데이트와 기능 추가 기록입니다</p>
+      </div>
+      <div id="patchnotesContent">
+        <div class="search-loading">불러오는 중...</div>
+      </div>
+    </div>
+  </div>
+</div><!-- /page-patchnotes -->
+
 <script>
 // ────────────────────────────────────────────────
 // XSS 방어 유틸
@@ -937,6 +992,42 @@ function switchPage(page, el) {
   document.querySelector('.nav-title').classList.remove('active');
   document.getElementById('page-' + page).classList.add('active');
   el.classList.add('active');
+  if (page === 'patchnotes') renderPatchNotes();
+}
+
+// 패치노트 — data/patchnotes.json 렌더
+async function renderPatchNotes() {
+  const container = document.getElementById('patchnotesContent');
+  if (!container || container.dataset.loaded === '1') return;
+  try {
+    const resp = await fetch('/data/patchnotes.json');
+    if (!resp.ok) throw new Error('HTTP ' + resp.status);
+    const entries = await resp.json();
+    const tagLabel = { feat: 'NEW', fix: 'FIX', improve: 'IMPROVE', chore: 'CHORE' };
+    if (!Array.isArray(entries) || entries.length === 0) {
+      container.innerHTML = '<div class="result-empty">기록된 패치노트가 없습니다.</div>';
+      return;
+    }
+    container.innerHTML = entries.map(e => {
+      const tag = (e.tag || 'feat').toLowerCase();
+      const label = tagLabel[tag] || 'UPDATE';
+      const items = Array.isArray(e.items) ? e.items : [];
+      return `
+        <article class="patch-entry">
+          <div class="patch-entry-head">
+            <span class="patch-entry-date">${escHtml(e.date || '')}</span>
+            <span class="patch-entry-tag ${escHtml(tag)}">${escHtml(label)}</span>
+            <span class="patch-entry-title">${escHtml(e.title || '')}</span>
+          </div>
+          <ul class="patch-entry-items">
+            ${items.map(it => `<li>${escHtml(it)}</li>`).join('')}
+          </ul>
+        </article>`;
+    }).join('');
+    container.dataset.loaded = '1';
+  } catch (e) {
+    container.innerHTML = `<div class="result-empty">패치노트를 불러올 수 없습니다: ${escHtml(e.message)}</div>`;
+  }
 }
 
 // ────────────────────────────────────────────────
