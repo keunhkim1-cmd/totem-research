@@ -780,16 +780,15 @@
       </div>
 
       <div class="card">
-        <h2>종목 자동검색 <span style="font-size:12px;color:var(--text-muted);font-weight:400;letter-spacing:-0.12px;">KRX KIND</span></h2>
+        <h2>종목명 검색 <span style="font-size:12px;color:var(--text-muted);font-weight:400;letter-spacing:-0.12px;">KRX KIND</span></h2>
         <div class="form-group">
-          <label>종목명으로 검색</label>
           <div class="search-row">
             <input
               type="text" id="searchInput"
               placeholder="종목명 입력 후 검색 (예: 에코프로, 셀트리온)"
               onkeydown="if(event.key==='Enter') doSearch()"
             />
-            <button class="search-btn" id="searchBtn" onclick="doSearch()">KRX 조회</button>
+            <button class="search-btn" id="searchBtn" onclick="doSearch()">search</button>
           </div>
           <div class="search-results" id="searchResults"></div>
         </div>
@@ -1097,7 +1096,7 @@ async function doSearch() {
     resultsEl.innerHTML = `<div class="result-empty">서버 연결 오류: ${escHtml(e.message)}</div>`;
   } finally {
     btn.disabled = false;
-    btn.textContent = 'KRX 조회';
+    btn.textContent = 'search';
   }
 }
 
