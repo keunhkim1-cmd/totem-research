@@ -139,8 +139,70 @@
     }
     .nav-item:hover { color: #ffffff; text-decoration: underline; text-underline-offset: 4px; }
     .nav-item.active { color: #ffffff; }
+    .nav-clock { display: none; }
     .page-section { display: none; }
     .page-section.active { display: block; }
+
+    /* ─── Nav bar — terminal skin (warning page only) ─── */
+    body.is-warning-active .nav-bar {
+      background: var(--tm-bg);
+      backdrop-filter: none;
+      -webkit-backdrop-filter: none;
+      height: 30px;
+      border-bottom: 1px solid var(--tm-hairline);
+    }
+    body.is-warning-active .nav-inner {
+      max-width: none;
+      padding: 0 12px;
+      gap: 0;
+      align-items: stretch;
+    }
+    body.is-warning-active .nav-title {
+      font-family: var(--font-display);
+      font-size: 10px;
+      font-weight: 600;
+      color: var(--tm-accent);
+      letter-spacing: 0.8px;
+      text-transform: uppercase;
+      margin-right: 16px;
+      display: flex;
+      align-items: center;
+    }
+    body.is-warning-active .nav-title::after {
+      content: " [MONO]";
+      color: var(--tm-text-mute);
+      font-weight: 400;
+      margin-left: 6px;
+    }
+    body.is-warning-active .nav-title:hover { opacity: 1; color: var(--tm-text); }
+    body.is-warning-active .nav-item {
+      height: 30px;
+      padding: 0 14px;
+      font-family: var(--font-display);
+      font-size: 10px;
+      font-weight: 500;
+      color: var(--tm-text-mute);
+      letter-spacing: 0.8px;
+      text-transform: uppercase;
+      border-bottom: 2px solid transparent;
+    }
+    body.is-warning-active .nav-item:hover {
+      color: var(--tm-text);
+      text-decoration: none;
+    }
+    body.is-warning-active .nav-item.active {
+      color: var(--tm-accent);
+      border-bottom-color: var(--tm-accent);
+    }
+    body.is-warning-active .nav-clock {
+      display: flex;
+      align-items: center;
+      margin-left: auto;
+      font-family: var(--mono);
+      font-size: 10px;
+      color: var(--tm-text-mute);
+      font-variant-numeric: tabular-nums;
+    }
 
     /* Header */
     .header { text-align: center; margin-bottom: 40px; }
@@ -976,30 +1038,6 @@
       border: 1px solid var(--tm-hairline);
     }
 
-    /* ─── §1 Terminal sub-bar ─── */
-    #page-warning .tm-top {
-      display: flex;
-      align-items: center;
-      height: 30px;
-      background: #000;
-      border-bottom: 1px solid var(--tm-hairline);
-      padding: 0 12px;
-      gap: 16px;
-      font-size: 10px;
-    }
-    #page-warning .tm-top .tm-logo {
-      color: var(--tm-accent);
-      font-weight: 600;
-      letter-spacing: 0.8px;
-      font-family: var(--font-display);
-    }
-    #page-warning .tm-top .tm-status {
-      margin-left: auto;
-      color: var(--tm-text-mute);
-      font-family: var(--mono);
-      font-variant-numeric: tabular-nums;
-    }
-
     /* ─── §0 Section Head ─── */
     #page-warning .tm-sec {
       border-bottom: 1px solid var(--tm-hairline);
@@ -1672,6 +1710,7 @@
     <button class="nav-item active" onclick="switchPage('warning', this)">투자경고 계산기</button>
     <button class="nav-item" onclick="switchPage('dart', this)">공시 분석기 (개발중)</button>
     <button class="nav-item" onclick="switchPage('patchnotes', this)">패치 노트</button>
+    <span id="tmClock" class="nav-clock">--:--:--</span>
   </div>
 </nav>
 
@@ -1767,12 +1806,6 @@
 <!-- ═══════════════ 투자경고 계산기 ═══════════════ -->
 <div id="page-warning" class="page-section active">
   <div class="warning-terminal">
-
-  <!-- Terminal sub-bar -->
-  <div class="tm-top">
-    <span class="tm-logo">샤머니즘 리서치 [MONO]</span>
-    <div class="tm-status"><span id="tmClock">--:--:--</span></div>
-  </div>
 
   <div class="section-dark">
     <div class="section-inner">
