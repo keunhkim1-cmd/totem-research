@@ -699,6 +699,45 @@
       100% { transform: translateX(-50%); }
     }
 
+    /* Terminal-tone ticker skin — only when warning calc tab is active */
+    body.is-warning-active .ticker-wrap {
+      height: 28px;
+      background: #000;
+      backdrop-filter: none;
+      -webkit-backdrop-filter: none;
+      border-top: 1px solid var(--tm-hairline);
+    }
+    body.is-warning-active .ticker-wrap::before {
+      content: "TABOO · 투자금지";
+      position: absolute;
+      left: 0; top: 0; bottom: 0;
+      z-index: 2;
+      display: flex;
+      align-items: center;
+      padding: 0 14px;
+      background: #000;
+      border-right: 1px solid var(--tm-hairline);
+      color: var(--tm-accent);
+      font: 600 9px/1 var(--font-display);
+      letter-spacing: 1.5px;
+    }
+    body.is-warning-active .ticker-track {
+      padding-left: 130px;
+      animation-duration: 60s;
+    }
+    body.is-warning-active .ticker-item {
+      color: var(--tm-text-dim);
+      padding: 0 22px;
+      font-size: 11px;
+      letter-spacing: 0;
+    }
+    body.is-warning-active .ticker-item::before {
+      content: "⛩ ";
+      color: var(--tm-amber);
+      opacity: 0.55;
+      margin-right: 2px;
+    }
+
     @media (max-width: 480px) {
       .date-grid { grid-template-columns: 1fr; }
       .header h1 { font-size: 28px; }
@@ -1705,8 +1744,12 @@ function switchPage(page, el) {
   document.querySelector('.nav-title').classList.remove('active');
   document.getElementById('page-' + page).classList.add('active');
   el.classList.add('active');
+  document.body.classList.toggle('is-warning-active', page === 'warning');
   if (page === 'patchnotes') renderPatchNotes();
 }
+
+// 초기 로드 시 경고 탭이 default active 이므로 body 클래스 반영
+document.body.classList.add('is-warning-active');
 
 // 패치 노트 — data/patchnotes.json 렌더
 async function renderPatchNotes() {
