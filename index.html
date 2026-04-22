@@ -797,6 +797,30 @@
       border: 1px solid var(--tm-accent);
       border-radius: 0;
     }
+
+    /* ─── §1 Terminal sub-bar ─── */
+    #page-warning .tm-top {
+      display: flex;
+      align-items: center;
+      height: 30px;
+      background: #000;
+      border-bottom: 1px solid var(--tm-hairline);
+      padding: 0 12px;
+      gap: 16px;
+      font-size: 10px;
+    }
+    #page-warning .tm-top .tm-logo {
+      color: var(--tm-accent);
+      font-weight: 600;
+      letter-spacing: 0.8px;
+      font-family: var(--font-display);
+    }
+    #page-warning .tm-top .tm-status {
+      margin-left: auto;
+      color: var(--tm-text-mute);
+      font-family: var(--mono);
+      font-variant-numeric: tabular-nums;
+    }
   </style>
 </head>
 <body>
@@ -904,6 +928,12 @@
 <!-- ═══════════════ 투자경고 계산기 ═══════════════ -->
 <div id="page-warning" class="page-section active">
   <div class="warning-terminal">
+
+  <!-- Terminal sub-bar -->
+  <div class="tm-top">
+    <span class="tm-logo">샤머니즘 리서치 [MONO]</span>
+    <div class="tm-status"><span id="tmClock">--:--:--</span></div>
+  </div>
 
   <div class="section-dark">
     <div class="section-inner">
@@ -2257,6 +2287,19 @@ function renderDartResults(data) {
   // 두 번 반복해서 끊김 없는 무한 스크롤
   const html = items.map(t => '<span class="ticker-item">' + t + '</span>').join('');
   track.innerHTML = html + html;
+})();
+
+// Terminal sub-bar live clock
+(function(){
+  const el = document.getElementById('tmClock');
+  if (!el) return;
+  function tick() {
+    const d = new Date();
+    const pad = n => String(n).padStart(2, '0');
+    el.textContent = pad(d.getHours()) + ':' + pad(d.getMinutes()) + ':' + pad(d.getSeconds());
+  }
+  tick();
+  setInterval(tick, 1000);
 })();
 </script>
 </body>
