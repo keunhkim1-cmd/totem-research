@@ -104,78 +104,44 @@
       max-width: 980px; margin: 0 auto; padding: 0 24px;
     }
 
-    /* Nav — Apple glass bar */
+    /* ─── Nav bar — terminal skin (global, all pages) ─── */
     .nav-bar {
       width: 100%;
-      background: rgba(0,0,0,0.8);
-      backdrop-filter: saturate(180%) blur(20px); -webkit-backdrop-filter: saturate(180%) blur(20px);
-      height: 48px;
+      background: var(--tm-bg);
+      height: 30px;
+      border-bottom: 1px solid var(--tm-hairline);
       position: sticky; top: 0; z-index: 100;
     }
-    .nav-title {
-      font-family: var(--font-display);
-      font-size: 21px; font-weight: 600; color: #ffffff;
-      letter-spacing: -0.4px; white-space: nowrap;
-      margin-right: 32px;
-      border: none; background: none; cursor: pointer;
-      transition: opacity 0.2s;
-    }
-    .nav-title:hover { opacity: 0.72; }
     .nav-inner {
-      max-width: 980px; margin: 0 auto; padding: 0 24px;
-      display: flex; align-items: center; justify-content: flex-start;
+      padding: 0 12px;
+      display: flex; align-items: stretch; justify-content: flex-start;
       height: 100%;
       overflow-x: auto; -webkit-overflow-scrolling: touch;
       scrollbar-width: none;
     }
     .nav-inner::-webkit-scrollbar { display: none; }
-    .nav-item {
-      flex: none; text-align: center; padding: 0 20px; height: 48px;
-      font-size: 12px; font-weight: 400; color: rgba(255,255,255,0.8);
-      cursor: pointer; transition: color 0.2s;
-      border: none; background: none;
-      display: flex; align-items: center;
-      letter-spacing: -0.12px;
-    }
-    .nav-item:hover { color: #ffffff; text-decoration: underline; text-underline-offset: 4px; }
-    .nav-item.active { color: #ffffff; }
-    .nav-clock { display: none; }
-    .page-section { display: none; }
-    .page-section.active { display: block; }
-
-    /* ─── Nav bar — terminal skin (warning page only) ─── */
-    body.is-warning-active .nav-bar {
-      background: var(--tm-bg);
-      backdrop-filter: none;
-      -webkit-backdrop-filter: none;
-      height: 30px;
-      border-bottom: 1px solid var(--tm-hairline);
-    }
-    body.is-warning-active .nav-inner {
-      max-width: none;
-      padding: 0 12px;
-      gap: 0;
-      align-items: stretch;
-    }
-    body.is-warning-active .nav-title {
+    .nav-title {
       font-family: var(--font-display);
       font-size: 10px;
       font-weight: 600;
       color: var(--tm-accent);
       letter-spacing: 0.8px;
       text-transform: uppercase;
+      white-space: nowrap;
       margin-right: 16px;
-      display: flex;
-      align-items: center;
+      border: none; background: none; cursor: pointer;
+      display: flex; align-items: center;
+      transition: color 0.2s;
     }
-    body.is-warning-active .nav-title::after {
+    .nav-title::after {
       content: " [MONO]";
       color: var(--tm-text-mute);
       font-weight: 400;
       margin-left: 6px;
     }
-    body.is-warning-active .nav-title:hover { opacity: 1; color: var(--tm-text); }
-    body.is-warning-active .nav-item {
+    .nav-title:hover { color: var(--tm-text); }
+    .nav-item {
+      flex: none;
       height: 30px;
       padding: 0 14px;
       font-family: var(--font-display);
@@ -184,17 +150,18 @@
       color: var(--tm-text-mute);
       letter-spacing: 0.8px;
       text-transform: uppercase;
+      cursor: pointer;
+      border: none; background: none;
       border-bottom: 2px solid transparent;
+      display: flex; align-items: center;
+      transition: color 0.2s;
     }
-    body.is-warning-active .nav-item:hover {
-      color: var(--tm-text);
-      text-decoration: none;
-    }
-    body.is-warning-active .nav-item.active {
+    .nav-item:hover { color: var(--tm-text); }
+    .nav-item.active {
       color: var(--tm-accent);
       border-bottom-color: var(--tm-accent);
     }
-    body.is-warning-active .nav-clock {
+    .nav-clock {
       display: flex;
       align-items: center;
       margin-left: auto;
@@ -203,6 +170,8 @@
       color: var(--tm-text-mute);
       font-variant-numeric: tabular-nums;
     }
+    .page-section { display: none; }
+    .page-section.active { display: block; }
 
     /* Header */
     .header { text-align: center; margin-bottom: 40px; }
@@ -811,7 +780,7 @@
       .date-grid { grid-template-columns: 1fr; }
       .header h1 { font-size: 28px; }
       .dart-filters { grid-template-columns: 1fr; }
-      .nav-item { padding: 0 12px; font-size: 11px; }
+      .nav-item { padding: 0 10px; }
       .section-inner { padding: 0 16px; }
       .section-dark { padding: 32px 0; }
     }
