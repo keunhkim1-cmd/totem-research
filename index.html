@@ -965,6 +965,11 @@
     #page-warning .warning-terminal .result-card {
       margin: 0 16px 16px;
     }
+    #page-warning .warning-terminal .chart-standalone {
+      margin: 0 16px 16px;
+      background: var(--tm-panel);
+      border: 1px solid var(--tm-hairline);
+    }
 
     /* ─── §1 Terminal sub-bar ─── */
     #page-warning .tm-top {
@@ -1791,7 +1796,22 @@
       <input type="hidden" id="tradingStop" value="no" />
       <input type="hidden" id="resumeDate" />
 
-      <!-- Result — Terminal section stack -->
+      <!-- §6 Chart (TradingView) — independent, follows search/selection -->
+      <section class="tm-sec chart-standalone" id="sec-chart" style="display:none">
+        <div class="tm-sec-head">
+          <span class="t">시세 · 임계가</span>
+          <span class="src">출처: TradingView</span>
+        </div>
+        <div class="tm-chart-wrap">
+          <div class="tm-chart-tabs">
+            <div class="flex"></div>
+            <div class="legend" id="chartLegend"></div>
+          </div>
+          <div class="tm-chart" id="tvChartWarning" style="height:360px;"></div>
+        </div>
+      </section>
+
+      <!-- Result — Terminal section stack (warning target only) -->
       <div class="result-card" id="resultCard">
 
         <!-- §2 Symbol Header -->
@@ -1862,21 +1882,6 @@
               <div class="d num"></div>
               <div class="l">해제 가능일</div>
             </div>
-          </div>
-        </section>
-
-        <!-- §6 Chart (TradingView mount target) -->
-        <section class="tm-sec" id="sec-chart" style="display:none">
-          <div class="tm-sec-head">
-            <span class="t">시세 · 임계가</span>
-            <span class="src">출처: TradingView</span>
-          </div>
-          <div class="tm-chart-wrap">
-            <div class="tm-chart-tabs">
-              <div class="flex"></div>
-              <div class="legend" id="chartLegend"></div>
-            </div>
-            <div class="tm-chart" id="tvChartWarning" style="height:360px;"></div>
           </div>
         </section>
 
@@ -2111,6 +2116,9 @@ async function doSearch() {
     return;
   }
 
+  // TV 차트는 즉시 동기화 (경고/주의 여부와 무관)
+  syncTvChartByName(query);
+
   const resultsEl = document.getElementById('searchResults');
   const btn = document.getElementById('searchBtn');
 
@@ -2187,16 +2195,13 @@ function hideWarningCards() {
   const rc = document.getElementById('resultCard');
   if (rc) {
     rc.classList.remove('show');
-    // 하위 섹션들도 숨겨서 재검색 시 잔상 방지
-    ['sec-chart','sec-price','sec-rules'].forEach(id => {
+    // 경고 관련 하위 섹션만 숨김 (sec-chart 는 독립 섹션이므로 유지)
+    ['sec-price','sec-rules'].forEach(id => {
       const el = document.getElementById(id);
       if (el) el.style.display = 'none';
     });
     const v = document.getElementById('sec-verdict');
     if (v) v.style.display = 'none';
-    // TradingView 재마운트 가드 리셋
-    const tvContainer = document.getElementById('tvChartWarning');
-    if (tvContainer) delete tvContainer.dataset.tvCode;
   }
 }
 
@@ -2214,10 +2219,14 @@ function showNotWarning() {
 
 function selectResult(r) {
   hideCautionCard();
-  document.getElementById('stockName').value = r.stockName || document.getElementById('searchInput').value;
+  const name = r.stockName || document.getElementById('searchInput').value;
+  document.getElementById('stockName').value = name;
   document.getElementById('designationDate').value = r.designationDate;
   document.getElementById('warningType').value = r.level === '투자위험' ? 'risk' : 'warning_normal';
   document.getElementById('searchResults').classList.remove('show');
+
+  // 사용자가 클릭한 종목으로 TV 차트 즉시 동기화
+  syncTvChartByName(name);
 
   // 기준가 조회 → 해제 여부 판별 후 결과 표시
   checkAndDisplay(r);
@@ -3288,6 +3297,18 @@ function loadTvChartWarning(stockCode) {
   if (!stockCode || !container) { if (section) section.style.display = 'none'; return; }
   if (section) section.style.display = '';
   _mountTvWidget(container, stockCode, '360', '#0A0A0A');
+}
+
+// 종목명으로 TV 차트 동기화 — 경고/주의 상태와 무관하게 즉시 업데이트
+async function syncTvChartByName(stockName) {
+  if (!stockName) return;
+  try {
+    const resp = await fetch(`/api/stock-code?name=${encodeURIComponent(stockName)}`);
+    const data = await resp.json();
+    if (data.items && data.items.length > 0) {
+      loadTvChartWarning(data.items[0].code);
+    }
+  } catch (e) { /* 네트워크/서버 오류는 조용히 무시 */ }
 }
 
 const CLS_NAMES = { Y: '유가', K: '코스닥', N: '코넥스', E: '기타' };
