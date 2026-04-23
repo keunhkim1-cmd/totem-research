@@ -1,4 +1,6 @@
 {
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "fluid": true,
   "rewrites": [
     { "source": "/api/(.*)", "destination": "/api/$1" }
   ],
@@ -61,11 +63,15 @@
     }
   ],
   "functions": {
+    "api/debug.py": { "maxDuration": 10 },
     "api/telegram.py": { "maxDuration": 300 },
-    "api/warn-search.py": { "maxDuration": 30 },
+    "api/stock-code.py": { "maxDuration": 20 },
+    "api/stock-overview.py": { "maxDuration": 20 },
+    "api/warn-search.py": { "maxDuration": 20 },
     "api/caution-search.py": { "maxDuration": 30 },
-    "api/stock-price.py": { "maxDuration": 30 },
-    "api/dart-search.py": { "maxDuration": 30 },
-    "api/financial-model.py": { "maxDuration": 60 }
+    "api/stock-price.py": { "maxDuration": 20 },
+    "api/dart-search.py": { "maxDuration": 20 },
+    "api/financial-model.py": { "maxDuration": 120 },
+    "api/cache-bust.py": { "maxDuration": 10 }
   }
 }

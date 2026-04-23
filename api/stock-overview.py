@@ -1,10 +1,16 @@
 from http.server import BaseHTTPRequestHandler
-import urllib.parse, json, sys, os
+import urllib.parse, sys, os
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from lib.naver import fetch_stock_overview
 from lib.validation import validate_stock_code
-from lib.http_utils import safe_traceback, send_json_headers, send_options_response
+from lib.http_utils import (
+    api_success_payload,
+    log_exception,
+    send_api_error,
+    send_json_response,
+    send_options_response,
+)
 
 class handler(BaseHTTPRequestHandler):
     def do_OPTIONS(self):
@@ -15,17 +21,11 @@ class handler(BaseHTTPRequestHandler):
         try:
             code = validate_stock_code(qs.get('code', [''])[0])
         except ValueError as e:
-            body = json.dumps({'error': str(e)}, ensure_ascii=False).encode()
-            self.send_response(400)
+            send_api_error(self, 400, 'VALIDATION_ERROR', str(e))
         else:
             try:
                 data = fetch_stock_overview(code)
-                body = json.dumps(data, ensure_ascii=False).encode()
-                self.send_response(200)
-            except Exception as e:
-                print(f'Error: {safe_traceback()}')
-                body = json.dumps({'error': '서버 오류가 발생했습니다.'}, ensure_ascii=False).encode()
-                self.send_response(500)
-        send_json_headers(self)
-        self.end_headers()
-        self.wfile.write(body)
+                send_json_response(self, 200, api_success_payload(data))
+            except Exception:
+                log_exception('api_request_failed', endpoint='stock-overview')
+                send_api_error(self, 500, 'INTERNAL_ERROR', '서버 오류가 발생했습니다.')

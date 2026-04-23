@@ -6,6 +6,7 @@ import re
 from pathlib import Path
 
 from lib.cache import TTLCache
+from lib.validation import parse_int_range
 
 
 CORP_CODE_RE = re.compile(r'^\d{8}$')
@@ -60,14 +61,8 @@ def validate_params(corp_code: str, fs_div: str, years_raw: str) -> tuple[str, s
     if fs_div not in ALLOWED_FS_DIVS:
         raise ValueError('잘못된 fs_div 값')
 
-    try:
-        years = int((years_raw or '5').strip())
-    except ValueError:
-        raise ValueError('years는 정수여야 합니다')
-
     max_allowed = max_years()
-    if years < 2 or years > max_allowed:
-        raise ValueError(f'years는 2~{max_allowed} 범위여야 합니다')
+    years = parse_int_range(years_raw, 'years', DEFAULT_MAX_YEARS, 2, max_allowed)
     return corp_code, fs_div, years
 
 

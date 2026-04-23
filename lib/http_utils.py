@@ -1,10 +1,12 @@
 """HTTP helpers for requests, responses, and safe error reporting."""
+import json
 import os
 import re
 import traceback
 import urllib.error
 import urllib.parse
 import urllib.request
+from datetime import datetime, timezone
 
 
 DEFAULT_SECRET_QUERY_KEYS = frozenset({
@@ -17,6 +19,7 @@ DEFAULT_SECRET_QUERY_KEYS = frozenset({
 })
 
 SECRET_ENV_NAMES = (
+    'CACHE_ADMIN_TOKEN',
     'DART_API_KEY',
     'ECOS_API_KEY',
     'FINANCIAL_MODEL_API_TOKEN',
@@ -27,6 +30,7 @@ SECRET_ENV_NAMES = (
     'SUPABASE_SERVICE_ROLE_KEY',
     'TELEGRAM_BOT_TOKEN',
     'TELEGRAM_WEBHOOK_SECRET',
+    'UPSTASH_REDIS_REST_TOKEN',
 )
 
 _TELEGRAM_BOT_TOKEN_RE = re.compile(r'(/bot)([^/?#]+)')
@@ -121,6 +125,75 @@ def send_options_response(handler, *, methods='GET, OPTIONS', allow_headers=None
     handler.end_headers()
 
 
+def api_success_payload(payload: dict | None = None) -> dict:
+    """Return a success payload without breaking existing top-level fields."""
+    out = dict(payload or {})
+    out.setdefault('ok', True)
+    return out
+
+
+def api_error_payload(code: str, message: str, *, details=None,
+                      legacy_key: str | None = 'error',
+                      status_value: str | None = None) -> dict:
+    """Build the transitional API error shape.
+
+    New clients should read errorInfo. Existing clients may still read the
+    legacy top-level `error` or `errorMessage` string during migration.
+    """
+    payload = {
+        'ok': False,
+        'errorInfo': {
+            'code': code,
+            'message': message,
+        },
+    }
+    if details is not None:
+        payload['errorInfo']['details'] = details
+    if legacy_key:
+        payload[legacy_key] = message
+    if status_value:
+        payload['status'] = status_value
+    return payload
+
+
+def send_json_response(handler, status: int, payload: dict, *, cors=True,
+                       methods='GET, OPTIONS', allow_headers=None,
+                       cache_control=None):
+    body = json.dumps(payload, ensure_ascii=False).encode()
+    handler.send_response(status)
+    send_json_headers(
+        handler,
+        cors=cors,
+        methods=methods,
+        allow_headers=allow_headers,
+        cache_control=cache_control,
+    )
+    handler.end_headers()
+    handler.wfile.write(body)
+
+
+def send_api_error(handler, status: int, code: str, message: str, *, details=None,
+                   legacy_key: str | None = 'error',
+                   status_value: str | None = None,
+                   cors=True, methods='GET, OPTIONS', allow_headers=None,
+                   cache_control=None):
+    send_json_response(
+        handler,
+        status,
+        api_error_payload(
+            code,
+            message,
+            details=details,
+            legacy_key=legacy_key,
+            status_value=status_value,
+        ),
+        cors=cors,
+        methods=methods,
+        allow_headers=allow_headers,
+        cache_control=cache_control,
+    )
+
+
 def build_url(base: str, path: str = '', params: dict | None = None) -> str:
     """Build a URL from a base, path, and query params."""
     root = base.rstrip('/')
@@ -181,7 +254,24 @@ def safe_traceback(secret_query_keys=()) -> str:
     return redact_text(traceback.format_exc(), secret_query_keys)
 
 
-def urlopen_sanitized(req: urllib.request.Request, timeout: int, secret_query_keys=()):
+def log_event(level: str, event: str, **fields):
+    """Emit one structured JSON log record to stdout."""
+    record = {
+        'ts': datetime.now(timezone.utc).isoformat().replace('+00:00', 'Z'),
+        'level': level,
+        'event': event,
+    }
+    for key, value in fields.items():
+        record[key] = redact_text(value)
+    print(json.dumps(record, ensure_ascii=False, default=str), flush=True)
+
+
+def log_exception(event: str, *, secret_query_keys=(), **fields):
+    fields['traceback'] = safe_traceback(secret_query_keys)
+    log_event('error', event, **fields)
+
+
+def urlopen_sanitized(req: urllib.request.Request, timeout: float, secret_query_keys=()):
     """Open a request, replacing URL-bearing urllib errors with safe messages."""
     try:
         return urllib.request.urlopen(req, timeout=timeout)

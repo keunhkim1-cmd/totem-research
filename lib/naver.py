@@ -1,20 +1,22 @@
 """네이버 금융 — 종목코드 검색 & 일별 주가 조회"""
-import urllib.request, urllib.parse, json
+import urllib.parse
+from concurrent.futures import ThreadPoolExecutor
 from datetime import date, datetime, timezone, timedelta
 from xml.etree import ElementTree as ET
 
-from lib.retry import retry
 from lib.cache import TTLCache
+from lib.http_client import JSON_HEADERS, request_json, request_text
+from lib.timeouts import NAVER_CODE_TIMEOUT, NAVER_OVERVIEW_TIMEOUT, NAVER_PRICE_TIMEOUT
 
 KST = timezone(timedelta(hours=9))
 
 HEADERS = {
-    'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7)',
+    **JSON_HEADERS,
     'Referer': 'https://finance.naver.com/',
 }
 
-# 종목코드는 잘 바뀌지 않으므로 10분 캐시
-_code_cache = TTLCache(ttl=600)
+# 종목코드는 잘 바뀌지 않으므로 서버 내부 캐시는 길게 유지
+_code_cache = TTLCache(ttl=24 * 3600, name='naver-code', durable=True)
 # 주가는 장중 변동하므로 2분 캐시
 _price_cache = TTLCache(ttl=120)
 
@@ -25,17 +27,24 @@ def stock_code(name: str) -> list:
         params = urllib.parse.urlencode({'q': name, 'target': 'stock'})
 
         def _call():
-            req = urllib.request.Request(
+            data = request_json(
+                'naver',
                 f'https://ac.stock.naver.com/ac?{params}',
-                headers={'User-Agent': HEADERS['User-Agent']})
-            with urllib.request.urlopen(req, timeout=8) as r:
-                data = json.loads(r.read().decode('utf-8'))
+                headers=JSON_HEADERS,
+                timeout=NAVER_CODE_TIMEOUT,
+                retries=1,
+            )
             return [{'code': it['code'], 'name': it['name'],
                      'market': it.get('typeName', '')} for it in data.get('items', [])]
 
-        return retry(_call)
+        return _call()
 
-    return _code_cache.get_or_set(f'code:{name}', _fetch)
+    return _code_cache.get_or_set(
+        f'code:{name}',
+        _fetch,
+        allow_stale_on_error=True,
+        max_stale=7 * 24 * 3600,
+    )
 
 
 def fetch_prices(code: str, count: int = 20) -> list:
@@ -45,9 +54,15 @@ def fetch_prices(code: str, count: int = 20) -> list:
                f'?symbol={code}&timeframe=day&count={count}&requestType=0')
 
         def _call():
-            req = urllib.request.Request(url, headers=HEADERS)
-            with urllib.request.urlopen(req, timeout=10) as r:
-                raw = r.read().decode('euc-kr', errors='replace')
+            raw = request_text(
+                'naver',
+                url,
+                headers=HEADERS,
+                timeout=NAVER_PRICE_TIMEOUT,
+                retries=1,
+                encoding='euc-kr',
+                errors='replace',
+            )
             root = ET.fromstring(raw)
             prices = []
             for item in root.iter('item'):
@@ -58,9 +73,14 @@ def fetch_prices(code: str, count: int = 20) -> list:
                 prices.append({'date': f'{d[:4]}-{d[4:6]}-{d[6:8]}', 'close': int(parts[4])})
             return prices
 
-        return retry(_call)
+        return _call()
 
-    return _price_cache.get_or_set(f'price:{code}:{count}', _fetch)
+    return _price_cache.get_or_set(
+        f'price:{code}:{count}',
+        _fetch,
+        allow_stale_on_error=True,
+        max_stale=300,
+    )
 
 
 def fetch_index_prices(symbol: str, count: int = 20) -> list:
@@ -70,9 +90,15 @@ def fetch_index_prices(symbol: str, count: int = 20) -> list:
                f'?symbol={symbol}&timeframe=day&count={count}&requestType=0')
 
         def _call():
-            req = urllib.request.Request(url, headers=HEADERS)
-            with urllib.request.urlopen(req, timeout=10) as r:
-                raw = r.read().decode('euc-kr', errors='replace')
+            raw = request_text(
+                'naver',
+                url,
+                headers=HEADERS,
+                timeout=NAVER_PRICE_TIMEOUT,
+                retries=1,
+                encoding='euc-kr',
+                errors='replace',
+            )
             root = ET.fromstring(raw)
             prices = []
             for item in root.iter('item'):
@@ -89,9 +115,14 @@ def fetch_index_prices(symbol: str, count: int = 20) -> list:
                 prices.append({'date': f'{d[:4]}-{d[4:6]}-{d[6:8]}', 'close': close})
             return prices
 
-        return retry(_call)
+        return _call()
 
-    return _price_cache.get_or_set(f'idx:{symbol}:{count}', _fetch)
+    return _price_cache.get_or_set(
+        f'idx:{symbol}:{count}',
+        _fetch,
+        allow_stale_on_error=True,
+        max_stale=300,
+    )
 
 
 _overview_cache = TTLCache(ttl=120)
@@ -103,9 +134,13 @@ def fetch_stock_overview(code: str) -> dict:
         url = f'https://m.stock.naver.com/api/stock/{code}/integration'
 
         def _call():
-            req = urllib.request.Request(url, headers={'User-Agent': HEADERS['User-Agent']})
-            with urllib.request.urlopen(req, timeout=8) as r:
-                data = json.loads(r.read().decode('utf-8'))
+            data = request_json(
+                'naver',
+                url,
+                headers=JSON_HEADERS,
+                timeout=NAVER_OVERVIEW_TIMEOUT,
+                retries=1,
+            )
             infos = {it['code']: it['value'] for it in (data.get('totalInfos') or [])}
             deals = data.get('dealTrendInfos') or []
             close_price = deals[0].get('closePrice', '-') if deals else '-'
@@ -125,9 +160,14 @@ def fetch_stock_overview(code: str) -> dict:
                 'tradingValue': infos.get('accumulatedTradingValue', '-'),  # 거래대금
             }
 
-        return retry(_call)
+        return _call()
 
-    return _overview_cache.get_or_set(f'overview:{code}', _fetch)
+    return _overview_cache.get_or_set(
+        f'overview:{code}',
+        _fetch,
+        allow_stale_on_error=True,
+        max_stale=600,
+    )
 
 
 def calc_thresholds(prices: list) -> dict:
@@ -348,8 +388,11 @@ def caution_search(name: str) -> dict:
         }
 
     try:
-        prices = fetch_prices(code, count=30)
-        index_prices = fetch_index_prices(idx_symbol, count=30)
+        with ThreadPoolExecutor(max_workers=2) as pool:
+            price_future = pool.submit(fetch_prices, code, count=30)
+            index_future = pool.submit(fetch_index_prices, idx_symbol, count=30)
+            prices = price_future.result()
+            index_prices = index_future.result()
     except Exception as e:
         return {
             'status': 'price_error', **base_fields,

@@ -1,10 +1,16 @@
 from http.server import BaseHTTPRequestHandler
-import urllib.parse, json, sys, os
+import urllib.parse, sys, os
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from lib.naver import caution_search
 from lib.validation import normalize_query
-from lib.http_utils import safe_traceback, send_json_headers, send_options_response
+from lib.http_utils import (
+    api_success_payload,
+    log_exception,
+    send_api_error,
+    send_json_response,
+    send_options_response,
+)
 
 class handler(BaseHTTPRequestHandler):
     def do_OPTIONS(self):
@@ -15,19 +21,23 @@ class handler(BaseHTTPRequestHandler):
         try:
             name = normalize_query(qs.get('name', [''])[0])
             result = caution_search(name)
-            body = json.dumps(result, ensure_ascii=False).encode()
-            self.send_response(200)
+            send_json_response(self, 200, api_success_payload(result))
         except ValueError as e:
-            body = json.dumps(
-                {'status': 'error', 'errorMessage': str(e)},
-                ensure_ascii=False).encode()
-            self.send_response(400)
+            send_api_error(
+                self,
+                400,
+                'VALIDATION_ERROR',
+                str(e),
+                legacy_key='errorMessage',
+                status_value='error',
+            )
         except Exception:
-            print(f'Error: {safe_traceback()}')
-            body = json.dumps(
-                {'status': 'error', 'errorMessage': '서버 오류가 발생했습니다.'},
-                ensure_ascii=False).encode()
-            self.send_response(500)
-        send_json_headers(self)
-        self.end_headers()
-        self.wfile.write(body)
+            log_exception('api_request_failed', endpoint='caution-search')
+            send_api_error(
+                self,
+                500,
+                'INTERNAL_ERROR',
+                '서버 오류가 발생했습니다.',
+                legacy_key='errorMessage',
+                status_value='error',
+            )

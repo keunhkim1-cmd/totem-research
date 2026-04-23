@@ -6,7 +6,9 @@ from http.server import BaseHTTPRequestHandler
 import json, os, sys
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-from lib.http_utils import send_json_headers, send_text_headers
+from lib.durable_cache import enabled as durable_cache_enabled
+from lib.http_utils import api_success_payload, send_json_headers, send_text_headers
+from lib.provider_rate_limit import DEFAULT_PER_MINUTE, provider_limit
 
 class handler(BaseHTTPRequestHandler):
     def do_GET(self):
@@ -20,9 +22,18 @@ class handler(BaseHTTPRequestHandler):
         result = {
             'token_set': bool(token),
             'telegram_api': 'SKIP (token-bearing API check disabled)',
+            'durable_cache_enabled': durable_cache_enabled(),
+            'external_rate_limits_enabled': os.environ.get(
+                'EXTERNAL_RATE_LIMITS_ENABLED',
+                'true',
+            ).strip().lower() in ('1', 'true', 'yes', 'on'),
+            'provider_rate_limits_per_minute': {
+                provider: provider_limit(provider)
+                for provider in sorted(DEFAULT_PER_MINUTE)
+            },
         }
 
-        body = json.dumps(result, ensure_ascii=False, indent=2).encode()
+        body = json.dumps(api_success_payload(result), ensure_ascii=False, indent=2).encode()
         self.send_response(200)
         send_json_headers(self, cors=False, cache_control='no-store')
         self.end_headers()

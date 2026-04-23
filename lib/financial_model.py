@@ -10,14 +10,45 @@ import json, os
 from concurrent.futures import ThreadPoolExecutor
 
 from lib.dart_full import fetch_all
-from lib.http_utils import safe_exception_text
-from lib.period import derive_q4_from_annual, yoy, safe_div, REPRT_QUARTER
+from lib.http_utils import log_event, safe_exception_text
 
 _MAPPING_PATH = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
                               'data', 'account-mapping.json')
 
 with open(_MAPPING_PATH, encoding='utf-8') as _f:
     MAPPING = json.load(_f)
+
+
+# DART reprt_code → 분기 매핑 (DART Open API 표준)
+REPRT_QUARTER = {
+    '11013': '1Q',
+    '11012': '2Q',
+    '11014': '3Q',
+    '11011': 'FY',
+}
+
+
+def derive_q4_from_annual(q1, q2, q3, fy):
+    """단일 분기 IS/CF 값들에서 Q4 도출. Q4 = FY - (Q1+Q2+Q3)."""
+    if fy is None:
+        return None
+    parts = [q1, q2, q3]
+    if any(p is None for p in parts):
+        return None
+    return fy - (q1 + q2 + q3)
+
+
+def yoy(cur, prev):
+    """전년 대비 증감률. None safe."""
+    if cur is None or prev is None or prev == 0:
+        return None
+    return (cur - prev) / abs(prev)
+
+
+def safe_div(num, den):
+    if num is None or den is None or den == 0:
+        return None
+    return num / den
 
 
 def _env_int(name: str, default: int, min_value: int, max_value: int) -> int:
@@ -167,7 +198,8 @@ def _load_cache(corp_code: str, fs_div: str) -> dict:
                 .execute()).data
         return {(r['period_type'], r['period_key']): r['data'] for r in rows}
     except Exception as e:
-        print(f'[cache] Supabase 조회 실패 (fallback to DART): {safe_exception_text(e)}')
+        log_event('warning', 'financial_cache_load_failed',
+                  error=safe_exception_text(e))
         return {}
 
 
@@ -184,7 +216,8 @@ def _save_cache(corp_code: str, fs_div: str, rows: list):
          .upsert(records, on_conflict='corp_code,fs_div,period_type,period_key')
          .execute())
     except Exception as e:
-        print(f'[cache] Supabase 저장 실패 (무시): {safe_exception_text(e)}')
+        log_event('warning', 'financial_cache_save_failed',
+                  error=safe_exception_text(e))
 
 
 def build_model(corp_code: str, fs_div: str = 'CFS', years: int = 5) -> dict:
@@ -244,7 +277,27 @@ def build_model(corp_code: str, fs_div: str = 'CFS', years: int = 5) -> dict:
     # ── 캐시 미스 연도만 DART 병렬 호출 ──
     if years_to_fetch:
         tasks = []
-        max_workers = _env_int('DART_FINANCIAL_MAX_WORKERS', 4, 1, 8)
+        planned_calls = len(years_to_fetch) * len(REPRT_QUARTER)
+        warn_calls = _env_int('DART_FINANCIAL_WARN_CALLS_PER_REQUEST', 12, 1, 64)
+        max_workers = _env_int('DART_FINANCIAL_MAX_WORKERS', 2, 1, 4)
+        log_event(
+            'info',
+            'financial_dart_fetch_plan',
+            corp_code=corp_code,
+            fs_div=fs_div,
+            years_to_fetch=years_to_fetch,
+            planned_calls=planned_calls,
+            max_workers=max_workers,
+            cached_years=[y for y in year_list if y not in years_to_fetch],
+        )
+        if planned_calls >= warn_calls:
+            log_event(
+                'warning',
+                'financial_dart_fetch_burst',
+                corp_code=corp_code,
+                planned_calls=planned_calls,
+                threshold=warn_calls,
+            )
         with ThreadPoolExecutor(max_workers=max_workers) as ex:
             for y in years_to_fetch:
                 for reprt in REPRT_QUARTER:

@@ -3,7 +3,7 @@
 종목명을 보내면 투자경고/위험 지정일, 해제 예상일, 기준가를 알려줍니다.
 """
 from http.server import BaseHTTPRequestHandler
-import hmac, json, os, urllib.request, re, sys, unicodedata
+import hmac, json, os, re, sys, unicodedata
 from concurrent.futures import ThreadPoolExecutor
 from datetime import date, datetime, timezone, timedelta
 
@@ -13,14 +13,16 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from lib.holidays import add_trading_days, count_trading_days
 from lib.krx import search_kind
 from lib.naver import stock_code as naver_stock_code, fetch_prices, calc_thresholds, caution_search
-from lib.dart_report import summarize_business_report
 from lib.cache import TTLCache
+from lib.http_client import request_json
+from lib.telegram_idempotency import claim_update, mark_update_done
+from lib.timeouts import TELEGRAM_SEND_TIMEOUT
 from lib.http_utils import (
+    log_event,
+    log_exception,
     safe_exception_text,
-    safe_traceback,
     send_text_headers,
     telegram_bot_url,
-    urlopen_sanitized,
 )
 from lib.validation import normalize_query
 
@@ -227,19 +229,25 @@ def tg_send(chat_id: int, text: str):
     body = json.dumps({
         'chat_id': chat_id, 'text': text, 'parse_mode': 'Markdown',
     }).encode('utf-8')
-    req = urllib.request.Request(
-        telegram_bot_url(BOT_TOKEN, 'sendMessage'), data=body,
-        headers={'Content-Type': 'application/json'})
-    with urlopen_sanitized(req, timeout=10) as r:
-        return json.loads(r.read())
+    return request_json(
+        'telegram',
+        telegram_bot_url(BOT_TOKEN, 'sendMessage'),
+        data=body,
+        headers={'Content-Type': 'application/json'},
+        timeout=TELEGRAM_SEND_TIMEOUT,
+        retries=0,
+    )
 
 def tg_send_plain(chat_id: int, text: str):
     body = json.dumps({'chat_id': chat_id, 'text': text}).encode('utf-8')
-    req  = urllib.request.Request(
-        telegram_bot_url(BOT_TOKEN, 'sendMessage'), data=body,
-        headers={'Content-Type': 'application/json'})
-    with urlopen_sanitized(req, timeout=10) as r:
-        return json.loads(r.read())
+    return request_json(
+        'telegram',
+        telegram_bot_url(BOT_TOKEN, 'sendMessage'),
+        data=body,
+        headers={'Content-Type': 'application/json'},
+        timeout=TELEGRAM_SEND_TIMEOUT,
+        retries=0,
+    )
 
 
 def _is_admin_chat(chat_id: int) -> bool:
@@ -265,7 +273,8 @@ def do_search(chat_id: int, query: str):
     try:
         tg_send_plain(chat_id, f'🔍 "{query}" 검색 중...')
     except Exception as e:
-        print(f'검색 중 메시지 전송 실패: {safe_exception_text(e)}', flush=True)
+        log_event('warning', 'telegram_send_search_notice_failed',
+                  error=safe_exception_text(e))
 
     try:
         results = search_kind(query)
@@ -284,9 +293,12 @@ def do_search(chat_id: int, query: str):
             if codes:
                 prices = fetch_prices(codes[0]['code'], count=20)
                 return calc_thresholds(prices)
+            return {'error': '종목코드를 찾을 수 없어 기준가를 계산할 수 없습니다.'}
         except Exception as e:
-            print(f'주가 조회 실패: {safe_exception_text(e)}', flush=True)
-        return None
+            message = safe_exception_text(e)
+            log_event('warning', 'telegram_threshold_fetch_failed',
+                      stock_name=warn.get('stockName', ''), error=message)
+            return {'error': f'주가 조회 실패: {message}'}
 
     targets = results[:3]
     with ThreadPoolExecutor(max_workers=3) as pool:
@@ -317,12 +329,13 @@ def do_info(chat_id: int, query: str):
     try:
         tg_send_plain(chat_id, f'📑 "{query}" 사업보고서 조회 중...')
     except Exception as e:
-        print(f'/info 안내 메시지 전송 실패: {safe_exception_text(e)}', flush=True)
+        log_event('warning', 'telegram_send_info_notice_failed',
+                  error=safe_exception_text(e))
 
     try:
         codes = naver_stock_code(query)
     except Exception as e:
-        print(f'[info] 네이버 종목조회 오류: {safe_traceback()}', flush=True)
+        log_exception('telegram_info_stock_lookup_failed')
         tg_send_plain(chat_id, f'❌ 종목 조회 오류: {safe_exception_text(e)}')
         return
 
@@ -333,17 +346,22 @@ def do_info(chat_id: int, query: str):
     target = codes[0]
     stock_code = target['code']
     stock_name = target['name']
-    print(f'[info] 대상 종목: {stock_name} ({stock_code})', flush=True)
+    log_event('info', 'telegram_info_target_selected',
+              stock_name=stock_name, stock_code=stock_code)
 
     try:
+        from lib.dart_report import summarize_business_report
         result = summarize_business_report(stock_code, stock_name)
     except Exception as e:
-        print(f'[info] summarize 예외: {safe_traceback()}', flush=True)
+        log_exception('telegram_info_summary_failed',
+                      stock_name=stock_name, stock_code=stock_code)
         tg_send_plain(chat_id, f'❌ 사업보고서 요약 실패: {safe_exception_text(e)}')
         return
 
     if 'error' in result:
-        print(f'[info] 요약 실패: {result["error"]}', flush=True)
+        log_event('warning', 'telegram_info_summary_returned_error',
+                  stock_name=stock_name, stock_code=stock_code,
+                  error=result['error'])
         tg_send_plain(chat_id, f'❌ {result["error"]}')
         return
 
@@ -382,7 +400,8 @@ def do_caution(chat_id: int, query: str):
     try:
         tg_send_plain(chat_id, f'🔍 "{query}" 투자주의 조회 중...')
     except Exception as e:
-        print(f'/caution 안내 메시지 전송 실패: {safe_exception_text(e)}', flush=True)
+        log_event('warning', 'telegram_send_caution_notice_failed',
+                  error=safe_exception_text(e))
 
     try:
         result = caution_search(query)
@@ -400,16 +419,9 @@ def do_caution(chat_id: int, query: str):
             tg_send_plain(chat_id, f'⚠️ 결과 전송 오류: {safe_exception_text(e)}')
 
 
-def process_update(update: dict):
+def _process_update_body(update: dict):
     if not isinstance(update, dict):
         return
-
-    update_id = update.get('update_id')
-    if update_id is not None:
-        key = f'upd:{update_id}'
-        if _seen_updates.get(key):
-            return  # 이미 처리한 update — 텔레그램 재시도 중복 방지
-        _seen_updates.set(key, True)
 
     msg = update.get('message') or update.get('edited_message')
     if not msg:
@@ -481,7 +493,7 @@ def process_update(update: dict):
         try:
             do_info(chat_id, query)
         except Exception as e:
-            print(f'[info] do_info 최상위 예외: {safe_traceback()}', flush=True)
+            log_exception('telegram_info_unhandled')
             try:
                 tg_send_plain(chat_id, f'❌ 처리 중 오류: {safe_exception_text(e)}')
             except Exception:
@@ -523,6 +535,34 @@ def process_update(update: dict):
     chat_type = chat.get('type', 'private')
     if chat_type == 'private':
         do_search(chat_id, text)
+
+
+def process_update(update: dict):
+    if not isinstance(update, dict):
+        return
+
+    update_id = update.get('update_id')
+    local_key = f'upd:{update_id}' if update_id is not None else ''
+    claimed = False
+    if update_id is not None:
+        if _seen_updates.get(local_key):
+            return  # 이미 처리한 update — 텔레그램 재시도 중복 방지
+        if not claim_update(update_id):
+            _seen_updates.set(local_key, True)
+            return
+        _seen_updates.set(local_key, 'processing')
+        claimed = True
+
+    try:
+        _process_update_body(update)
+    except Exception:
+        if local_key:
+            _seen_updates.delete(local_key)
+        raise
+
+    if claimed:
+        mark_update_done(update_id)
+        _seen_updates.set(local_key, True)
 
 # ── Vercel Handler ───────────────────────────────────────────
 class handler(BaseHTTPRequestHandler):
@@ -569,7 +609,7 @@ class handler(BaseHTTPRequestHandler):
             self._respond_text(400, b'Invalid JSON')
             return
         except Exception as e:
-            print(f'Update error: {safe_exception_text(e)}', flush=True)
+            log_event('error', 'telegram_update_failed', error=safe_exception_text(e))
 
         self._respond_text(200, b'OK')
 

@@ -1,8 +1,10 @@
 """Google Gemini API 호출 (stdlib only)"""
-import urllib.request, json, os
+import json, os
 
-from lib.retry import retry
-from lib.http_utils import build_url, urlopen_sanitized
+from lib.http_client import request_json
+from lib.http_utils import build_url
+from lib.provider_rate_limit import throttle
+from lib.timeouts import GEMINI_TIMEOUT
 
 GEMINI_BASE = 'https://generativelanguage.googleapis.com/v1beta'
 # Flash-Lite: 요약 태스크에 충분하고 Flash보다 훨씬 빠름
@@ -29,17 +31,20 @@ def generate(prompt: str, model: str = DEFAULT_MODEL, max_output_tokens: int = 5
         },
     }).encode('utf-8')
 
-    def _call():
-        req = urllib.request.Request(
-            request_url, data=body,
-            headers={
-                'Content-Type': 'application/json',
-                'x-goog-api-key': _api_key(),
-            })
-        with urlopen_sanitized(req, timeout=60) as r:
-            return json.loads(r.read().decode('utf-8'))
+    estimated_tokens = max(1, len(prompt) // 4 + max_output_tokens)
+    throttle('gemini_tokens', units=max(1, (estimated_tokens + 999) // 1000))
 
-    data = retry(_call)
+    data = request_json(
+        'gemini',
+        request_url,
+        data=body,
+        headers={
+            'Content-Type': 'application/json',
+            'x-goog-api-key': _api_key(),
+        },
+        timeout=GEMINI_TIMEOUT,
+        retries=1,
+    )
     candidates = data.get('candidates') or []
     if not candidates:
         raise RuntimeError(f'Gemini 응답에 candidates 없음: {data}')

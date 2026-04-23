@@ -1,20 +1,22 @@
 """KRX KIND 투자경고/위험 종목 검색"""
-import urllib.request, urllib.parse, re
+import urllib.parse, re
 from concurrent.futures import ThreadPoolExecutor
 from datetime import date, timedelta
 
-from lib.retry import retry
 from lib.cache import TTLCache
 from lib.holidays import count_trading_days
+from lib.http_client import BROWSER_HEADERS, request_text
+from lib.http_utils import log_event, safe_exception_text
+from lib.timeouts import KRX_KIND_TIMEOUT
 
 HEADERS = {
-    'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7)',
+    **BROWSER_HEADERS,
     'Accept': 'text/html,application/xhtml+xml',
     'Referer': 'https://kind.krx.co.kr/',
 }
 
 # KRX 데이터는 일중 변동이 적으므로 10분 캐시
-_krx_cache = TTLCache(ttl=600)
+_krx_cache = TTLCache(ttl=600, name='krx-kind', durable=True)
 
 
 def fetch_kind_page(menu_index: str, page: int = 1, days_back: int = 365, page_size: int = 100) -> str:
@@ -32,15 +34,24 @@ def fetch_kind_page(menu_index: str, page: int = 1, days_back: int = 365, page_s
         })
 
         def _call():
-            req = urllib.request.Request(
+            return request_text(
+                'krx',
                 f'https://kind.krx.co.kr/investwarn/investattentwarnrisky.do?{params}',
-                headers=HEADERS)
-            with urllib.request.urlopen(req, timeout=12) as r:
-                return r.read().decode('utf-8', errors='replace')
+                headers=HEADERS,
+                timeout=KRX_KIND_TIMEOUT,
+                retries=1,
+                encoding='utf-8',
+                errors='replace',
+            )
 
-        return retry(_call)
+        return _call()
 
-    return _krx_cache.get_or_set(cache_key, _fetch)
+    return _krx_cache.get_or_set(
+        cache_key,
+        _fetch,
+        allow_stale_on_error=True,
+        max_stale=3600,
+    )
 
 
 def parse_kind_html(html: str, level_name: str) -> list:
@@ -76,7 +87,8 @@ def search_kind(stock_name: str) -> list:
                 rows = [r for r in rows if stock_name in r['stockName']]
             return rows
         except Exception as e:
-            print(f'KIND error menu={idx}: {e}')
+            log_event('warning', 'krx_kind_fetch_failed',
+                      menu_index=idx, error=safe_exception_text(e))
             return []
 
     with ThreadPoolExecutor(max_workers=2) as pool:
@@ -112,7 +124,8 @@ def search_kind_caution(stock_name: str) -> list:
     try:
         html = fetch_kind_page('1', days_back=21, page_size=1000)
     except Exception as e:
-        print(f'KIND caution error: {e}', flush=True)
+        log_event('warning', 'krx_caution_fetch_failed',
+                  error=safe_exception_text(e))
         return []
 
     # rows_by_stock[name] = [(date_str, reason, market), ...]

@@ -43,7 +43,6 @@
       --tm-up:        #F04452;
       --tm-up-soft:   rgba(240, 68, 82, 0.10);
       --tm-dn:        #3485FF;
-      --tm-dn-soft:   rgba(52, 133, 255, 0.10);
 
       --tm-ok:        #4ADE80;
       --tm-ok-soft:   rgba(74, 222, 128, 0.10);
@@ -53,35 +52,17 @@
       --tm-amber:      #F5A623;
       --tm-amber-soft: rgba(245, 166, 35, 0.12);
 
-      --tm-space-1: 4px;  --tm-space-2: 6px;  --tm-space-3: 8px;  --tm-space-4: 10px;
-      --tm-space-5: 14px; --tm-space-6: 16px; --tm-space-7: 24px;
-
       /* DESIGN.md 매핑 (Apple SF Pro 스케일) */
       --tm-fs-micro: 10px;   /* Nano 10/400/-0.08 */
-      --tm-fs-xs:    10px;   /* Nano */
       --tm-fs-sm:    12px;   /* Micro 12/400/-0.12 */
-      --tm-fs-md:    12px;   /* Micro */
-      --tm-fs-lg:    14px;   /* Caption 14/400/-0.224 */
-      --tm-fs-xl:    21px;   /* Card Title 21/600/0.231 */
-      --tm-fs-2xl:   28px;   /* Tile Heading 28/400/0.196 */
 
-      --tm-fw-reg:  400;
       --tm-fw-med:  500;
-      --tm-fw-semi: 600;
-      --tm-fw-bold: 700;
 
       /* uppercase 라벨용 (터미널 density 보존) */
       --tm-ls-caps:   1.5px;
       --tm-ls-label:  0.8px;
       /* DESIGN.md negative tracking (본문 사이즈) */
       --tm-ls-12:    -0.12px;   /* 12px body */
-      --tm-ls-14:    -0.224px;  /* 14px caption */
-      --tm-ls-21:     0.231px;  /* 21px card title */
-      --tm-ls-28:     0.196px;  /* 28px tile heading */
-      --tm-ls-tight: -0.3px;    /* 대형 숫자 */
-
-      --tm-radius: 0;
-      --tm-radius-pill: 50%;
     }
 
     body {
@@ -1788,6 +1769,11 @@ function escHtml(s) {
   return d.innerHTML;
 }
 
+function apiErrorMessage(data) {
+  if (!data || data.ok !== false) return '';
+  return data.errorInfo?.message || data.errorMessage || data.error || '서버 오류가 발생했습니다.';
+}
+
 function safeStockCode(code) {
   const value = String(code || '').trim();
   return /^\d{6}$/.test(value) ? value : '';
@@ -1902,8 +1888,9 @@ async function doSearch() {
     const resp = await fetch(url);
     const data = await resp.json();
 
-    if (data.error) {
-      resultsEl.innerHTML = `<div class="result-empty">${escHtml(data.error)}</div>`;
+    const apiError = apiErrorMessage(data);
+    if (apiError || data.error) {
+      resultsEl.innerHTML = `<div class="result-empty">${escHtml(apiError || data.error)}</div>`;
       return;
     }
 
@@ -2009,6 +1996,12 @@ async function checkCautionFallback(query) {
   try {
     const resp = await fetch(`/api/caution-search?name=${encodeURIComponent(query)}`);
     const d = await resp.json();
+    const cautionError = apiErrorMessage(d);
+    if (cautionError) {
+      resultsEl.innerHTML = `<div class="result-empty">${escHtml(cautionError)}</div>`;
+      hideCautionCard();
+      return;
+    }
     switch (d.status) {
       case 'ok':
         resultsEl.classList.remove('show');
@@ -2157,7 +2150,7 @@ async function checkAndDisplay(r) {
   try {
     const codeResp = await fetch(`/api/stock-code?name=${encodeURIComponent(r.stockName)}`);
     const codeData = await codeResp.json();
-    if (codeData.error || !codeData.items || codeData.items.length === 0) {
+    if (apiErrorMessage(codeData) || codeData.error || !codeData.items || codeData.items.length === 0) {
       // 종목코드 조회 실패 시 기존대로 표시
       calculate();
       fetchPriceThresholds(r.stockName);
@@ -2172,7 +2165,7 @@ async function checkAndDisplay(r) {
 
     const priceResp = await fetch(`/api/stock-price?code=${encodeURIComponent(code)}`);
     const priceData = await priceResp.json();
-    if (priceData.error || priceData.thresholds?.error) {
+    if (apiErrorMessage(priceData) || priceData.error || priceData.thresholds?.error) {
       calculate();
       fetchPriceThresholds(r.stockName);
       return;
@@ -2191,9 +2184,6 @@ async function checkAndDisplay(r) {
     calculate();
     // 이미 가격 데이터를 가져왔으므로 직접 렌더링
     const item = codeData.items[0];
-    window.currentStock = { name: r.stockName, code, market: item.market };
-    window.warningResult = t;
-    window.priceSnapshot = priceData;
     renderSymHeader(r.stockName, code, item.market, document.getElementById('designationDate').value, t);
     renderConditions(t);
     const rc = document.getElementById('resultCard');
@@ -2222,7 +2212,8 @@ async function fetchPriceThresholds(stockName) {
     // 1. 종목코드 검색
     const codeResp = await fetch(`/api/stock-code?name=${encodeURIComponent(stockName)}`);
     const codeData = await codeResp.json();
-    if (codeData.error || !codeData.items || codeData.items.length === 0) {
+    const codeError = apiErrorMessage(codeData);
+    if (codeError || codeData.error || !codeData.items || codeData.items.length === 0) {
       if (tbody) tbody.innerHTML = `<tr><td colspan="8" class="tm-error" style="color:var(--tm-up)">종목코드를 찾을 수 없습니다: ${escHtml(stockName)}</td></tr>`;
       return;
     }
@@ -2236,8 +2227,9 @@ async function fetchPriceThresholds(stockName) {
     // 2. 일별 주가 + 기준가 계산
     const priceResp = await fetch(`/api/stock-price?code=${encodeURIComponent(code)}`);
     const priceData = await priceResp.json();
-    if (priceData.error) {
-      if (tbody) tbody.innerHTML = `<tr><td colspan="8" class="tm-error" style="color:var(--tm-up)">${escHtml(priceData.error)}</td></tr>`;
+    const priceError = apiErrorMessage(priceData);
+    if (priceError || priceData.error) {
+      if (tbody) tbody.innerHTML = `<tr><td colspan="8" class="tm-error" style="color:var(--tm-up)">${escHtml(priceError || priceData.error)}</td></tr>`;
       return;
     }
 
@@ -2246,11 +2238,6 @@ async function fetchPriceThresholds(stockName) {
       if (tbody) tbody.innerHTML = `<tr><td colspan="8" class="tm-error" style="color:var(--tm-up)">${escHtml(t.error)}</td></tr>`;
       return;
     }
-
-    // Cache for other renderers
-    window.currentStock = { name: stockName, code, market: item.market };
-    window.warningResult = t;
-    window.priceSnapshot = priceData;
 
     // Update symbol header with price
     const desigStr = document.getElementById('designationDate').value;
@@ -2284,7 +2271,6 @@ function fmt(n) {
   const value = Number(n);
   return Number.isFinite(value) ? value.toLocaleString('ko-KR') : '—';
 }
-function fmtWon(n) { return fmt(n) + '원'; }
 
 // ────────────────────────────────────────────────
 // Terminal-tone renderers (Step 4)
@@ -2595,10 +2581,6 @@ function countTradingDays(start, end) {
   return count;
 }
 
-function formatDate(d) {
-  return d.toLocaleDateString('ko-KR', { year: 'numeric', month: 'long', day: 'numeric', weekday: 'short' });
-}
-
 // ────────────────────────────────────────────────
 // 이벤트
 // ────────────────────────────────────────────────
@@ -2657,23 +2639,6 @@ async function calculate() {
   rc.classList.add('show');
   rc.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
 }
-
-function getConditions(type) {
-  const base = [
-    '지정일로부터 <strong>10 매매거래일</strong> 경과 후 아래 요건 심사',
-    '[유지 조건 ①] 판단일(T) 종가 ≥ T-5 종가 × 1.45 &nbsp;<span style="color:var(--text-muted);font-size:0.75em">(5일 전 대비 45% 이상 상승)</span>',
-    '[유지 조건 ②] 판단일(T) 종가 ≥ T-15 종가 × 1.75 &nbsp;<span style="color:var(--text-muted);font-size:0.75em">(15일 전 대비 75% 이상 상승)</span>',
-    '[유지 조건 ③] 판단일(T) 종가 = 최근 15일 종가 중 최고가',
-    '→ ①②③이 <strong>모두 충족</strong>되면 경고 <strong>유지</strong> / <strong>하나라도 미충족</strong>이면 다음날 <strong>해제</strong>',
-  ];
-  if (type === 'risk') return [
-    ...base,
-    '투자위험종목 해제 후 → 자동으로 <strong>투자경고종목으로 하향 지정</strong>',
-    '이후 위 3가지 요건을 모두 충족하지 않는 날의 다음날 최종 해제',
-  ];
-  return base;
-}
-
 
 // 경고 탭 인라인 SVG 차트 — NAVER 일별 주가 + 3개 임계선
 // TV 무료 embed는 한국 소형주 차트 렌더가 막혀 AAPL로 fallback되므로 사용하지 않음.
@@ -2800,7 +2765,7 @@ async function syncTvChartByName(stockName) {
   try {
     const codeResp = await fetch(`/api/stock-code?name=${encodeURIComponent(stockName)}`);
     const codeData = await codeResp.json();
-    if (!codeData.items || codeData.items.length === 0) return;
+    if (apiErrorMessage(codeData) || !codeData.items || codeData.items.length === 0) return;
     const code = safeStockCode(codeData.items[0].code);
     if (!code) return;
     // 이미 같은 종목 차트 마운트돼 있으면 스킵
@@ -2808,7 +2773,7 @@ async function syncTvChartByName(stockName) {
     if (container && container.dataset.chartCode === code) return;
     const priceResp = await fetch(`/api/stock-price?code=${encodeURIComponent(code)}`);
     const priceData = await priceResp.json();
-    if (priceData.error) return;
+    if (apiErrorMessage(priceData) || priceData.error) return;
     renderInlineChart(priceData, code, stockName);
     if (priceData.thresholds) renderChartLegend(priceData.thresholds, priceData);
   } catch (e) { /* 네트워크/서버 오류는 조용히 무시 */ }
