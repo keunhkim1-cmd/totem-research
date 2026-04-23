@@ -33,7 +33,6 @@ _TELEGRAM_BOT_TOKEN_RE = re.compile(r'(/bot)([^/?#]+)')
 _ORIGIN_RE = re.compile(r'^https?://[A-Za-z0-9.-]+(?::\d{1,5})?$')
 
 DEFAULT_ALLOWED_ORIGINS = (
-    'https://investment-warning-calculator.vercel.app',
     'https://shamanism-research.vercel.app',
     'http://localhost:5173',
     'http://127.0.0.1:5173',
@@ -71,7 +70,7 @@ def cors_origin(request_origin: str | None) -> str | None:
     origin = (request_origin or '').strip().rstrip('/')
     if origin:
         return origin if origin in allowed else None
-    return allowed[0] if allowed else None
+    return None
 
 
 def send_security_headers(handler, *, csp: str = API_CSP):
