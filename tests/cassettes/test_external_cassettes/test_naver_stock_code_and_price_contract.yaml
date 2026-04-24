@@ -1,0 +1,194 @@
+interactions:
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Connection:
+      - close
+      Host:
+      - ac.stock.naver.com
+      User-Agent:
+      - Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7)
+    method: GET
+    uri: https://ac.stock.naver.com/ac?q=%EC%82%BC%EC%84%B1%EC%A0%84%EC%9E%90&target=stock
+  response:
+    body:
+      string: "{\"query\":\"\uC0BC\uC131\uC804\uC790\",\"items\":[{\"code\":\"005930\",\"name\":\"\uC0BC\uC131\uC804\uC790\",\"typeCode\":\"KOSPI\",\"typeName\":\"\uCF54\uC2A4\uD53C\",\"url\":\"/domestic/stock/005930/total\",\"reutersCode\":\"005930\",\"nationCode\":\"KOR\",\"nationName\":\"\uB300\uD55C\uBBFC\uAD6D\",\"category\":\"stock\",\"hasDiscussion\":true},{\"code\":\"005935\",\"name\":\"\uC0BC\uC131\uC804\uC790\uC6B0\",\"typeCode\":\"KOSPI\",\"typeName\":\"\uCF54\uC2A4\uD53C\",\"url\":\"/domestic/stock/005935/total\",\"reutersCode\":\"005935\",\"nationCode\":\"KOR\",\"nationName\":\"\uB300\uD55C\uBBFC\uAD6D\",\"category\":\"stock\",\"hasDiscussion\":true}]}"
+    headers:
+      connection:
+      - close
+      content-length:
+      - '495'
+      content-type:
+      - application/json;charset=UTF-8
+      date:
+      - Fri, 24 Apr 2026 04:44:37 GMT
+      referrer-policy:
+      - unsafe-url
+      server:
+      - nfront
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Connection:
+      - close
+      Host:
+      - fchart.stock.naver.com
+      Referer:
+      - https://finance.naver.com/
+      User-Agent:
+      - Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7)
+    method: GET
+    uri: https://fchart.stock.naver.com/sise.nhn?count=16&requestType=0&symbol=005930&timeframe=day
+  response:
+    body:
+      string: !!binary |
+        PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iRVVDLUtSIiA/PgoKPHByb3RvY29sPgoKCgoJ
+        CgkKCQkJPGNoYXJ0ZGF0YSBzeW1ib2w9IjAwNTkzMCIgbmFtZT0iu++8usD8wNoiIGNvdW50PSIx
+        NiIgdGltZWZyYW1lPSJkYXkiIHByZWNpc2lvbj0iMCIgb3JpZ2ludGltZT0iMTk5MDAxMDMiPgoJ
+        CQkKCQkJCTxpdGVtIGRhdGE9IjIwMjYwNDAzfDE4NDIwMHwxODcyMDB8MTgyNzAwfDE4NjIwMHwy
+        MDE5NDQ0NyIgLz4KCQkJCgkJCQk8aXRlbSBkYXRhPSIyMDI2MDQwNnwxOTA5MDB8MTk0NjAwfDE5
+        MDEwMHwxOTMxMDB8MjA2MzU5NTgiIC8+CgkJCQoJCQkJPGl0ZW0gZGF0YT0iMjAyNjA0MDd8MjAy
+        MDAwfDIwMjUwMHwxOTI0MDB8MTk2NTAwfDMwODQ4MDUzIiAvPgoJCQkKCQkJCTxpdGVtIGRhdGE9
+        IjIwMjYwNDA4fDIxNDAwMHwyMTQ1MDB8MjA3NTAwfDIxMDUwMHwzNTg5MDk3MyIgLz4KCQkJCgkJ
+        CQk8aXRlbSBkYXRhPSIyMDI2MDQwOXwyMDcwMDB8MjA3NTAwfDIwMjAwMHwyMDQwMDB8NDIzMjA4
+        MzkiIC8+CgkJCQoJCQkJPGl0ZW0gZGF0YT0iMjAyNjA0MTB8MjA4NTAwfDIxMTAwMHwyMDU1MDB8
+        MjA2MDAwfDE4MjQ0NDU5IiAvPgoJCQkKCQkJCTxpdGVtIGRhdGE9IjIwMjYwNDEzfDE5ODIwMHwy
+        MDMwMDB8MTk4MjAwfDIwMTAwMHwxOTYwMzQxNSIgLz4KCQkJCgkJCQk8aXRlbSBkYXRhPSIyMDI2
+        MDQxNHwyMDgwMDB8MjEwMDAwfDIwNTUwMHwyMDY1MDB8MjM2NzIwNzgiIC8+CgkJCQoJCQkJPGl0
+        ZW0gZGF0YT0iMjAyNjA0MTV8MjE1MDAwfDIxNTUwMHwyMTAwMDB8MjExMDAwfDI0MDkyODg0IiAv
+        PgoJCQkKCQkJCTxpdGVtIGRhdGE9IjIwMjYwNDE2fDIxMjAwMHwyMTgwMDB8MjEwNTAwfDIxNzUw
+        MHwyMTQ5OTc4OCIgLz4KCQkJCgkJCQk8aXRlbSBkYXRhPSIyMDI2MDQxN3wyMTcwMDB8MjE4MDAw
+        fDIxNTAwMHwyMTYwMDB8MTgwNzkzMjIiIC8+CgkJCQoJCQkJPGl0ZW0gZGF0YT0iMjAyNjA0MjB8
+        MjE0NTAwfDIxOTAwMHwyMTMwMDB8MjE0NTAwfDE3MTA3NzQxIiAvPgoJCQkKCQkJCTxpdGVtIGRh
+        dGE9IjIwMjYwNDIxfDIxODAwMHwyMjAwMDB8MjE2MDAwfDIxOTAwMHwxNjc1MjEzMiIgLz4KCQkJ
+        CgkJCQk8aXRlbSBkYXRhPSIyMDI2MDQyMnwyMTg1MDB8MjIyNTAwfDIxNTUwMHwyMTc1MDB8MTY4
+        MjM0ODAiIC8+CgkJCQoJCQkJPGl0ZW0gZGF0YT0iMjAyNjA0MjN8MjIzMDAwfDIyOTUwMHwyMTYw
+        MDB8MjI0NTAwfDM0NTI1NDg1IiAvPgoJCQkKCQkJCTxpdGVtIGRhdGE9IjIwMjYwNDI0fDIyNDAw
+        MHwyMjUwMDB8MjE2NTAwfDIxODc1MHwxNTUwNzE1OSIgLz4KCQkJCgkKCgoJPC9jaGFydGRhdGE+
+        CjwvcHJvdG9jb2w+Cg==
+    headers:
+      cache-control:
+      - no-cache
+      connection:
+      - close
+      content-length:
+      - '1324'
+      content-type:
+      - text/xml;charset=EUC-KR
+      date:
+      - Fri, 24 Apr 2026 04:44:37 GMT
+      expires:
+      - Thu, 01 Jan 1970 00:00:00 GMT
+      referrer-policy:
+      - unsafe-url
+      server:
+      - nfront
+      set-cookie:
+      - REDACTED
+    status:
+      code: 200
+      message: '200'
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Connection:
+      - close
+      Host:
+      - ac.stock.naver.com
+      User-Agent:
+      - Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7)
+    method: GET
+    uri: https://ac.stock.naver.com/ac?q=%EC%82%BC%EC%84%B1%EC%A0%84%EC%9E%90&target=stock
+  response:
+    body:
+      string: "{\"query\":\"\uC0BC\uC131\uC804\uC790\",\"items\":[{\"code\":\"005930\",\"name\":\"\uC0BC\uC131\uC804\uC790\",\"typeCode\":\"KOSPI\",\"typeName\":\"\uCF54\uC2A4\uD53C\",\"url\":\"/domestic/stock/005930/total\",\"reutersCode\":\"005930\",\"nationCode\":\"KOR\",\"nationName\":\"\uB300\uD55C\uBBFC\uAD6D\",\"category\":\"stock\",\"hasDiscussion\":true},{\"code\":\"005935\",\"name\":\"\uC0BC\uC131\uC804\uC790\uC6B0\",\"typeCode\":\"KOSPI\",\"typeName\":\"\uCF54\uC2A4\uD53C\",\"url\":\"/domestic/stock/005935/total\",\"reutersCode\":\"005935\",\"nationCode\":\"KOR\",\"nationName\":\"\uB300\uD55C\uBBFC\uAD6D\",\"category\":\"stock\",\"hasDiscussion\":true}]}"
+    headers:
+      connection:
+      - close
+      content-length:
+      - '495'
+      content-type:
+      - application/json;charset=UTF-8
+      date:
+      - Fri, 24 Apr 2026 04:46:20 GMT
+      referrer-policy:
+      - unsafe-url
+      server:
+      - nfront
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Connection:
+      - close
+      Host:
+      - fchart.stock.naver.com
+      Referer:
+      - https://finance.naver.com/
+      User-Agent:
+      - Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7)
+    method: GET
+    uri: https://fchart.stock.naver.com/sise.nhn?count=16&requestType=0&symbol=005930&timeframe=day
+  response:
+    body:
+      string: !!binary |
+        PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iRVVDLUtSIiA/PgoKPHByb3RvY29sPgoKCgoJ
+        CgkKCQkJPGNoYXJ0ZGF0YSBzeW1ib2w9IjAwNTkzMCIgbmFtZT0iu++8usD8wNoiIGNvdW50PSIx
+        NiIgdGltZWZyYW1lPSJkYXkiIHByZWNpc2lvbj0iMCIgb3JpZ2ludGltZT0iMTk5MDAxMDMiPgoJ
+        CQkKCQkJCTxpdGVtIGRhdGE9IjIwMjYwNDAzfDE4NDIwMHwxODcyMDB8MTgyNzAwfDE4NjIwMHwy
+        MDE5NDQ0NyIgLz4KCQkJCgkJCQk8aXRlbSBkYXRhPSIyMDI2MDQwNnwxOTA5MDB8MTk0NjAwfDE5
+        MDEwMHwxOTMxMDB8MjA2MzU5NTgiIC8+CgkJCQoJCQkJPGl0ZW0gZGF0YT0iMjAyNjA0MDd8MjAy
+        MDAwfDIwMjUwMHwxOTI0MDB8MTk2NTAwfDMwODQ4MDUzIiAvPgoJCQkKCQkJCTxpdGVtIGRhdGE9
+        IjIwMjYwNDA4fDIxNDAwMHwyMTQ1MDB8MjA3NTAwfDIxMDUwMHwzNTg5MDk3MyIgLz4KCQkJCgkJ
+        CQk8aXRlbSBkYXRhPSIyMDI2MDQwOXwyMDcwMDB8MjA3NTAwfDIwMjAwMHwyMDQwMDB8NDIzMjA4
+        MzkiIC8+CgkJCQoJCQkJPGl0ZW0gZGF0YT0iMjAyNjA0MTB8MjA4NTAwfDIxMTAwMHwyMDU1MDB8
+        MjA2MDAwfDE4MjQ0NDU5IiAvPgoJCQkKCQkJCTxpdGVtIGRhdGE9IjIwMjYwNDEzfDE5ODIwMHwy
+        MDMwMDB8MTk4MjAwfDIwMTAwMHwxOTYwMzQxNSIgLz4KCQkJCgkJCQk8aXRlbSBkYXRhPSIyMDI2
+        MDQxNHwyMDgwMDB8MjEwMDAwfDIwNTUwMHwyMDY1MDB8MjM2NzIwNzgiIC8+CgkJCQoJCQkJPGl0
+        ZW0gZGF0YT0iMjAyNjA0MTV8MjE1MDAwfDIxNTUwMHwyMTAwMDB8MjExMDAwfDI0MDkyODg0IiAv
+        PgoJCQkKCQkJCTxpdGVtIGRhdGE9IjIwMjYwNDE2fDIxMjAwMHwyMTgwMDB8MjEwNTAwfDIxNzUw
+        MHwyMTQ5OTc4OCIgLz4KCQkJCgkJCQk8aXRlbSBkYXRhPSIyMDI2MDQxN3wyMTcwMDB8MjE4MDAw
+        fDIxNTAwMHwyMTYwMDB8MTgwNzkzMjIiIC8+CgkJCQoJCQkJPGl0ZW0gZGF0YT0iMjAyNjA0MjB8
+        MjE0NTAwfDIxOTAwMHwyMTMwMDB8MjE0NTAwfDE3MTA3NzQxIiAvPgoJCQkKCQkJCTxpdGVtIGRh
+        dGE9IjIwMjYwNDIxfDIxODAwMHwyMjAwMDB8MjE2MDAwfDIxOTAwMHwxNjc1MjEzMiIgLz4KCQkJ
+        CgkJCQk8aXRlbSBkYXRhPSIyMDI2MDQyMnwyMTg1MDB8MjIyNTAwfDIxNTUwMHwyMTc1MDB8MTY4
+        MjM0ODAiIC8+CgkJCQoJCQkJPGl0ZW0gZGF0YT0iMjAyNjA0MjN8MjIzMDAwfDIyOTUwMHwyMTYw
+        MDB8MjI0NTAwfDM0NTI1NDg1IiAvPgoJCQkKCQkJCTxpdGVtIGRhdGE9IjIwMjYwNDI0fDIyNDAw
+        MHwyMjUwMDB8MjE2NTAwfDIxODc1MHwxNTUzNDIxNSIgLz4KCQkJCgkKCgoJPC9jaGFydGRhdGE+
+        CjwvcHJvdG9jb2w+Cg==
+    headers:
+      cache-control:
+      - no-cache
+      connection:
+      - close
+      content-length:
+      - '1324'
+      content-type:
+      - text/xml;charset=EUC-KR
+      date:
+      - Fri, 24 Apr 2026 04:46:20 GMT
+      expires:
+      - Thu, 01 Jan 1970 00:00:00 GMT
+      referrer-policy:
+      - unsafe-url
+      server:
+      - nfront
+      set-cookie:
+      - REDACTED
+    status:
+      code: 200
+      message: '200'
+version: 1

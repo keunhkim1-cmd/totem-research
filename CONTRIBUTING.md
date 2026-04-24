@@ -22,21 +22,42 @@ Do not revert unrelated local changes.
 
 ## Tests
 
-Use `unittest` and mock network calls at the provider adapter boundary.
+Use `pytest`. Existing `unittest.TestCase` tests are intentionally kept
+compatible with pytest discovery. Mock network calls at the provider adapter
+boundary unless the test is explicitly marked `external`.
 
 Minimum check:
 
 ```bash
-python3 -m py_compile api/*.py lib/*.py serve.py tests/*.py
-python3 -m unittest discover -s tests
+python -m ruff check .
+python -m mypy
+python -m compileall -q lib api scripts tests serve.py
+python -m pytest -m "not external" --disable-socket --allow-hosts=127.0.0.1,localhost --record-mode=none --cov --cov-report=term-missing
 ```
 
 For frontend changes, also run:
 
 ```bash
+python -m playwright install chromium  # first local setup only
 python3 scripts/check_frontend_smoke.py
 python3 scripts/check_frontend_budget.py
+python -m pytest tests/test_playwright_flows.py --disable-socket --allow-hosts=127.0.0.1,localhost
 ```
+
+For cassette-backed external API tests, use VCR.py/pytest recording fixtures and
+filter secret-bearing query params and headers. CI runs with recording disabled,
+so new external calls fail instead of silently hitting live providers.
+
+Mypy starts on shared, low-churn `lib/` modules listed in `tool.mypy.files`.
+Expand the allowlist one dependency boundary at a time, after the current target
+passes without suppressing useful errors.
+
+Coverage starts as a regression floor, not a vanity metric. Raise
+`tool.coverage.report.fail_under` only after adding tests that protect real user
+or provider behavior.
+
+Ruff formatting is introduced incrementally through pre-commit. Format changed
+Python files, but do not mix broad repo-wide formatting with behavioral changes.
 
 ## Deploy Notes
 

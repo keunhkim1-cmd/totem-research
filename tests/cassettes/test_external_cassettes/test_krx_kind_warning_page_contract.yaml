@@ -1,0 +1,406 @@
+interactions:
+- request:
+    body: null
+    headers:
+      Accept:
+      - text/html,application/xhtml+xml
+      Connection:
+      - close
+      Host:
+      - kind.krx.co.kr
+      Referer:
+      - https://kind.krx.co.kr/
+      User-Agent:
+      - Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7)
+    method: GET
+    uri: https://kind.krx.co.kr/investwarn/investattentwarnrisky.do?currentPageSize=20&endDate=20260424&menuIndex=2&method=investattentwarnriskySub&orderMode=3&orderStat=D&pageIndex=1&startDate=20260325
+  response:
+    body:
+      string: "\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n<section class=\"scrarea type-00\">\r\n\t<table
+        class=\"list type-00 mt5\" summary=\"\uBC88\uD638, \uC885\uBAA9\uBA85, \uC720\uD615,
+        \uACF5\uC2DC\uC77C, \uC9C0\uC815\uC77C\">\r\n\t\t<caption>\uBAA9\uB85D</caption>\r\n\t\t<colgroup>\r\n\t\t\t<col
+        width=\"10%\" />\r\n\t\t\t<col width=\"*\" />\r\n\t\t\t<col width=\"30%\"
+        />\r\n\t\t\t<col width=\"15%\" />\r\n\t\t\t<col width=\"15%\" />\r\n\t\t</colgroup>\r\n\t\t<thead>\r\n\t\t\t<tr
+        class=\"first\" id=\"title-contents\">\r\n\t\t\t</tr>\r\n\t\t</thead>\r\n\t\t<tbody>\r\n\t\t\t\r\n\t\t\t\r\n\t\t\t\r\n\t\t\t\r\n\t\t\t\t\r\n\t\t\t\t\t\r\n\t\t\t<tr
+        \r\n\t\t\t\t\tclass=\"first\"\r\n\t\t\t>\r\n\t\t\t\t<td class=\"first txc\"
+        scope=\"row\">108</td>\r\n\t\t\t\t<td title=\"\uB450\uC0B0\uD14C\uC2A4\uB098\"><img
+        src='/images/common/icn_t_ko.gif' class='vmiddle legend' alt='\uCF54\uC2A4\uB2E5'>
+        <a id=\"companysum\" href=\"#companysum\" onclick=\"companysummary_open('13197');
+        return false;\" title='\uB450\uC0B0\uD14C\uC2A4\uB098'> \uB450\uC0B0\uD14C\uC2A4\uB098</a>
+        <img src='/images/common/icn_t_q150.gif' class='vmiddle legend' alt='KOSDAQ150'>
+        </td>\r\n\t\t\t\t<td></td>\r\n\t\t\t\t<td class=\"txc\">2026-04-23</td>\r\n\t\t\t\t<td
+        class=\"txc\">2026-04-24</td>\r\n\t\t\t</tr>\r\n\t\t\t\t\t\r\n\t\t\t<tr \r\n\t\t\t\t\t\r\n\t\t\t>\r\n\t\t\t\t<td
+        class=\"first txc\" scope=\"row\">107</td>\r\n\t\t\t\t<td title=\"\uBBF8\uB798\uC5D0\uC14B\uBCA4\uCC98\uD22C\uC790\"><img
+        src='/images/common/icn_t_ko.gif' class='vmiddle legend' alt='\uCF54\uC2A4\uB2E5'>
+        <a id=\"companysum\" href=\"#companysum\" onclick=\"companysummary_open('10079');
+        return false;\" title='\uBBF8\uB798\uC5D0\uC14B\uBCA4\uCC98\uD22C\uC790'>
+        \uBBF8\uB798\uC5D0\uC14B\uBCA4\uCC98\uD22C\uC790</a> </td>\r\n\t\t\t\t<td></td>\r\n\t\t\t\t<td
+        class=\"txc\">2026-04-23</td>\r\n\t\t\t\t<td class=\"txc\">2026-04-24</td>\r\n\t\t\t</tr>\r\n\t\t\t\t\t\r\n\t\t\t<tr
+        \r\n\t\t\t\t\t\r\n\t\t\t>\r\n\t\t\t\t<td class=\"first txc\" scope=\"row\">106</td>\r\n\t\t\t\t<td
+        title=\"\uD55C\uAD6D\uCCA8\uB2E8\uC18C\uC7AC\"><img src='/images/common/icn_t_ko.gif'
+        class='vmiddle legend' alt='\uCF54\uC2A4\uB2E5'> <a id=\"companysum\" href=\"#companysum\"
+        onclick=\"companysummary_open('06297'); return false;\" title='\uD55C\uAD6D\uCCA8\uB2E8\uC18C\uC7AC'>
+        \uD55C\uAD6D\uCCA8\uB2E8\uC18C\uC7AC</a> </td>\r\n\t\t\t\t<td></td>\r\n\t\t\t\t<td
+        class=\"txc\">2026-04-23</td>\r\n\t\t\t\t<td class=\"txc\">2026-04-24</td>\r\n\t\t\t</tr>\r\n\t\t\t\t\t\r\n\t\t\t<tr
+        \r\n\t\t\t\t\t\r\n\t\t\t>\r\n\t\t\t\t<td class=\"first txc\" scope=\"row\">105</td>\r\n\t\t\t\t<td
+        title=\"\uC0BC\uC544\uC54C\uBBF8\uB284\"><img src='/images/common/icn_t_yu.gif'
+        class='vmiddle legend' alt='\uC720\uAC00\uC99D\uAD8C'> <a id=\"companysum\"
+        href=\"#companysum\" onclick=\"companysummary_open('00611'); return false;\"
+        title='\uC0BC\uC544\uC54C\uBBF8\uB284'> \uC0BC\uC544\uC54C\uBBF8\uB284</a>
+        </td>\r\n\t\t\t\t<td></td>\r\n\t\t\t\t<td class=\"txc\">2026-04-22</td>\r\n\t\t\t\t<td
+        class=\"txc\">2026-04-23</td>\r\n\t\t\t</tr>\r\n\t\t\t\t\t\r\n\t\t\t<tr \r\n\t\t\t\t\t\r\n\t\t\t>\r\n\t\t\t\t<td
+        class=\"first txc\" scope=\"row\">104</td>\r\n\t\t\t\t<td title=\"\uC800\uC2A4\uD15C\"><img
+        src='/images/common/icn_t_ko.gif' class='vmiddle legend' alt='\uCF54\uC2A4\uB2E5'>
+        <a id=\"companysum\" href=\"#companysum\" onclick=\"companysummary_open('41784');
+        return false;\" title='\uC800\uC2A4\uD15C'> \uC800\uC2A4\uD15C</a> </td>\r\n\t\t\t\t<td></td>\r\n\t\t\t\t<td
+        class=\"txc\">2026-04-22</td>\r\n\t\t\t\t<td class=\"txc\">2026-04-23</td>\r\n\t\t\t</tr>\r\n\t\t\t\t\t\r\n\t\t\t<tr
+        \r\n\t\t\t\t\t\r\n\t\t\t>\r\n\t\t\t\t<td class=\"first txc\" scope=\"row\">103</td>\r\n\t\t\t\t<td
+        title=\"\uC8FC\uC131\uC5D4\uC9C0\uB2C8\uC5B4\uB9C1\"><img src='/images/common/icn_t_ko.gif'
+        class='vmiddle legend' alt='\uCF54\uC2A4\uB2E5'> <a id=\"companysum\" href=\"#companysum\"
+        onclick=\"companysummary_open('03693'); return false;\" title='\uC8FC\uC131\uC5D4\uC9C0\uB2C8\uC5B4\uB9C1'>
+        \uC8FC\uC131\uC5D4\uC9C0\uB2C8\uC5B4\uB9C1</a> <img src='/images/common/icn_t_v100.gif'
+        class='vmiddle legend' alt='V100'> <img src='/images/common/icn_t_q150.gif'
+        class='vmiddle legend' alt='KOSDAQ150'> <img src='/images/common/icn_t_x300.gif'
+        class='vmiddle legend' alt='KRX300'> </td>\r\n\t\t\t\t<td></td>\r\n\t\t\t\t<td
+        class=\"txc\">2026-04-22</td>\r\n\t\t\t\t<td class=\"txc\">2026-04-23</td>\r\n\t\t\t</tr>\r\n\t\t\t\t\t\r\n\t\t\t<tr
+        \r\n\t\t\t\t\t\r\n\t\t\t>\r\n\t\t\t\t<td class=\"first txc\" scope=\"row\">102</td>\r\n\t\t\t\t<td
+        title=\"\uD14C\uC2A4\"><img src='/images/common/icn_t_ko.gif' class='vmiddle
+        legend' alt='\uCF54\uC2A4\uB2E5'> <a id=\"companysum\" href=\"#companysum\"
+        onclick=\"companysummary_open('09561'); return false;\" title='\uD14C\uC2A4'>
+        \uD14C\uC2A4</a> <img src='/images/common/icn_t_q150.gif' class='vmiddle legend'
+        alt='KOSDAQ150'> </td>\r\n\t\t\t\t<td></td>\r\n\t\t\t\t<td class=\"txc\">2026-04-22</td>\r\n\t\t\t\t<td
+        class=\"txc\">2026-04-23</td>\r\n\t\t\t</tr>\r\n\t\t\t\t\t\r\n\t\t\t<tr \r\n\t\t\t\t\t\r\n\t\t\t>\r\n\t\t\t\t<td
+        class=\"first txc\" scope=\"row\">101</td>\r\n\t\t\t\t<td title=\"\uD37C\uC2A4\uD14D\"><img
+        src='/images/common/icn_t_yu.gif' class='vmiddle legend' alt='\uC720\uAC00\uC99D\uAD8C'>
+        <a id=\"companysum\" href=\"#companysum\" onclick=\"companysummary_open('01082');
+        return false;\" title='\uD37C\uC2A4\uD14D'> \uD37C\uC2A4\uD14D</a> </td>\r\n\t\t\t\t<td></td>\r\n\t\t\t\t<td
+        class=\"txc\">2026-04-22</td>\r\n\t\t\t\t<td class=\"txc\">2026-04-23</td>\r\n\t\t\t</tr>\r\n\t\t\t\t\t\r\n\t\t\t<tr
+        \r\n\t\t\t\t\t\r\n\t\t\t>\r\n\t\t\t\t<td class=\"first txc\" scope=\"row\">100</td>\r\n\t\t\t\t<td
+        title=\"\uBE44\uCE20\uB85C\uC140\"><img src='/images/common/icn_t_ko.gif'
+        class='vmiddle legend' alt='\uCF54\uC2A4\uB2E5'> <a id=\"companysum\" href=\"#companysum\"
+        onclick=\"companysummary_open('08292'); return false;\" title='\uBE44\uCE20\uB85C\uC140'>
+        \uBE44\uCE20\uB85C\uC140</a> </td>\r\n\t\t\t\t<td></td>\r\n\t\t\t\t<td class=\"txc\">2026-04-21</td>\r\n\t\t\t\t<td
+        class=\"txc\">2026-04-22</td>\r\n\t\t\t</tr>\r\n\t\t\t\t\t\r\n\t\t\t<tr \r\n\t\t\t\t\t\r\n\t\t\t>\r\n\t\t\t\t<td
+        class=\"first txc\" scope=\"row\">99</td>\r\n\t\t\t\t<td title=\"\uC544\uD558\uC815\uBCF4\uD1B5\uC2E0\"><img
+        src='/images/common/icn_t_konex.gif' class='vmiddle legend' alt='\uCF54\uB125\uC2A4'>
+        <a id=\"companysum\" href=\"#companysum\" onclick=\"companysummary_open('10295');
+        return false;\" title='\uC544\uD558\uC815\uBCF4\uD1B5\uC2E0'> \uC544\uD558\uC815\uBCF4\uD1B5\uC2E0</a>
+        </td>\r\n\t\t\t\t<td></td>\r\n\t\t\t\t<td class=\"txc\">2026-04-21</td>\r\n\t\t\t\t<td
+        class=\"txc\">2026-04-22</td>\r\n\t\t\t</tr>\r\n\t\t\t\t\t\r\n\t\t\t<tr \r\n\t\t\t\t\t\r\n\t\t\t>\r\n\t\t\t\t<td
+        class=\"first txc\" scope=\"row\">98</td>\r\n\t\t\t\t<td title=\"\uC6D0\uC775IPS\"><img
+        src='/images/common/icn_t_ko.gif' class='vmiddle legend' alt='\uCF54\uC2A4\uB2E5'>
+        <a id=\"companysum\" href=\"#companysum\" onclick=\"companysummary_open('24081');
+        return false;\" title='\uC6D0\uC775IPS'> \uC6D0\uC775IPS</a> <img src='/images/common/icn_t_q150.gif'
+        class='vmiddle legend' alt='KOSDAQ150'> <img src='/images/common/icn_t_x300.gif'
+        class='vmiddle legend' alt='KRX300'> </td>\r\n\t\t\t\t<td></td>\r\n\t\t\t\t<td
+        class=\"txc\">2026-04-21</td>\r\n\t\t\t\t<td class=\"txc\">2026-04-22</td>\r\n\t\t\t</tr>\r\n\t\t\t\t\t\r\n\t\t\t<tr
+        \r\n\t\t\t\t\t\r\n\t\t\t>\r\n\t\t\t\t<td class=\"first txc\" scope=\"row\">97</td>\r\n\t\t\t\t<td
+        title=\"\uC9C4\uC6D0\uC0DD\uBA85\uACFC\uD559\"><img src='/images/common/icn_t_yu.gif'
+        class='vmiddle legend' alt='\uC720\uAC00\uC99D\uAD8C'> <a id=\"companysum\"
+        href=\"#companysum\" onclick=\"companysummary_open('01100'); return false;\"
+        title='\uC9C4\uC6D0\uC0DD\uBA85\uACFC\uD559'> \uC9C4\uC6D0\uC0DD\uBA85\uACFC\uD559</a>
+        <img src='/images/common/icn_t_kwan.gif' class='vmiddle legend' alt='\uAD00\uB9AC\uC885\uBAA9'/>
+        </td>\r\n\t\t\t\t<td></td>\r\n\t\t\t\t<td class=\"txc\">2026-04-21</td>\r\n\t\t\t\t<td
+        class=\"txc\">2026-04-22</td>\r\n\t\t\t</tr>\r\n\t\t\t\t\t\r\n\t\t\t<tr \r\n\t\t\t\t\t\r\n\t\t\t>\r\n\t\t\t\t<td
+        class=\"first txc\" scope=\"row\">96</td>\r\n\t\t\t\t<td title=\"(\uC8FC)\uD55C\uC2F9\"><img
+        src='/images/common/icn_t_ko.gif' class='vmiddle legend' alt='\uCF54\uC2A4\uB2E5'>
+        <a id=\"companysum\" href=\"#companysum\" onclick=\"companysummary_open('43069');
+        return false;\" title='(\uC8FC)\uD55C\uC2F9'> (\uC8FC)\uD55C\uC2F9</a> </td>\r\n\t\t\t\t<td></td>\r\n\t\t\t\t<td
+        class=\"txc\">2026-04-20</td>\r\n\t\t\t\t<td class=\"txc\">2026-04-21</td>\r\n\t\t\t</tr>\r\n\t\t\t\t\t\r\n\t\t\t<tr
+        \r\n\t\t\t\t\t\r\n\t\t\t>\r\n\t\t\t\t<td class=\"first txc\" scope=\"row\">95</td>\r\n\t\t\t\t<td
+        title=\"SGA\uC194\uB8E8\uC158\uC988\"><img src='/images/common/icn_t_ko.gif'
+        class='vmiddle legend' alt='\uCF54\uC2A4\uB2E5'> <a id=\"companysum\" href=\"#companysum\"
+        onclick=\"companysummary_open('18423'); return false;\" title='SGA\uC194\uB8E8\uC158\uC988'>
+        SGA\uC194\uB8E8\uC158\uC988</a> </td>\r\n\t\t\t\t<td></td>\r\n\t\t\t\t<td
+        class=\"txc\">2026-04-20</td>\r\n\t\t\t\t<td class=\"txc\">2026-04-21</td>\r\n\t\t\t</tr>\r\n\t\t\t\t\t\r\n\t\t\t<tr
+        \r\n\t\t\t\t\t\r\n\t\t\t>\r\n\t\t\t\t<td class=\"first txc\" scope=\"row\">94</td>\r\n\t\t\t\t<td
+        title=\"\uB3D9\uC6B4\uC544\uB098\uD14D\"><img src='/images/common/icn_t_ko.gif'
+        class='vmiddle legend' alt='\uCF54\uC2A4\uB2E5'> <a id=\"companysum\" href=\"#companysum\"
+        onclick=\"companysummary_open('09417'); return false;\" title='\uB3D9\uC6B4\uC544\uB098\uD14D'>
+        \uB3D9\uC6B4\uC544\uB098\uD14D</a> </td>\r\n\t\t\t\t<td></td>\r\n\t\t\t\t<td
+        class=\"txc\">2026-04-20</td>\r\n\t\t\t\t<td class=\"txc\">2026-04-21</td>\r\n\t\t\t</tr>\r\n\t\t\t\t\t\r\n\t\t\t<tr
+        \r\n\t\t\t\t\t\r\n\t\t\t>\r\n\t\t\t\t<td class=\"first txc\" scope=\"row\">93</td>\r\n\t\t\t\t<td
+        title=\"\uC36C\uD14C\uD06C\"><img src='/images/common/icn_t_konex.gif' class='vmiddle
+        legend' alt='\uCF54\uB125\uC2A4'> <a id=\"companysum\" href=\"#companysum\"
+        onclick=\"companysummary_open('21732'); return false;\" title='\uC36C\uD14C\uD06C'>
+        \uC36C\uD14C\uD06C</a> </td>\r\n\t\t\t\t<td></td>\r\n\t\t\t\t<td class=\"txc\">2026-04-20</td>\r\n\t\t\t\t<td
+        class=\"txc\">2026-04-21</td>\r\n\t\t\t</tr>\r\n\t\t\t\t\t\r\n\t\t\t<tr \r\n\t\t\t\t\t\r\n\t\t\t>\r\n\t\t\t\t<td
+        class=\"first txc\" scope=\"row\">92</td>\r\n\t\t\t\t<td title=\"\uC5D0\uC774\uCE58\uC5E0\uB125\uC2A4\"><img
+        src='/images/common/icn_t_ko.gif' class='vmiddle legend' alt='\uCF54\uC2A4\uB2E5'>
+        <a id=\"companysum\" href=\"#companysum\" onclick=\"companysummary_open('03617');
+        return false;\" title='\uC5D0\uC774\uCE58\uC5E0\uB125\uC2A4'> \uC5D0\uC774\uCE58\uC5E0\uB125\uC2A4</a>
+        </td>\r\n\t\t\t\t<td></td>\r\n\t\t\t\t<td class=\"txc\">2026-04-20</td>\r\n\t\t\t\t<td
+        class=\"txc\">2026-04-21</td>\r\n\t\t\t</tr>\r\n\t\t\t\t\t\r\n\t\t\t<tr \r\n\t\t\t\t\t\r\n\t\t\t>\r\n\t\t\t\t<td
+        class=\"first txc\" scope=\"row\">91</td>\r\n\t\t\t\t<td title=\"\uCF00\uC774\uC528\uC5D0\uC2A4\"><img
+        src='/images/common/icn_t_ko.gif' class='vmiddle legend' alt='\uCF54\uC2A4\uB2E5'>
+        <a id=\"companysum\" href=\"#companysum\" onclick=\"companysummary_open('11550');
+        return false;\" title='\uCF00\uC774\uC528\uC5D0\uC2A4'> \uCF00\uC774\uC528\uC5D0\uC2A4</a>
+        </td>\r\n\t\t\t\t<td></td>\r\n\t\t\t\t<td class=\"txc\">2026-04-20</td>\r\n\t\t\t\t<td
+        class=\"txc\">2026-04-21</td>\r\n\t\t\t</tr>\r\n\t\t\t\t\t\r\n\t\t\t<tr \r\n\t\t\t\t\t\r\n\t\t\t>\r\n\t\t\t\t<td
+        class=\"first txc\" scope=\"row\">90</td>\r\n\t\t\t\t<td title=\"\uC544\uC774\uC528\uD2F0\uCF00\uC774\"><img
+        src='/images/common/icn_t_ko.gif' class='vmiddle legend' alt='\uCF54\uC2A4\uB2E5'>
+        <a id=\"companysum\" href=\"#companysum\" onclick=\"companysummary_open('45601');
+        return false;\" title='\uC544\uC774\uC528\uD2F0\uCF00\uC774'> \uC544\uC774\uC528\uD2F0\uCF00\uC774</a>
+        </td>\r\n\t\t\t\t<td></td>\r\n\t\t\t\t<td class=\"txc\">2026-04-17</td>\r\n\t\t\t\t<td
+        class=\"txc\">2026-04-20</td>\r\n\t\t\t</tr>\r\n\t\t\t\t\t\r\n\t\t\t<tr \r\n\t\t\t\t\t\r\n\t\t\t>\r\n\t\t\t\t<td
+        class=\"first txc\" scope=\"row\">89</td>\r\n\t\t\t\t<td title=\"\uC624\uD0A8\uC2A4\uC804\uC790\"><img
+        src='/images/common/icn_t_ko.gif' class='vmiddle legend' alt='\uCF54\uC2A4\uB2E5'>
+        <a id=\"companysum\" href=\"#companysum\" onclick=\"companysummary_open('08058');
+        return false;\" title='\uC624\uD0A8\uC2A4\uC804\uC790'> \uC624\uD0A8\uC2A4\uC804\uC790</a>
+        </td>\r\n\t\t\t\t<td></td>\r\n\t\t\t\t<td class=\"txc\">2026-04-17</td>\r\n\t\t\t\t<td
+        class=\"txc\">2026-04-20</td>\r\n\t\t\t</tr>\r\n\t\t\t\t\t\r\n\t\t\t\t\r\n\t\t\t\t\r\n\t\t\t\r\n\t\t</tbody>\r\n\t</table>\r\n</section>\r\n\r\n<!--
+        \uD398\uC774\uC9D5 START -->\r\n<section class=\"paging-group\">\r\n\t<div
+        class='paging type-00'><a href='#prevPage10' class='pprev' onclick='return
+        false;'><span>\uC774\uC80410\uAC1C \uD398\uC774\uC9C0</span></a><a href='#prevPage'
+        class='prev' onclick='return false;'><span>\uC774\uC804 \uD398\uC774\uC9C0</span></a>\r\n<a
+        href='#page_link_1' class='active' onclick='return false;'>1</a><a href='#page_link_2'
+        onclick=\"fnPageGo('2');return false;\">2</a><a href='#page_link_3' onclick=\"fnPageGo('3');return
+        false;\">3</a><a href='#page_link_4' onclick=\"fnPageGo('4');return false;\">4</a><a
+        href='#page_link_5' onclick=\"fnPageGo('5');return false;\">5</a><a href='#page_link_6'
+        onclick=\"fnPageGo('6');return false;\">6</a>\r\n<a href='#nextPage' class='next'
+        onclick=\"fnPageGo('2');return false;\"><span>\uB2E4\uC74C \uD398\uC774\uC9C0</span></a><a
+        href='#nextPage10' class='nnext' onclick='return false;'><span>\uB2E4\uC74C10\uAC1C
+        \uD398\uC774\uC9C0</span></a></div><div class=\"info type-00\">\r\n\uC804\uCCB4
+        <em>108</em>\uAC74 : <strong>1</strong>/6&nbsp;&nbsp;&nbsp;\r\n<select id='currentPageSize'
+        name='currentPageSize'>\r\n<option value='15'  >15\uAC74</option>\r\n<option
+        value='30'  >30\uAC74</option>\r\n<option value='50'  >50\uAC74</option>\r\n<option
+        value='100' >100\uAC74</option>\r\n</select>&nbsp;&nbsp;<a href='#' onclick=\"fnSearch1();return
+        false;\" class='btn-sprite btn-go vmiddle' title='GO'><span>GO</span></a>\r\n</div>\r\n</section>\r\n<!--
+        \uD398\uC774\uC9D5 END -->\r\n\r\n<dl class=\"info-group type-00 bgtype-01
+        pt10\">\r\n<dt>\uC870\uD68C\uAE30\uAC04 \uC911\uC5D0 \uD22C\uC790\uC8FC\uC758\uC885\uBAA9\uC73C\uB85C
+        \uC9C0\uC815 \uC911\uC778 \uC885\uBAA9\uC744 \uC870\uD68C\uD560 \uC218 \uC788\uC73C\uBA70,
+        \uD22C\uC790\uC8FC\uC758\uC885\uBAA9\uC740 1\uC77C\uAC04(\uACF5\uC2DC\uC77C
+        \uB2E4\uC74C \uB9E4\uB9E4\uAC70\uB798\uC77C) \uC9C0\uC815\uB429\uB2C8\uB2E4.<br/><strong
+        class=\"red\">\uD22C\uC790\uC8FC\uC758\uC885\uBAA9\uC774\uB780</strong> \uC2DC\uC7A5\uAC10\uC2DC\uC704\uC6D0\uD68C\uB294
+        \uD22C\uAE30\uC801\uC774\uAC70\uB098 \uBD88\uACF5\uC815\uAC70\uB798\uC758
+        \uAC1C\uC5F0\uC131\uC774 \uC788\uB294 \uC885\uBAA9\uC744 \uD22C\uC790\uC8FC\uC758\uC885\uBAA9\uC73C\uB85C
+        \uACF5\uD45C\uD558\uC5EC \uC77C\uBC18 \uD22C\uC790\uC790\uB4E4\uC758 \uB1CC\uB3D9\uB9E4\uB9E4
+        \uBC29\uC9C0 \uBC0F \uC7A0\uC7AC\uC801 \uBD88\uACF5\uC815\uAC70\uB798 \uD589\uC704\uC790\uC5D0
+        \uB300\uD55C \uACBD\uAC01\uC2EC\uC744 \uACE0\uCDE8\uD558\uACE0\uC788\uC2B5\uB2C8\uB2E4.
+        <strong class=\"blue\">\uC2DC\uC7A5\uAC10\uC2DC\uADDC\uC815 \uC81C5\uC870
+        \uBC0F \uC2DC\uC7A5\uAC10\uC2DC\uADDC\uC815 \uC2DC\uD589\uC138\uCE59 \uC81C3\uC870</strong></dt>\r\n</dl>\r\n\r\n<script
+        language=\"javascript\" type=\"text/JavaScript\">\r\n$(document).ready(function(){\r\n\tfn_InitTitle(\"\uBC88\uD638,\uC885\uBAA9\uBA85,\uC720\uD615,\uACF5\uC2DC\uC77C,\uC9C0\uC815\uC77C\",
+        \"false,true,false,false,true\");\r\n});\r\n</script>"
+    headers:
+      Cache-Control:
+      - max-age=0, no-cache, no-store
+      Connection:
+      - close
+      Content-Length:
+      - '11961'
+      Content-Type:
+      - text/html; charset=UTF-8
+      Date:
+      - Fri, 24 Apr 2026 04:44:36 GMT
+      Expires:
+      - Fri, 24 Apr 2026 04:44:36 GMT
+      Pragma:
+      - no-cache
+      Set-Cookie:
+      - REDACTED
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - text/html,application/xhtml+xml
+      Connection:
+      - close
+      Host:
+      - kind.krx.co.kr
+      Referer:
+      - https://kind.krx.co.kr/
+      User-Agent:
+      - Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7)
+    method: GET
+    uri: https://kind.krx.co.kr/investwarn/investattentwarnrisky.do?currentPageSize=20&endDate=20260424&menuIndex=2&method=investattentwarnriskySub&orderMode=3&orderStat=D&pageIndex=1&startDate=20260325
+  response:
+    body:
+      string: "\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n<section class=\"scrarea type-00\">\r\n\t<table
+        class=\"list type-00 mt5\" summary=\"\uBC88\uD638, \uC885\uBAA9\uBA85, \uC720\uD615,
+        \uACF5\uC2DC\uC77C, \uC9C0\uC815\uC77C\">\r\n\t\t<caption>\uBAA9\uB85D</caption>\r\n\t\t<colgroup>\r\n\t\t\t<col
+        width=\"10%\" />\r\n\t\t\t<col width=\"*\" />\r\n\t\t\t<col width=\"30%\"
+        />\r\n\t\t\t<col width=\"15%\" />\r\n\t\t\t<col width=\"15%\" />\r\n\t\t</colgroup>\r\n\t\t<thead>\r\n\t\t\t<tr
+        class=\"first\" id=\"title-contents\">\r\n\t\t\t</tr>\r\n\t\t</thead>\r\n\t\t<tbody>\r\n\t\t\t\r\n\t\t\t\r\n\t\t\t\r\n\t\t\t\r\n\t\t\t\t\r\n\t\t\t\t\t\r\n\t\t\t<tr
+        \r\n\t\t\t\t\tclass=\"first\"\r\n\t\t\t>\r\n\t\t\t\t<td class=\"first txc\"
+        scope=\"row\">108</td>\r\n\t\t\t\t<td title=\"\uB450\uC0B0\uD14C\uC2A4\uB098\"><img
+        src='/images/common/icn_t_ko.gif' class='vmiddle legend' alt='\uCF54\uC2A4\uB2E5'>
+        <a id=\"companysum\" href=\"#companysum\" onclick=\"companysummary_open('13197');
+        return false;\" title='\uB450\uC0B0\uD14C\uC2A4\uB098'> \uB450\uC0B0\uD14C\uC2A4\uB098</a>
+        <img src='/images/common/icn_t_q150.gif' class='vmiddle legend' alt='KOSDAQ150'>
+        </td>\r\n\t\t\t\t<td></td>\r\n\t\t\t\t<td class=\"txc\">2026-04-23</td>\r\n\t\t\t\t<td
+        class=\"txc\">2026-04-24</td>\r\n\t\t\t</tr>\r\n\t\t\t\t\t\r\n\t\t\t<tr \r\n\t\t\t\t\t\r\n\t\t\t>\r\n\t\t\t\t<td
+        class=\"first txc\" scope=\"row\">107</td>\r\n\t\t\t\t<td title=\"\uBBF8\uB798\uC5D0\uC14B\uBCA4\uCC98\uD22C\uC790\"><img
+        src='/images/common/icn_t_ko.gif' class='vmiddle legend' alt='\uCF54\uC2A4\uB2E5'>
+        <a id=\"companysum\" href=\"#companysum\" onclick=\"companysummary_open('10079');
+        return false;\" title='\uBBF8\uB798\uC5D0\uC14B\uBCA4\uCC98\uD22C\uC790'>
+        \uBBF8\uB798\uC5D0\uC14B\uBCA4\uCC98\uD22C\uC790</a> </td>\r\n\t\t\t\t<td></td>\r\n\t\t\t\t<td
+        class=\"txc\">2026-04-23</td>\r\n\t\t\t\t<td class=\"txc\">2026-04-24</td>\r\n\t\t\t</tr>\r\n\t\t\t\t\t\r\n\t\t\t<tr
+        \r\n\t\t\t\t\t\r\n\t\t\t>\r\n\t\t\t\t<td class=\"first txc\" scope=\"row\">106</td>\r\n\t\t\t\t<td
+        title=\"\uD55C\uAD6D\uCCA8\uB2E8\uC18C\uC7AC\"><img src='/images/common/icn_t_ko.gif'
+        class='vmiddle legend' alt='\uCF54\uC2A4\uB2E5'> <a id=\"companysum\" href=\"#companysum\"
+        onclick=\"companysummary_open('06297'); return false;\" title='\uD55C\uAD6D\uCCA8\uB2E8\uC18C\uC7AC'>
+        \uD55C\uAD6D\uCCA8\uB2E8\uC18C\uC7AC</a> </td>\r\n\t\t\t\t<td></td>\r\n\t\t\t\t<td
+        class=\"txc\">2026-04-23</td>\r\n\t\t\t\t<td class=\"txc\">2026-04-24</td>\r\n\t\t\t</tr>\r\n\t\t\t\t\t\r\n\t\t\t<tr
+        \r\n\t\t\t\t\t\r\n\t\t\t>\r\n\t\t\t\t<td class=\"first txc\" scope=\"row\">105</td>\r\n\t\t\t\t<td
+        title=\"\uC0BC\uC544\uC54C\uBBF8\uB284\"><img src='/images/common/icn_t_yu.gif'
+        class='vmiddle legend' alt='\uC720\uAC00\uC99D\uAD8C'> <a id=\"companysum\"
+        href=\"#companysum\" onclick=\"companysummary_open('00611'); return false;\"
+        title='\uC0BC\uC544\uC54C\uBBF8\uB284'> \uC0BC\uC544\uC54C\uBBF8\uB284</a>
+        </td>\r\n\t\t\t\t<td></td>\r\n\t\t\t\t<td class=\"txc\">2026-04-22</td>\r\n\t\t\t\t<td
+        class=\"txc\">2026-04-23</td>\r\n\t\t\t</tr>\r\n\t\t\t\t\t\r\n\t\t\t<tr \r\n\t\t\t\t\t\r\n\t\t\t>\r\n\t\t\t\t<td
+        class=\"first txc\" scope=\"row\">104</td>\r\n\t\t\t\t<td title=\"\uC800\uC2A4\uD15C\"><img
+        src='/images/common/icn_t_ko.gif' class='vmiddle legend' alt='\uCF54\uC2A4\uB2E5'>
+        <a id=\"companysum\" href=\"#companysum\" onclick=\"companysummary_open('41784');
+        return false;\" title='\uC800\uC2A4\uD15C'> \uC800\uC2A4\uD15C</a> </td>\r\n\t\t\t\t<td></td>\r\n\t\t\t\t<td
+        class=\"txc\">2026-04-22</td>\r\n\t\t\t\t<td class=\"txc\">2026-04-23</td>\r\n\t\t\t</tr>\r\n\t\t\t\t\t\r\n\t\t\t<tr
+        \r\n\t\t\t\t\t\r\n\t\t\t>\r\n\t\t\t\t<td class=\"first txc\" scope=\"row\">103</td>\r\n\t\t\t\t<td
+        title=\"\uC8FC\uC131\uC5D4\uC9C0\uB2C8\uC5B4\uB9C1\"><img src='/images/common/icn_t_ko.gif'
+        class='vmiddle legend' alt='\uCF54\uC2A4\uB2E5'> <a id=\"companysum\" href=\"#companysum\"
+        onclick=\"companysummary_open('03693'); return false;\" title='\uC8FC\uC131\uC5D4\uC9C0\uB2C8\uC5B4\uB9C1'>
+        \uC8FC\uC131\uC5D4\uC9C0\uB2C8\uC5B4\uB9C1</a> <img src='/images/common/icn_t_v100.gif'
+        class='vmiddle legend' alt='V100'> <img src='/images/common/icn_t_q150.gif'
+        class='vmiddle legend' alt='KOSDAQ150'> <img src='/images/common/icn_t_x300.gif'
+        class='vmiddle legend' alt='KRX300'> </td>\r\n\t\t\t\t<td></td>\r\n\t\t\t\t<td
+        class=\"txc\">2026-04-22</td>\r\n\t\t\t\t<td class=\"txc\">2026-04-23</td>\r\n\t\t\t</tr>\r\n\t\t\t\t\t\r\n\t\t\t<tr
+        \r\n\t\t\t\t\t\r\n\t\t\t>\r\n\t\t\t\t<td class=\"first txc\" scope=\"row\">102</td>\r\n\t\t\t\t<td
+        title=\"\uD14C\uC2A4\"><img src='/images/common/icn_t_ko.gif' class='vmiddle
+        legend' alt='\uCF54\uC2A4\uB2E5'> <a id=\"companysum\" href=\"#companysum\"
+        onclick=\"companysummary_open('09561'); return false;\" title='\uD14C\uC2A4'>
+        \uD14C\uC2A4</a> <img src='/images/common/icn_t_q150.gif' class='vmiddle legend'
+        alt='KOSDAQ150'> </td>\r\n\t\t\t\t<td></td>\r\n\t\t\t\t<td class=\"txc\">2026-04-22</td>\r\n\t\t\t\t<td
+        class=\"txc\">2026-04-23</td>\r\n\t\t\t</tr>\r\n\t\t\t\t\t\r\n\t\t\t<tr \r\n\t\t\t\t\t\r\n\t\t\t>\r\n\t\t\t\t<td
+        class=\"first txc\" scope=\"row\">101</td>\r\n\t\t\t\t<td title=\"\uD37C\uC2A4\uD14D\"><img
+        src='/images/common/icn_t_yu.gif' class='vmiddle legend' alt='\uC720\uAC00\uC99D\uAD8C'>
+        <a id=\"companysum\" href=\"#companysum\" onclick=\"companysummary_open('01082');
+        return false;\" title='\uD37C\uC2A4\uD14D'> \uD37C\uC2A4\uD14D</a> </td>\r\n\t\t\t\t<td></td>\r\n\t\t\t\t<td
+        class=\"txc\">2026-04-22</td>\r\n\t\t\t\t<td class=\"txc\">2026-04-23</td>\r\n\t\t\t</tr>\r\n\t\t\t\t\t\r\n\t\t\t<tr
+        \r\n\t\t\t\t\t\r\n\t\t\t>\r\n\t\t\t\t<td class=\"first txc\" scope=\"row\">100</td>\r\n\t\t\t\t<td
+        title=\"\uBE44\uCE20\uB85C\uC140\"><img src='/images/common/icn_t_ko.gif'
+        class='vmiddle legend' alt='\uCF54\uC2A4\uB2E5'> <a id=\"companysum\" href=\"#companysum\"
+        onclick=\"companysummary_open('08292'); return false;\" title='\uBE44\uCE20\uB85C\uC140'>
+        \uBE44\uCE20\uB85C\uC140</a> </td>\r\n\t\t\t\t<td></td>\r\n\t\t\t\t<td class=\"txc\">2026-04-21</td>\r\n\t\t\t\t<td
+        class=\"txc\">2026-04-22</td>\r\n\t\t\t</tr>\r\n\t\t\t\t\t\r\n\t\t\t<tr \r\n\t\t\t\t\t\r\n\t\t\t>\r\n\t\t\t\t<td
+        class=\"first txc\" scope=\"row\">99</td>\r\n\t\t\t\t<td title=\"\uC544\uD558\uC815\uBCF4\uD1B5\uC2E0\"><img
+        src='/images/common/icn_t_konex.gif' class='vmiddle legend' alt='\uCF54\uB125\uC2A4'>
+        <a id=\"companysum\" href=\"#companysum\" onclick=\"companysummary_open('10295');
+        return false;\" title='\uC544\uD558\uC815\uBCF4\uD1B5\uC2E0'> \uC544\uD558\uC815\uBCF4\uD1B5\uC2E0</a>
+        </td>\r\n\t\t\t\t<td></td>\r\n\t\t\t\t<td class=\"txc\">2026-04-21</td>\r\n\t\t\t\t<td
+        class=\"txc\">2026-04-22</td>\r\n\t\t\t</tr>\r\n\t\t\t\t\t\r\n\t\t\t<tr \r\n\t\t\t\t\t\r\n\t\t\t>\r\n\t\t\t\t<td
+        class=\"first txc\" scope=\"row\">98</td>\r\n\t\t\t\t<td title=\"\uC6D0\uC775IPS\"><img
+        src='/images/common/icn_t_ko.gif' class='vmiddle legend' alt='\uCF54\uC2A4\uB2E5'>
+        <a id=\"companysum\" href=\"#companysum\" onclick=\"companysummary_open('24081');
+        return false;\" title='\uC6D0\uC775IPS'> \uC6D0\uC775IPS</a> <img src='/images/common/icn_t_q150.gif'
+        class='vmiddle legend' alt='KOSDAQ150'> <img src='/images/common/icn_t_x300.gif'
+        class='vmiddle legend' alt='KRX300'> </td>\r\n\t\t\t\t<td></td>\r\n\t\t\t\t<td
+        class=\"txc\">2026-04-21</td>\r\n\t\t\t\t<td class=\"txc\">2026-04-22</td>\r\n\t\t\t</tr>\r\n\t\t\t\t\t\r\n\t\t\t<tr
+        \r\n\t\t\t\t\t\r\n\t\t\t>\r\n\t\t\t\t<td class=\"first txc\" scope=\"row\">97</td>\r\n\t\t\t\t<td
+        title=\"\uC9C4\uC6D0\uC0DD\uBA85\uACFC\uD559\"><img src='/images/common/icn_t_yu.gif'
+        class='vmiddle legend' alt='\uC720\uAC00\uC99D\uAD8C'> <a id=\"companysum\"
+        href=\"#companysum\" onclick=\"companysummary_open('01100'); return false;\"
+        title='\uC9C4\uC6D0\uC0DD\uBA85\uACFC\uD559'> \uC9C4\uC6D0\uC0DD\uBA85\uACFC\uD559</a>
+        <img src='/images/common/icn_t_kwan.gif' class='vmiddle legend' alt='\uAD00\uB9AC\uC885\uBAA9'/>
+        </td>\r\n\t\t\t\t<td></td>\r\n\t\t\t\t<td class=\"txc\">2026-04-21</td>\r\n\t\t\t\t<td
+        class=\"txc\">2026-04-22</td>\r\n\t\t\t</tr>\r\n\t\t\t\t\t\r\n\t\t\t<tr \r\n\t\t\t\t\t\r\n\t\t\t>\r\n\t\t\t\t<td
+        class=\"first txc\" scope=\"row\">96</td>\r\n\t\t\t\t<td title=\"(\uC8FC)\uD55C\uC2F9\"><img
+        src='/images/common/icn_t_ko.gif' class='vmiddle legend' alt='\uCF54\uC2A4\uB2E5'>
+        <a id=\"companysum\" href=\"#companysum\" onclick=\"companysummary_open('43069');
+        return false;\" title='(\uC8FC)\uD55C\uC2F9'> (\uC8FC)\uD55C\uC2F9</a> </td>\r\n\t\t\t\t<td></td>\r\n\t\t\t\t<td
+        class=\"txc\">2026-04-20</td>\r\n\t\t\t\t<td class=\"txc\">2026-04-21</td>\r\n\t\t\t</tr>\r\n\t\t\t\t\t\r\n\t\t\t<tr
+        \r\n\t\t\t\t\t\r\n\t\t\t>\r\n\t\t\t\t<td class=\"first txc\" scope=\"row\">95</td>\r\n\t\t\t\t<td
+        title=\"SGA\uC194\uB8E8\uC158\uC988\"><img src='/images/common/icn_t_ko.gif'
+        class='vmiddle legend' alt='\uCF54\uC2A4\uB2E5'> <a id=\"companysum\" href=\"#companysum\"
+        onclick=\"companysummary_open('18423'); return false;\" title='SGA\uC194\uB8E8\uC158\uC988'>
+        SGA\uC194\uB8E8\uC158\uC988</a> </td>\r\n\t\t\t\t<td></td>\r\n\t\t\t\t<td
+        class=\"txc\">2026-04-20</td>\r\n\t\t\t\t<td class=\"txc\">2026-04-21</td>\r\n\t\t\t</tr>\r\n\t\t\t\t\t\r\n\t\t\t<tr
+        \r\n\t\t\t\t\t\r\n\t\t\t>\r\n\t\t\t\t<td class=\"first txc\" scope=\"row\">94</td>\r\n\t\t\t\t<td
+        title=\"\uB3D9\uC6B4\uC544\uB098\uD14D\"><img src='/images/common/icn_t_ko.gif'
+        class='vmiddle legend' alt='\uCF54\uC2A4\uB2E5'> <a id=\"companysum\" href=\"#companysum\"
+        onclick=\"companysummary_open('09417'); return false;\" title='\uB3D9\uC6B4\uC544\uB098\uD14D'>
+        \uB3D9\uC6B4\uC544\uB098\uD14D</a> </td>\r\n\t\t\t\t<td></td>\r\n\t\t\t\t<td
+        class=\"txc\">2026-04-20</td>\r\n\t\t\t\t<td class=\"txc\">2026-04-21</td>\r\n\t\t\t</tr>\r\n\t\t\t\t\t\r\n\t\t\t<tr
+        \r\n\t\t\t\t\t\r\n\t\t\t>\r\n\t\t\t\t<td class=\"first txc\" scope=\"row\">93</td>\r\n\t\t\t\t<td
+        title=\"\uC36C\uD14C\uD06C\"><img src='/images/common/icn_t_konex.gif' class='vmiddle
+        legend' alt='\uCF54\uB125\uC2A4'> <a id=\"companysum\" href=\"#companysum\"
+        onclick=\"companysummary_open('21732'); return false;\" title='\uC36C\uD14C\uD06C'>
+        \uC36C\uD14C\uD06C</a> </td>\r\n\t\t\t\t<td></td>\r\n\t\t\t\t<td class=\"txc\">2026-04-20</td>\r\n\t\t\t\t<td
+        class=\"txc\">2026-04-21</td>\r\n\t\t\t</tr>\r\n\t\t\t\t\t\r\n\t\t\t<tr \r\n\t\t\t\t\t\r\n\t\t\t>\r\n\t\t\t\t<td
+        class=\"first txc\" scope=\"row\">92</td>\r\n\t\t\t\t<td title=\"\uC5D0\uC774\uCE58\uC5E0\uB125\uC2A4\"><img
+        src='/images/common/icn_t_ko.gif' class='vmiddle legend' alt='\uCF54\uC2A4\uB2E5'>
+        <a id=\"companysum\" href=\"#companysum\" onclick=\"companysummary_open('03617');
+        return false;\" title='\uC5D0\uC774\uCE58\uC5E0\uB125\uC2A4'> \uC5D0\uC774\uCE58\uC5E0\uB125\uC2A4</a>
+        </td>\r\n\t\t\t\t<td></td>\r\n\t\t\t\t<td class=\"txc\">2026-04-20</td>\r\n\t\t\t\t<td
+        class=\"txc\">2026-04-21</td>\r\n\t\t\t</tr>\r\n\t\t\t\t\t\r\n\t\t\t<tr \r\n\t\t\t\t\t\r\n\t\t\t>\r\n\t\t\t\t<td
+        class=\"first txc\" scope=\"row\">91</td>\r\n\t\t\t\t<td title=\"\uCF00\uC774\uC528\uC5D0\uC2A4\"><img
+        src='/images/common/icn_t_ko.gif' class='vmiddle legend' alt='\uCF54\uC2A4\uB2E5'>
+        <a id=\"companysum\" href=\"#companysum\" onclick=\"companysummary_open('11550');
+        return false;\" title='\uCF00\uC774\uC528\uC5D0\uC2A4'> \uCF00\uC774\uC528\uC5D0\uC2A4</a>
+        </td>\r\n\t\t\t\t<td></td>\r\n\t\t\t\t<td class=\"txc\">2026-04-20</td>\r\n\t\t\t\t<td
+        class=\"txc\">2026-04-21</td>\r\n\t\t\t</tr>\r\n\t\t\t\t\t\r\n\t\t\t<tr \r\n\t\t\t\t\t\r\n\t\t\t>\r\n\t\t\t\t<td
+        class=\"first txc\" scope=\"row\">90</td>\r\n\t\t\t\t<td title=\"\uC544\uC774\uC528\uD2F0\uCF00\uC774\"><img
+        src='/images/common/icn_t_ko.gif' class='vmiddle legend' alt='\uCF54\uC2A4\uB2E5'>
+        <a id=\"companysum\" href=\"#companysum\" onclick=\"companysummary_open('45601');
+        return false;\" title='\uC544\uC774\uC528\uD2F0\uCF00\uC774'> \uC544\uC774\uC528\uD2F0\uCF00\uC774</a>
+        </td>\r\n\t\t\t\t<td></td>\r\n\t\t\t\t<td class=\"txc\">2026-04-17</td>\r\n\t\t\t\t<td
+        class=\"txc\">2026-04-20</td>\r\n\t\t\t</tr>\r\n\t\t\t\t\t\r\n\t\t\t<tr \r\n\t\t\t\t\t\r\n\t\t\t>\r\n\t\t\t\t<td
+        class=\"first txc\" scope=\"row\">89</td>\r\n\t\t\t\t<td title=\"\uC624\uD0A8\uC2A4\uC804\uC790\"><img
+        src='/images/common/icn_t_ko.gif' class='vmiddle legend' alt='\uCF54\uC2A4\uB2E5'>
+        <a id=\"companysum\" href=\"#companysum\" onclick=\"companysummary_open('08058');
+        return false;\" title='\uC624\uD0A8\uC2A4\uC804\uC790'> \uC624\uD0A8\uC2A4\uC804\uC790</a>
+        </td>\r\n\t\t\t\t<td></td>\r\n\t\t\t\t<td class=\"txc\">2026-04-17</td>\r\n\t\t\t\t<td
+        class=\"txc\">2026-04-20</td>\r\n\t\t\t</tr>\r\n\t\t\t\t\t\r\n\t\t\t\t\r\n\t\t\t\t\r\n\t\t\t\r\n\t\t</tbody>\r\n\t</table>\r\n</section>\r\n\r\n<!--
+        \uD398\uC774\uC9D5 START -->\r\n<section class=\"paging-group\">\r\n\t<div
+        class='paging type-00'><a href='#prevPage10' class='pprev' onclick='return
+        false;'><span>\uC774\uC80410\uAC1C \uD398\uC774\uC9C0</span></a><a href='#prevPage'
+        class='prev' onclick='return false;'><span>\uC774\uC804 \uD398\uC774\uC9C0</span></a>\r\n<a
+        href='#page_link_1' class='active' onclick='return false;'>1</a><a href='#page_link_2'
+        onclick=\"fnPageGo('2');return false;\">2</a><a href='#page_link_3' onclick=\"fnPageGo('3');return
+        false;\">3</a><a href='#page_link_4' onclick=\"fnPageGo('4');return false;\">4</a><a
+        href='#page_link_5' onclick=\"fnPageGo('5');return false;\">5</a><a href='#page_link_6'
+        onclick=\"fnPageGo('6');return false;\">6</a>\r\n<a href='#nextPage' class='next'
+        onclick=\"fnPageGo('2');return false;\"><span>\uB2E4\uC74C \uD398\uC774\uC9C0</span></a><a
+        href='#nextPage10' class='nnext' onclick='return false;'><span>\uB2E4\uC74C10\uAC1C
+        \uD398\uC774\uC9C0</span></a></div><div class=\"info type-00\">\r\n\uC804\uCCB4
+        <em>108</em>\uAC74 : <strong>1</strong>/6&nbsp;&nbsp;&nbsp;\r\n<select id='currentPageSize'
+        name='currentPageSize'>\r\n<option value='15'  >15\uAC74</option>\r\n<option
+        value='30'  >30\uAC74</option>\r\n<option value='50'  >50\uAC74</option>\r\n<option
+        value='100' >100\uAC74</option>\r\n</select>&nbsp;&nbsp;<a href='#' onclick=\"fnSearch1();return
+        false;\" class='btn-sprite btn-go vmiddle' title='GO'><span>GO</span></a>\r\n</div>\r\n</section>\r\n<!--
+        \uD398\uC774\uC9D5 END -->\r\n\r\n<dl class=\"info-group type-00 bgtype-01
+        pt10\">\r\n<dt>\uC870\uD68C\uAE30\uAC04 \uC911\uC5D0 \uD22C\uC790\uC8FC\uC758\uC885\uBAA9\uC73C\uB85C
+        \uC9C0\uC815 \uC911\uC778 \uC885\uBAA9\uC744 \uC870\uD68C\uD560 \uC218 \uC788\uC73C\uBA70,
+        \uD22C\uC790\uC8FC\uC758\uC885\uBAA9\uC740 1\uC77C\uAC04(\uACF5\uC2DC\uC77C
+        \uB2E4\uC74C \uB9E4\uB9E4\uAC70\uB798\uC77C) \uC9C0\uC815\uB429\uB2C8\uB2E4.<br/><strong
+        class=\"red\">\uD22C\uC790\uC8FC\uC758\uC885\uBAA9\uC774\uB780</strong> \uC2DC\uC7A5\uAC10\uC2DC\uC704\uC6D0\uD68C\uB294
+        \uD22C\uAE30\uC801\uC774\uAC70\uB098 \uBD88\uACF5\uC815\uAC70\uB798\uC758
+        \uAC1C\uC5F0\uC131\uC774 \uC788\uB294 \uC885\uBAA9\uC744 \uD22C\uC790\uC8FC\uC758\uC885\uBAA9\uC73C\uB85C
+        \uACF5\uD45C\uD558\uC5EC \uC77C\uBC18 \uD22C\uC790\uC790\uB4E4\uC758 \uB1CC\uB3D9\uB9E4\uB9E4
+        \uBC29\uC9C0 \uBC0F \uC7A0\uC7AC\uC801 \uBD88\uACF5\uC815\uAC70\uB798 \uD589\uC704\uC790\uC5D0
+        \uB300\uD55C \uACBD\uAC01\uC2EC\uC744 \uACE0\uCDE8\uD558\uACE0\uC788\uC2B5\uB2C8\uB2E4.
+        <strong class=\"blue\">\uC2DC\uC7A5\uAC10\uC2DC\uADDC\uC815 \uC81C5\uC870
+        \uBC0F \uC2DC\uC7A5\uAC10\uC2DC\uADDC\uC815 \uC2DC\uD589\uC138\uCE59 \uC81C3\uC870</strong></dt>\r\n</dl>\r\n\r\n<script
+        language=\"javascript\" type=\"text/JavaScript\">\r\n$(document).ready(function(){\r\n\tfn_InitTitle(\"\uBC88\uD638,\uC885\uBAA9\uBA85,\uC720\uD615,\uACF5\uC2DC\uC77C,\uC9C0\uC815\uC77C\",
+        \"false,true,false,false,true\");\r\n});\r\n</script>"
+    headers:
+      Cache-Control:
+      - max-age=0, no-cache, no-store
+      Connection:
+      - close
+      Content-Length:
+      - '11961'
+      Content-Type:
+      - text/html; charset=UTF-8
+      Date:
+      - Fri, 24 Apr 2026 04:46:20 GMT
+      Expires:
+      - Fri, 24 Apr 2026 04:46:20 GMT
+      Pragma:
+      - no-cache
+      Set-Cookie:
+      - REDACTED
+    status:
+      code: 200
+      message: OK
+version: 1

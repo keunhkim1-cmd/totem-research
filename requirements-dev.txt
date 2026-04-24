@@ -1,0 +1,10 @@
+coverage==7.13.5
+pytest==9.0.2
+pytest-cov==7.1.0
+pytest-recording==0.13.4
+pytest-socket==0.7.0
+ruff==0.15.11
+pre-commit==4.5.1
+mypy==1.20.2
+vcrpy==8.1.1
+playwright==1.58.0

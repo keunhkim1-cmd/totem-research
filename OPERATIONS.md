@@ -94,6 +94,50 @@ Suggested first production limits:
 Set `EXTERNAL_RATE_GEMINI_TOKENS_PER_MINUTE` only after you know your Gemini
 project TPM limit. The value is measured in estimated 1K-token units per minute.
 
+### Log Drain Monitoring
+
+Use a Vercel Log Drain or the Logflare Vercel integration to retain runtime logs
+outside Vercel's short live-log window. This project already emits structured
+JSON-like events through `log_event`, so the first dashboard should stay narrow:
+
+- Error stream: `level:error`, grouped by `event`, `provider`, and endpoint.
+- External API health: `external_api_call`, `external_api_retry`,
+  `provider_rate_limit_wait`, and `provider_rate_limit_exceeded`.
+- Fallback quality: `cache_stale_returned`, `dart_financial_stale_returned`,
+  and `gemini_summary_stale_returned`.
+- Telegram delivery: webhook 5xx logs, `telegram_duplicate_update`, and
+  `telegram_info_unhandled`.
+
+First alert rules:
+
+- Any `level:error` spike above the normal baseline for 5 minutes.
+- More than 3 `provider_rate_limit_exceeded` events in 10 minutes.
+- Any `cache_stale_returned` event for DART financial data during market hours.
+- Telegram webhook 5xx or timeout events.
+
+Setup path:
+
+1. Create one drain/source for this Vercel project rather than mixing all
+   projects in one source.
+2. Include runtime function logs for Production first; add Preview after noise is
+   understood.
+3. Trigger the Required Checks After Deploy requests and confirm logs are parsed
+   by event fields.
+4. Save the dashboard URL and alert recipients in the team's password manager or
+   operations notes, not in the repository.
+
+### Monthly QA Maintenance
+
+Dependabot checks Python tooling and GitHub Actions monthly. For each PR:
+
+1. Confirm CI passes with network disabled tests and coverage.
+2. Re-record VCR cassettes only when provider response contracts intentionally
+   changed.
+3. Raise coverage only when added tests protect real endpoint, provider, or
+   frontend behavior.
+4. Expand `tool.mypy.files` by one dependency boundary after the current list is
+   clean.
+
 ### Manual Cache Bust
 
 Use `/api/cache-bust` only with `CACHE_ADMIN_TOKEN` or `FINANCIAL_MODEL_API_TOKEN`.
@@ -131,7 +175,7 @@ or schedule it in a trusted maintenance environment:
 
 ```bash
 DART_API_KEY=... python3 scripts/update_dart_corps.py
-python3 -m unittest discover -s tests
+python -m pytest -m "not external" --disable-socket --allow-hosts=127.0.0.1,localhost --record-mode=none
 ```
 
 ### Telegram Webhook

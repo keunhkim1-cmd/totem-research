@@ -1,0 +1,56 @@
+default_install_hook_types: [pre-commit, pre-push]
+
+repos:
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.15.11
+    hooks:
+      - id: ruff-check
+        args: [--fix]
+      - id: ruff-format
+
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v6.0.0
+    hooks:
+      - id: trailing-whitespace
+      - id: end-of-file-fixer
+      - id: check-json
+      - id: check-yaml
+      - id: check-toml
+      - id: check-added-large-files
+
+  - repo: local
+    hooks:
+      - id: compileall
+        name: compile Python modules
+        entry: .venv/bin/python -m compileall -q lib api scripts tests serve.py
+        language: system
+        pass_filenames: false
+        stages: [pre-push, manual]
+
+      - id: mypy-leaf-modules
+        name: mypy leaf modules
+        entry: .venv/bin/python -m mypy
+        language: system
+        pass_filenames: false
+        stages: [pre-push, manual]
+
+      - id: pytest-fast
+        name: pytest fast suite without external network
+        entry: .venv/bin/python -m pytest -m "not external" --disable-socket --allow-hosts=127.0.0.1,localhost --record-mode=none --cov --cov-report=term-missing
+        language: system
+        pass_filenames: false
+        stages: [pre-push, manual]
+
+      - id: frontend-smoke
+        name: frontend static smoke checks
+        entry: .venv/bin/python scripts/check_frontend_smoke.py
+        language: system
+        pass_filenames: false
+        stages: [pre-push, manual]
+
+      - id: frontend-budget
+        name: frontend asset budget
+        entry: .venv/bin/python scripts/check_frontend_budget.py
+        language: system
+        pass_filenames: false
+        stages: [pre-push, manual]

@@ -1,4 +1,5 @@
 """HTTP helpers for requests, responses, and safe error reporting."""
+
 import json
 import os
 import re
@@ -9,14 +10,16 @@ import urllib.request
 from datetime import datetime, timezone
 
 
-DEFAULT_SECRET_QUERY_KEYS = frozenset({
-    'access_token',
-    'api_key',
-    'apikey',
-    'crtfc_key',
-    'key',
-    'token',
-})
+DEFAULT_SECRET_QUERY_KEYS = frozenset(
+    {
+        'access_token',
+        'api_key',
+        'apikey',
+        'crtfc_key',
+        'key',
+        'token',
+    }
+)
 
 SECRET_ENV_NAMES = (
     'CACHE_ADMIN_TOKEN',
@@ -97,8 +100,9 @@ def send_cors_headers(handler, *, methods='GET, OPTIONS', allow_headers=None):
     handler.send_header('Access-Control-Max-Age', '600')
 
 
-def send_json_headers(handler, *, cors=True, methods='GET, OPTIONS',
-                      allow_headers=None, cache_control=None):
+def send_json_headers(
+    handler, *, cors=True, methods='GET, OPTIONS', allow_headers=None, cache_control=None
+):
     handler.send_header('Content-Type', 'application/json; charset=utf-8')
     if cors:
         send_cors_headers(handler, methods=methods, allow_headers=allow_headers)
@@ -107,8 +111,9 @@ def send_json_headers(handler, *, cors=True, methods='GET, OPTIONS',
     send_security_headers(handler)
 
 
-def send_text_headers(handler, *, cors=False, methods='GET, OPTIONS',
-                      allow_headers=None, cache_control='no-store'):
+def send_text_headers(
+    handler, *, cors=False, methods='GET, OPTIONS', allow_headers=None, cache_control='no-store'
+):
     handler.send_header('Content-Type', 'text/plain; charset=utf-8')
     if cors:
         send_cors_headers(handler, methods=methods, allow_headers=allow_headers)
@@ -132,23 +137,29 @@ def api_success_payload(payload: dict | None = None) -> dict:
     return out
 
 
-def api_error_payload(code: str, message: str, *, details=None,
-                      legacy_key: str | None = 'error',
-                      status_value: str | None = None) -> dict:
+def api_error_payload(
+    code: str,
+    message: str,
+    *,
+    details=None,
+    legacy_key: str | None = 'error',
+    status_value: str | None = None,
+) -> dict:
     """Build the transitional API error shape.
 
     New clients should read errorInfo. Existing clients may still read the
     legacy top-level `error` or `errorMessage` string during migration.
     """
-    payload = {
-        'ok': False,
-        'errorInfo': {
-            'code': code,
-            'message': message,
-        },
+    error_info: dict[str, object] = {
+        'code': code,
+        'message': message,
     }
     if details is not None:
-        payload['errorInfo']['details'] = details
+        error_info['details'] = details
+    payload: dict[str, object] = {
+        'ok': False,
+        'errorInfo': error_info,
+    }
     if legacy_key:
         payload[legacy_key] = message
     if status_value:
@@ -156,9 +167,16 @@ def api_error_payload(code: str, message: str, *, details=None,
     return payload
 
 
-def send_json_response(handler, status: int, payload: dict, *, cors=True,
-                       methods='GET, OPTIONS', allow_headers=None,
-                       cache_control=None):
+def send_json_response(
+    handler,
+    status: int,
+    payload: dict,
+    *,
+    cors=True,
+    methods='GET, OPTIONS',
+    allow_headers=None,
+    cache_control=None,
+):
     body = json.dumps(payload, ensure_ascii=False).encode()
     handler.send_response(status)
     send_json_headers(
@@ -172,11 +190,20 @@ def send_json_response(handler, status: int, payload: dict, *, cors=True,
     handler.wfile.write(body)
 
 
-def send_api_error(handler, status: int, code: str, message: str, *, details=None,
-                   legacy_key: str | None = 'error',
-                   status_value: str | None = None,
-                   cors=True, methods='GET, OPTIONS', allow_headers=None,
-                   cache_control=None):
+def send_api_error(
+    handler,
+    status: int,
+    code: str,
+    message: str,
+    *,
+    details=None,
+    legacy_key: str | None = 'error',
+    status_value: str | None = None,
+    cors=True,
+    methods='GET, OPTIONS',
+    allow_headers=None,
+    cache_control=None,
+):
     send_json_response(
         handler,
         status,
@@ -214,18 +241,19 @@ def redact_url(url: str, secret_query_keys=()) -> str:
     secret_keys.update(k.lower() for k in secret_query_keys)
 
     query = urllib.parse.parse_qsl(parts.query, keep_blank_values=True)
-    safe_query = urllib.parse.urlencode([
-        (key, 'REDACTED' if key.lower() in secret_keys else value)
-        for key, value in query
-    ])
+    safe_query = urllib.parse.urlencode(
+        [(key, 'REDACTED' if key.lower() in secret_keys else value) for key, value in query]
+    )
     safe_path = _TELEGRAM_BOT_TOKEN_RE.sub(r'\1[REDACTED]', parts.path)
-    return urllib.parse.urlunsplit((
-        parts.scheme,
-        parts.netloc,
-        safe_path,
-        safe_query,
-        parts.fragment,
-    ))
+    return urllib.parse.urlunsplit(
+        (
+            parts.scheme,
+            parts.netloc,
+            safe_path,
+            safe_query,
+            parts.fragment,
+        )
+    )
 
 
 def redact_text(value, secret_query_keys=()) -> str:
@@ -233,7 +261,8 @@ def redact_text(value, secret_query_keys=()) -> str:
     text = str(value)
     url_re = re.compile(r'https?://[^\s\'"<>]+')
     return redact_known_secrets(
-        url_re.sub(lambda m: redact_url(m.group(0), secret_query_keys), text))
+        url_re.sub(lambda m: redact_url(m.group(0), secret_query_keys), text)
+    )
 
 
 def redact_known_secrets(value) -> str:

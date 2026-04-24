@@ -1,4 +1,5 @@
 """KRX KIND 투자경고/위험 종목 검색"""
+
 import urllib.parse, re
 from concurrent.futures import ThreadPoolExecutor
 from datetime import date, timedelta
@@ -19,19 +20,28 @@ HEADERS = {
 _krx_cache = TTLCache(ttl=600, name='krx-kind', durable=True)
 
 
-def fetch_kind_page(menu_index: str, page: int = 1, days_back: int = 365, page_size: int = 100) -> str:
+def fetch_kind_page(
+    menu_index: str, page: int = 1, days_back: int = 365, page_size: int = 100
+) -> str:
     cache_key = f'kind:{menu_index}:{page}:{days_back}:{page_size}:{date.today().isoformat()}'
 
     def _fetch():
         end_date = date.today().strftime('%Y%m%d')
         start_date = (date.today() - timedelta(days=days_back)).strftime('%Y%m%d')
-        params = urllib.parse.urlencode({
-            'method': 'investattentwarnriskySub', 'menuIndex': menu_index,
-            'marketType': '', 'searchCorpName': '',
-            'startDate': start_date, 'endDate': end_date,
-            'pageIndex': str(page), 'currentPageSize': str(page_size),
-            'orderMode': '3', 'orderStat': 'D',
-        })
+        params = urllib.parse.urlencode(
+            {
+                'method': 'investattentwarnriskySub',
+                'menuIndex': menu_index,
+                'marketType': '',
+                'searchCorpName': '',
+                'startDate': start_date,
+                'endDate': end_date,
+                'pageIndex': str(page),
+                'currentPageSize': str(page_size),
+                'orderMode': '3',
+                'orderStat': 'D',
+            }
+        )
 
         def _call():
             return request_text(
@@ -55,7 +65,7 @@ def fetch_kind_page(menu_index: str, page: int = 1, days_back: int = 365, page_s
 
 
 def parse_kind_html(html: str, level_name: str) -> list:
-    results = []
+    results: list[dict] = []
     tbody_m = re.search(r'<tbody>(.*?)</tbody>', html, re.DOTALL)
     if not tbody_m:
         return results
@@ -64,13 +74,16 @@ def parse_kind_html(html: str, level_name: str) -> list:
         if not name_m or not name_m.group(1).strip():
             continue
         dates = re.findall(
-            r'<td[^>]*class="[^"]*txc[^"]*"[^>]*>\s*(\d{4}-\d{2}-\d{2})\s*</td>', row)
+            r'<td[^>]*class="[^"]*txc[^"]*"[^>]*>\s*(\d{4}-\d{2}-\d{2})\s*</td>', row
+        )
         if dates:
-            results.append({
-                'level': level_name,
-                'stockName': name_m.group(1).strip(),
-                'designationDate': dates[-1],
-            })
+            results.append(
+                {
+                    'level': level_name,
+                    'stockName': name_m.group(1).strip(),
+                    'designationDate': dates[-1],
+                }
+            )
     return results
 
 
@@ -87,8 +100,9 @@ def search_kind(stock_name: str) -> list:
                 rows = [r for r in rows if stock_name in r['stockName']]
             return rows
         except Exception as e:
-            log_event('warning', 'krx_kind_fetch_failed',
-                      menu_index=idx, error=safe_exception_text(e))
+            log_event(
+                'warning', 'krx_kind_fetch_failed', menu_index=idx, error=safe_exception_text(e)
+            )
             return []
 
     with ThreadPoolExecutor(max_workers=2) as pool:
@@ -124,8 +138,7 @@ def search_kind_caution(stock_name: str) -> list:
     try:
         html = fetch_kind_page('1', days_back=21, page_size=1000)
     except Exception as e:
-        log_event('warning', 'krx_caution_fetch_failed',
-                  error=safe_exception_text(e))
+        log_event('warning', 'krx_caution_fetch_failed', error=safe_exception_text(e))
         return []
 
     # rows_by_stock[name] = [(date_str, reason, market), ...]
@@ -138,7 +151,8 @@ def search_kind_caution(stock_name: str) -> list:
         if not name_m or not name_m.group(1).strip():
             continue
         dates = re.findall(
-            r'<td[^>]*class="[^"]*txc[^"]*"[^>]*>\s*(\d{4}-\d{2}-\d{2})\s*</td>', row)
+            r'<td[^>]*class="[^"]*txc[^"]*"[^>]*>\s*(\d{4}-\d{2}-\d{2})\s*</td>', row
+        )
         if not dates:
             continue
         tds = re.findall(r'<td[^>]*>(.*?)</td>', row, re.DOTALL)
@@ -171,15 +185,17 @@ def search_kind_caution(stock_name: str) -> list:
             if count_trading_days(d_obj, today) <= 15:
                 recent15 += 1
         latest_date, latest_reason, latest_market = row_entries[0]
-        results.append({
-            'stockName': name,
-            'latestDesignationDate': latest_date,
-            'latestDesignationReason': latest_reason,
-            'market': latest_market,
-            'recent15dCount': recent15,
-            'allDates': sorted_dates,
-            'entries': entry_list,  # [{'date': 'YYYY-MM-DD', 'reason': '...'}, ...] 최신→과거
-        })
+        results.append(
+            {
+                'stockName': name,
+                'latestDesignationDate': latest_date,
+                'latestDesignationReason': latest_reason,
+                'market': latest_market,
+                'recent15dCount': recent15,
+                'allDates': sorted_dates,
+                'entries': entry_list,  # [{'date': 'YYYY-MM-DD', 'reason': '...'}, ...] 최신→과거
+            }
+        )
 
     results.sort(key=lambda x: x['latestDesignationDate'], reverse=True)
     return results

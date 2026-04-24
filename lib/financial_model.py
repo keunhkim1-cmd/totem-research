@@ -6,14 +6,16 @@
 - 추후 어댑터 추가 시 build_model() 내부에서 enrich_*()만 호출 추가.
 - Supabase 캐싱: 확정 기간(전년도 이전) 데이터는 DB에서 조회, 미확정만 DART 호출.
 """
+
 import json, os
 from concurrent.futures import ThreadPoolExecutor
 
 from lib.dart_full import fetch_all
 from lib.http_utils import log_event, safe_exception_text
 
-_MAPPING_PATH = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
-                              'data', 'account-mapping.json')
+_MAPPING_PATH = os.path.join(
+    os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'data', 'account-mapping.json'
+)
 
 with open(_MAPPING_PATH, encoding='utf-8') as _f:
     MAPPING = json.load(_f)
@@ -64,7 +66,7 @@ def _to_num(s):
         return None
     try:
         return float(str(s).replace(',', ''))
-    except (ValueError, TypeError):
+    except ValueError, TypeError:
         return None
 
 
@@ -189,17 +191,20 @@ def _load_cache(corp_code: str, fs_div: str) -> dict:
     """Supabase에서 기존 캐시 데이터를 일괄 로드 → {(period_type, period_key): data}"""
     try:
         from lib.supabase_client import cache_enabled, get_client
+
         if not cache_enabled():
             return {}
-        rows = (get_client().table('financial_data')
-                .select('period_type, period_key, data')
-                .eq('corp_code', corp_code)
-                .eq('fs_div', fs_div)
-                .execute()).data
+        rows = (
+            get_client()
+            .table('financial_data')
+            .select('period_type, period_key, data')
+            .eq('corp_code', corp_code)
+            .eq('fs_div', fs_div)
+            .execute()
+        ).data
         return {(r['period_type'], r['period_key']): r['data'] for r in rows}
     except Exception as e:
-        log_event('warning', 'financial_cache_load_failed',
-                  error=safe_exception_text(e))
+        log_event('warning', 'financial_cache_load_failed', error=safe_exception_text(e))
         return {}
 
 
@@ -209,15 +214,18 @@ def _save_cache(corp_code: str, fs_div: str, rows: list):
         return
     try:
         from lib.supabase_client import cache_writes_enabled, get_client
+
         if not cache_writes_enabled():
             return
         records = [{'corp_code': corp_code, 'fs_div': fs_div, **r} for r in rows]
-        (get_client().table('financial_data')
-         .upsert(records, on_conflict='corp_code,fs_div,period_type,period_key')
-         .execute())
+        (
+            get_client()
+            .table('financial_data')
+            .upsert(records, on_conflict='corp_code,fs_div,period_type,period_key')
+            .execute()
+        )
     except Exception as e:
-        log_event('warning', 'financial_cache_save_failed',
-                  error=safe_exception_text(e))
+        log_event('warning', 'financial_cache_save_failed', error=safe_exception_text(e))
 
 
 def build_model(corp_code: str, fs_div: str = 'CFS', years: int = 5) -> dict:
@@ -234,6 +242,7 @@ def build_model(corp_code: str, fs_div: str = 'CFS', years: int = 5) -> dict:
         }
     """
     from datetime import date
+
     end_year = date.today().year - 1
     start_year = end_year - years + 1
     year_list = [str(y) for y in range(start_year, end_year + 1)]
@@ -242,7 +251,6 @@ def build_model(corp_code: str, fs_div: str = 'CFS', years: int = 5) -> dict:
     cache = _load_cache(corp_code, fs_div)
 
     # 확정 기간 판별: 전년도(end_year - 1) 이전은 변하지 않음
-    current_year = str(date.today().year)
     prev_year = str(end_year)  # 가장 최근 연도 (아직 보고서 업데이트 가능)
 
     def _is_settled(year: str) -> bool:
@@ -301,7 +309,9 @@ def build_model(corp_code: str, fs_div: str = 'CFS', years: int = 5) -> dict:
         with ThreadPoolExecutor(max_workers=max_workers) as ex:
             for y in years_to_fetch:
                 for reprt in REPRT_QUARTER:
-                    tasks.append((y, reprt, ex.submit(_fetch_period_safe, corp_code, y, reprt, fs_div)))
+                    tasks.append(
+                        (y, reprt, ex.submit(_fetch_period_safe, corp_code, y, reprt, fs_div))
+                    )
 
             for y, reprt, fut in tasks:
                 resp = fut.result()
@@ -332,8 +342,7 @@ def build_model(corp_code: str, fs_div: str = 'CFS', years: int = 5) -> dict:
             annual[y]['revenue_yoy'] = None
         else:
             prev_y = sorted_years[i - 1]
-            annual[y]['revenue_yoy'] = yoy(annual[y].get('revenue'),
-                                           annual[prev_y].get('revenue'))
+            annual[y]['revenue_yoy'] = yoy(annual[y].get('revenue'), annual[prev_y].get('revenue'))
 
     # ── 분기 YoY 계산 ──
     for y in year_list:
@@ -352,7 +361,9 @@ def build_model(corp_code: str, fs_div: str = 'CFS', years: int = 5) -> dict:
         for q in ['1Q', '2Q', '3Q', '4Q']:
             label = f'{q}{y[2:]}'
             if label in quarterly and any(v is not None for v in quarterly[label].values()):
-                to_save.append({'period_type': 'quarterly', 'period_key': label, 'data': quarterly[label]})
+                to_save.append(
+                    {'period_type': 'quarterly', 'period_key': label, 'data': quarterly[label]}
+                )
     _save_cache(corp_code, fs_div, to_save)
 
     return {

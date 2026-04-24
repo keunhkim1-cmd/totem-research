@@ -3,6 +3,7 @@
 Centralizes headers, retry classification, latency logging, and secret-safe
 error messages for DART, KRX, Naver, Gemini, and Telegram.
 """
+
 from email.utils import parsedate_to_datetime
 import json
 import time
@@ -28,8 +29,15 @@ TRANSIENT_HTTP_STATUSES = frozenset({408, 425, 429, 500, 502, 503, 504})
 
 
 class ExternalAPIError(RuntimeError):
-    def __init__(self, message: str, *, provider: str, status: int | None = None,
-                 url: str = '', retry_after: float | None = None):
+    def __init__(
+        self,
+        message: str,
+        *,
+        provider: str,
+        status: int | None = None,
+        url: str = '',
+        retry_after: float | None = None,
+    ):
         super().__init__(message)
         self.provider = provider
         self.status = status
@@ -60,26 +68,38 @@ def _retry_after_seconds(headers) -> float | None:
         return None
 
 
-def _error_from_http_error(provider: str, err: urllib.error.HTTPError,
-                           secret_query_keys=()):
+def _error_from_http_error(provider: str, err: urllib.error.HTTPError, secret_query_keys=()):
     safe_url = redact_url(err.geturl(), secret_query_keys)
     retry_after = _retry_after_seconds(err.headers)
     message = f'{provider} HTTP {err.code} while requesting {safe_url}'
-    kwargs = {
-        'provider': provider,
-        'status': err.code,
-        'url': safe_url,
-        'retry_after': retry_after,
-    }
     if err.code in TRANSIENT_HTTP_STATUSES:
-        return RetryableHTTPError(message, **kwargs)
-    return NonRetryableHTTPError(message, **kwargs)
+        return RetryableHTTPError(
+            message,
+            provider=provider,
+            status=err.code,
+            url=safe_url,
+            retry_after=retry_after,
+        )
+    return NonRetryableHTTPError(
+        message,
+        provider=provider,
+        status=err.code,
+        url=safe_url,
+        retry_after=retry_after,
+    )
 
 
-def request_bytes(provider: str, url: str, *, headers: dict | None = None,
-                  data: bytes | None = None, method: str | None = None,
-                  timeout: float = 10.0, retries: int = 1,
-                  secret_query_keys=()) -> bytes:
+def request_bytes(
+    provider: str,
+    url: str,
+    *,
+    headers: dict | None = None,
+    data: bytes | None = None,
+    method: str | None = None,
+    timeout: float = 10.0,
+    retries: int = 1,
+    secret_query_keys=(),
+) -> bytes:
     """Perform an HTTP request with retry and structured logging."""
     request_headers = dict(headers or {})
     request_headers.setdefault('User-Agent', DEFAULT_USER_AGENT)
@@ -91,6 +111,7 @@ def request_bytes(provider: str, url: str, *, headers: dict | None = None,
     def _call():
         nonlocal attempts, rate_waited
         from lib.provider_rate_limit import throttle
+
         rate_waited += throttle(provider)
         attempts += 1
         req = urllib.request.Request(
@@ -156,8 +177,7 @@ def request_bytes(provider: str, url: str, *, headers: dict | None = None,
         raise
 
 
-def request_text(provider: str, url: str, *, encoding='utf-8', errors='replace',
-                 **kwargs) -> str:
+def request_text(provider: str, url: str, *, encoding='utf-8', errors='replace', **kwargs) -> str:
     return request_bytes(provider, url, **kwargs).decode(encoding, errors=errors)
 
 

@@ -1,0 +1,60 @@
+interactions:
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Connection:
+      - close
+      Host:
+      - opendart.fss.or.kr
+      User-Agent:
+      - Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7)
+    method: GET
+    uri: https://opendart.fss.or.kr/api/list.json?bgn_de=20260401&corp_code=00126380&end_de=20260424&page_count=1&page_no=1
+  response:
+    body:
+      string: "{\"status\":\"010\",\"message\":\"\uB4F1\uB85D\uB418\uC9C0 \uC54A\uC740
+        \uC778\uC99D\uD0A4\uC785\uB2C8\uB2E4.\"}"
+    headers:
+      Connection:
+      - close
+      Content-Type:
+      - application/json;charset=UTF-8
+      Date:
+      - Fri, 24 Apr 2026 04:44:35 GMT
+      Set-Cookie:
+      - REDACTED
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Connection:
+      - close
+      Host:
+      - opendart.fss.or.kr
+      User-Agent:
+      - Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7)
+    method: GET
+    uri: https://opendart.fss.or.kr/api/list.json?bgn_de=20260401&corp_code=00126380&end_de=20260424&page_count=1&page_no=1
+  response:
+    body:
+      string: "{\"status\":\"010\",\"message\":\"\uB4F1\uB85D\uB418\uC9C0 \uC54A\uC740
+        \uC778\uC99D\uD0A4\uC785\uB2C8\uB2E4.\"}"
+    headers:
+      Connection:
+      - close
+      Content-Type:
+      - application/json;charset=UTF-8
+      Date:
+      - Fri, 24 Apr 2026 04:46:18 GMT
+      Set-Cookie:
+      - REDACTED
+    status:
+      code: 200
+      message: OK
+version: 1

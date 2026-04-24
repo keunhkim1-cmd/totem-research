@@ -1,4 +1,5 @@
 """DART corporation registry shared by stock-code mapping and allowlists."""
+
 import io
 import json
 import re
@@ -18,7 +19,7 @@ PACKAGED_CORP_PATH = ROOT / 'data' / 'dart-corps.json'
 _registry_cache = TTLCache(ttl=24 * 3600, name='dart-corp-registry')
 
 
-def _normalize_row(corp_code: str, corp_name: str, stock_code: str) -> dict | None:
+def _normalize_row(corp_code: object, corp_name: object, stock_code: object) -> dict | None:
     corp_code = str(corp_code or '').strip()
     corp_name = str(corp_name or '').strip()
     stock_code = str(stock_code or '').strip()
@@ -69,6 +70,7 @@ def fetch_live_corp_rows() -> list[dict]:
 
 def load_corp_rows() -> list[dict]:
     """Return the latest DART registry, falling back to the bundled snapshot."""
+
     def _fetch():
         try:
             return fetch_live_corp_rows()
@@ -101,11 +103,7 @@ def known_corp_codes() -> set[str]:
     """Return valid 8-digit DART corp codes using the shared registry."""
     return _registry_cache.get_or_set(
         'corp-codes',
-        lambda: {
-            row['c']
-            for row in load_corp_rows()
-            if CORP_CODE_RE.fullmatch(row.get('c', ''))
-        },
+        lambda: {row['c'] for row in load_corp_rows() if CORP_CODE_RE.fullmatch(row.get('c', ''))},
         allow_stale_on_error=True,
         max_stale=7 * 24 * 3600,
     )

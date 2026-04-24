@@ -1,0 +1,32 @@
+version: 2
+updates:
+  - package-ecosystem: pip
+    directory: /
+    schedule:
+      interval: monthly
+      day: monday
+      time: "09:00"
+      timezone: Asia/Seoul
+    open-pull-requests-limit: 3
+    groups:
+      python-dev-tooling:
+        patterns:
+          - coverage
+          - mypy
+          - playwright
+          - pre-commit
+          - pytest
+          - pytest-cov
+          - pytest-recording
+          - pytest-socket
+          - ruff
+          - vcrpy
+
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: monthly
+      day: monday
+      time: "09:15"
+      timezone: Asia/Seoul
+    open-pull-requests-limit: 3
