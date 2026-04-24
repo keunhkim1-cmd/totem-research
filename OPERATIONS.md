@@ -123,6 +123,17 @@ The job warms:
 Set `CRON_SECRET` in Production before deployment. With Upstash configured, the
 job uses a Redis lock to avoid overlapping runs.
 
+### DART Corp Registry Refresh
+
+`data/dart-corps.json` is the bundled fallback for DART company lookup and the
+financial-model corp-code allowlist. Refresh it after meaningful listing changes,
+or schedule it in a trusted maintenance environment:
+
+```bash
+DART_API_KEY=... python3 scripts/update_dart_corps.py
+python3 -m unittest discover -s tests
+```
+
 ### Telegram Webhook
 
 Telegram retries webhooks when the function times out or fails before returning

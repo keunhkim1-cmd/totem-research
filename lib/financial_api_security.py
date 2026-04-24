@@ -1,11 +1,10 @@
 """Guards for the high-cost financial model API."""
 import hmac
-import json
 import os
 import re
-from pathlib import Path
 
 from lib.cache import TTLCache
+from lib.dart_registry import known_corp_codes
 from lib.validation import parse_int_range
 
 
@@ -15,7 +14,6 @@ DEFAULT_MAX_YEARS = 5
 DEFAULT_RATE_LIMIT_PER_MINUTE = 20
 
 _rate_cache = TTLCache(ttl=60)
-_corp_codes: set[str] | None = None
 
 
 def _env_int(name: str, default: int, min_value: int, max_value: int) -> int:
@@ -30,24 +28,8 @@ def max_years() -> int:
     return _env_int('FINANCIAL_MODEL_MAX_YEARS', DEFAULT_MAX_YEARS, 2, 7)
 
 
-def _load_known_corp_codes() -> set[str]:
-    global _corp_codes
-    if _corp_codes is not None:
-        return _corp_codes
-
-    path = Path(__file__).resolve().parent.parent / 'data' / 'dart-corps.json'
-    with path.open(encoding='utf-8') as f:
-        rows = json.load(f)
-    _corp_codes = {
-        str(row.get('c', '')).strip()
-        for row in rows
-        if CORP_CODE_RE.fullmatch(str(row.get('c', '')).strip())
-    }
-    return _corp_codes
-
-
 def is_known_corp_code(corp_code: str) -> bool:
-    return corp_code in _load_known_corp_codes()
+    return corp_code in known_corp_codes()
 
 
 def validate_params(corp_code: str, fs_div: str, years_raw: str) -> tuple[str, str, int]:

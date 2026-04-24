@@ -71,10 +71,21 @@ FORBIDDEN_PATH_PARTS = {
     '.claude',
     '__pycache__',
 }
+SERVER_ONLY_STATIC_PATHS = {
+    '/data/account-mapping.json',
+    '/data/dart-corps.json',
+}
+SERVER_ONLY_PATH_PREFIXES = (
+    '/supabase/',
+)
 
 
 def is_forbidden_static_path(request_path: str) -> bool:
     path = urllib.parse.unquote(urllib.parse.urlparse(request_path).path)
+    if path in SERVER_ONLY_STATIC_PATHS:
+        return True
+    if any(path.startswith(prefix) for prefix in SERVER_ONLY_PATH_PREFIXES):
+        return True
     parts = [p for p in path.split('/') if p]
     for part in parts:
         if part in FORBIDDEN_PATH_PARTS or part.startswith('.'):
@@ -241,7 +252,7 @@ class Handler(http.server.SimpleHTTPRequestHandler):
             self.send_header('Cache-Control', 'public, max-age=0, must-revalidate')
         elif path in ('/robots.txt', '/sitemap.xml'):
             self.send_header('Cache-Control', 'public, max-age=3600')
-        elif path.startswith('/data/') and path.endswith('.json'):
+        elif path in ('/data/holidays.json', '/data/patchnotes.json'):
             self.send_header('Cache-Control', 'public, max-age=3600')
         if not path.startswith('/api/'):
             send_security_headers(self, csp=STATIC_CSP)

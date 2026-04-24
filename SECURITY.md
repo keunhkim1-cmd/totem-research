@@ -43,6 +43,8 @@ Recommended cache behavior:
 Recommended table hardening:
 
 ```sql
+-- See supabase/migrations/20260424000000_create_runtime_cache_tables.sql
+-- for the version-controlled table, index, and RLS setup.
 alter table public.financial_data enable row level security;
 
 -- Do not create anon/authenticated policies for this cache table.

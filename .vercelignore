@@ -1,6 +1,7 @@
 design_handoff_warning_calculator/
 tests/
 scripts/
+supabase/
 .claude/
 __pycache__/
 **/__pycache__/
@@ -11,3 +12,5 @@ __pycache__/
 .env.*
 !.env.example
 *.md
+data/account-mapping.json
+data/dart-corps.json

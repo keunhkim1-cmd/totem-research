@@ -11,6 +11,9 @@ class ServeSecurityTests(unittest.TestCase):
             '/.git/config',
             '/.vercel/project.json',
             '/lib/__pycache__/x.pyc',
+            '/data/dart-corps.json',
+            '/data/account-mapping.json',
+            '/supabase/migrations/20260424000000_create_runtime_cache_tables.sql',
         ]
         for path in blocked:
             with self.subTest(path=path):
@@ -20,6 +23,7 @@ class ServeSecurityTests(unittest.TestCase):
         allowed = [
             '/',
             '/index.html',
+            '/data/holidays.json',
             '/data/patchnotes.json',
             '/api/stock-price?code=005930',
         ]
