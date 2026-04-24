@@ -171,7 +171,7 @@ function switchPage(page, el) {
   });
 
   document.body.classList.toggle('is-warning-active', page === 'warning');
-  document.body.classList.toggle('is-terminal-active', page === 'warning' || page === 'about');
+  document.body.classList.toggle('is-terminal-active', page === 'warning' || page === 'about' || page === 'patchnotes');
   if (page !== 'warning') hideSearchResults();
   if (page === 'patchnotes') renderPatchNotes();
 }
@@ -198,12 +198,12 @@ async function renderPatchNotes() {
       return `
         <article class="patch-entry">
           <div class="patch-entry-head">
-            <span class="patch-entry-date">${escHtml(e.date || '')}</span>
             <span class="patch-entry-tag ${escHtml(tag)}">${escHtml(label)}</span>
             <span class="patch-entry-title">${escHtml(e.title || '')}</span>
+            <span class="patch-entry-date num">${escHtml(e.date || '')}</span>
           </div>
           <ul class="patch-entry-items">
-            ${items.map(it => `<li>${escHtml(it)}</li>`).join('')}
+            ${items.map((it, idx) => `<li><span class="k">${String(idx + 1).padStart(2, '0')}</span><span class="v">${escHtml(it)}</span></li>`).join('')}
           </ul>
         </article>`;
     }).join('');

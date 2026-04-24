@@ -524,98 +524,159 @@ select option { background: var(--surface2); }
 }
 .caution-nonprice strong { color: var(--text); }
 
-/* 패치 노트 — Apple dark surface */
-#page-patchnotes .header {
-  padding: 32px 16px 16px;
-  text-align: left;
+/* 패치 노트 — Terminal release log */
+#page-patchnotes .patchnotes-terminal {
+  min-height: calc(100vh - 58px);
+  background: var(--tm-bg);
 }
-#page-patchnotes .header h1 {
+#page-patchnotes .patch-hero {
+  padding: 32px 16px 18px;
+  border-bottom: 1px solid var(--tm-hairline);
+}
+#page-patchnotes .patch-kicker {
+  color: var(--tm-text-mute);
+  font-size: 10px;
+}
+#page-patchnotes .patch-hero h1 {
   font-family: var(--font-display);
-  font-size: 28px;
+  font-size: 32px;
   font-weight: 600;
-  color: var(--text);
-  margin: 6px 0;
-  letter-spacing: -0.2px;
-  line-height: 1.10;
+  color: var(--tm-text);
+  margin: 6px 0 8px;
+  letter-spacing: 0;
+  line-height: 1.1;
 }
-#page-patchnotes .header p {
-  font-size: 12px;
-  color: var(--text-secondary);
-  text-align: left;
+#page-patchnotes .patch-hero p {
+  max-width: 620px;
+  font-size: 13px;
+  color: var(--tm-text-dim);
+  line-height: 1.6;
+  letter-spacing: 0;
 }
-#page-patchnotes #patchnotesContent {
-  padding: 0 16px 24px;
+#page-patchnotes .patch-list {
+  margin: 0 16px 16px;
+  background: var(--tm-panel);
+  border: 1px solid var(--tm-hairline);
 }
-.patch-entry {
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  padding: 0;
-  margin-bottom: 12px;
-  overflow: hidden;
-}
-.patch-entry-head {
+#page-patchnotes .patch-list .tm-sec-head {
   display: flex;
   align-items: center;
   flex-wrap: wrap;
   gap: 10px;
   padding: 11px 16px 9px;
-  border-bottom: 1px solid var(--border);
+  font-family: var(--font-display);
+  font-size: 12px;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  border-bottom: 1px solid var(--tm-hairline);
 }
-.patch-entry-date {
+#page-patchnotes .patch-list .tm-sec-head .t {
+  color: var(--tm-text);
+  font-weight: 500;
+  border-left: 2px solid var(--tm-accent);
+  padding-left: 10px;
+}
+#page-patchnotes .patch-list .tm-sec-head .src {
+  margin-left: auto;
+  color: var(--tm-text-mute);
+  font-size: 10px;
+  font-family: var(--mono);
+  letter-spacing: 0.3px;
+  text-transform: none;
+}
+#page-patchnotes .patch-list-body {
+  padding: 0;
+}
+#page-patchnotes .patch-entry {
+  border-bottom: 1px solid var(--tm-hairline);
+  background: var(--tm-panel);
+}
+#page-patchnotes .patch-entry:last-child {
+  border-bottom: none;
+}
+#page-patchnotes .patch-entry-head {
+  display: grid;
+  grid-template-columns: max-content minmax(0, 1fr) max-content;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 16px 10px;
+  border-bottom: 1px solid var(--tm-hairline-soft);
+}
+#page-patchnotes .patch-entry-date {
   font-family: var(--mono);
   font-size: 10px;
-  color: var(--text-muted);
+  color: var(--tm-text-mute);
   letter-spacing: 0.3px;
-  font-variant-numeric: tabular-nums;
+  justify-self: end;
+  text-align: right;
 }
-.patch-entry-tag {
+#page-patchnotes .patch-entry-tag {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  justify-self: start;
+  width: max-content;
   font-family: var(--font-display);
-  font-size: 9px;
+  font-size: 10px;
   font-weight: 600;
-  letter-spacing: 1.5px;
+  letter-spacing: 1.2px;
   text-transform: uppercase;
   padding: 2px 8px;
-  border-radius: 0;
-  border: 1px solid;
+  border: 1px solid var(--tm-accent);
+  background: var(--tm-accent-soft);
+  color: var(--tm-accent);
 }
-.patch-entry-tag.feat    { background: var(--info-blue-soft);  color: var(--info-blue);   border-color: var(--info-blue); }
-.patch-entry-tag.fix     { background: rgba(255,69,58,0.16);   color: var(--negative);    border-color: var(--negative); }
-.patch-entry-tag.improve { background: rgba(255,149,0,0.16);   color: #ff9f0a;           border-color: #ff9f0a; }
-.patch-entry-tag.chore   { background: rgba(255,255,255,0.08); color: var(--text-muted);  border-color: var(--border); }
-.patch-entry-title {
-  flex: 1 1 100%;
-  font-family: var(--font-display);
+#page-patchnotes .patch-entry-tag.fix {
+  border-color: var(--tm-up);
+  background: var(--tm-up-soft);
+  color: var(--tm-up);
+}
+#page-patchnotes .patch-entry-tag.improve {
+  border-color: var(--tm-amber);
+  background: var(--tm-amber-soft);
+  color: var(--tm-amber);
+}
+#page-patchnotes .patch-entry-tag.chore {
+  border-color: var(--tm-text-mute);
+  background: transparent;
+  color: var(--tm-text-mute);
+}
+#page-patchnotes .patch-entry-title {
+  min-width: 0;
+  color: var(--tm-text);
   font-size: 12px;
   font-weight: 500;
-  color: var(--text);
-  letter-spacing: 1.5px;
-  text-transform: uppercase;
-  border-left: 2px solid var(--info-blue);
-  padding-left: 10px;
-  line-height: 1.2;
+  line-height: 1.35;
   overflow-wrap: anywhere;
 }
-.patch-entry-items {
+#page-patchnotes .patch-entry-items {
   list-style: none;
-  padding: 14px 16px;
+  padding: 4px 0;
   margin: 0;
 }
-.patch-entry-items li {
-  padding: 4px 0 4px 14px;
-  position: relative;
-  font-family: var(--font-text);
+#page-patchnotes .patch-entry-items li {
+  display: grid;
+  grid-template-columns: 44px minmax(0, 1fr);
+  gap: 12px;
+  padding: 8px 16px;
+  border-bottom: 1px solid var(--tm-hairline-soft);
+  color: var(--tm-text-dim);
   font-size: 12px;
-  color: var(--text-secondary);
-  line-height: 1.5;
-  letter-spacing: -0.12px;
-  overflow-wrap: anywhere;
+  line-height: 1.55;
+  letter-spacing: 0;
 }
-.patch-entry-items li::before {
-  content: "–";
-  position: absolute;
-  left: 0;
-  color: var(--text-muted);
+#page-patchnotes .patch-entry-items li:last-child {
+  border-bottom: none;
+}
+#page-patchnotes .patch-entry-items .k {
+  color: var(--tm-text-mute);
+  font-family: var(--mono);
+  font-size: 10px;
+  font-variant-numeric: tabular-nums;
+}
+#page-patchnotes .patch-entry-items .v {
+  min-width: 0;
+  overflow-wrap: anywhere;
 }
 
 .price-loading {
@@ -752,15 +813,12 @@ body:is(.is-warning-active, .is-terminal-active) .ticker-item::before {
   .price-summary { grid-template-columns: 1fr; }
   .ps-item:last-of-type { text-align: left; }
   .ps-status-wrap { grid-column: auto; }
-  #page-patchnotes .header { padding-left: 0; padding-right: 0; }
-  #page-patchnotes #patchnotesContent { padding-left: 0; padding-right: 0; }
-  .patch-entry-title { letter-spacing: 0.5px; }
 }
 
 /* ═══════════════════════════════════════════════════════════════
    Warning Calculator — Terminal Mono Night Scope
    All styles scoped under .warning-terminal
-   About reuses this system below; patch notes keep the original shell.
+   About and patch notes reuse this system below.
    ═══════════════════════════════════════════════════════════════ */
 .warning-terminal {
   background: var(--tm-bg);
@@ -1856,6 +1914,29 @@ body:is(.is-warning-active, .is-terminal-active) .ticker-item::before {
   #page-about .about-disclaimer .tm-verdict {
     align-items: flex-start;
   }
+  #page-patchnotes .patch-hero {
+    padding: 24px 12px 14px;
+  }
+  #page-patchnotes .patch-hero h1 {
+    font-size: 28px;
+  }
+  #page-patchnotes .patch-list {
+    margin-left: 12px;
+    margin-right: 12px;
+  }
+  #page-patchnotes .patch-list .tm-sec-head .src {
+    margin-left: 0;
+    flex-basis: 100%;
+  }
+  #page-patchnotes .patch-entry-head {
+    grid-template-columns: max-content 1fr;
+  }
+  #page-patchnotes .patch-entry-title {
+    grid-column: 1 / -1;
+  }
+  #page-patchnotes .patch-entry-date {
+    justify-self: end;
+  }
   #page-warning .tm-sym { flex-wrap: wrap; gap: 10px; }
   #page-warning .tm-sym .chips { order: 3; margin-left: 0; width: 100%; }
   #page-warning .tm-sym .px { margin-left: auto; }
@@ -1890,6 +1971,16 @@ body:is(.is-warning-active, .is-terminal-active) .ticker-item::before {
   #page-about .about-disclaimer .tm-verdict {
     flex-wrap: wrap;
     padding: 12px;
+  }
+  #page-patchnotes .patch-entry-items li {
+    grid-template-columns: 32px minmax(0, 1fr);
+    padding-left: 12px;
+    padding-right: 12px;
+  }
+  #page-patchnotes .patch-entry-head,
+  #page-patchnotes .patch-list .tm-sec-head {
+    padding-left: 12px;
+    padding-right: 12px;
   }
   .warning-terminal .header { padding: 24px 12px 18px; }
   .warning-terminal .card,

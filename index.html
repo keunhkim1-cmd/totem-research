@@ -23,8 +23,8 @@
 {"@context":"https://schema.org","@type":"WebApplication","name":"Shamanism Research","alternateName":"투자경고 계산기","url":"https://shamanism-research.vercel.app/","applicationCategory":"FinanceApplication","operatingSystem":"Web","inLanguage":"ko-KR","description":"KRX 투자경고·투자위험 종목의 지정 여부, 기준가, 해제 예정일을 점검하는 한국 주식 리서치 도구입니다.","isAccessibleForFree":true,"offers":{"@type":"Offer","price":"0","priceCurrency":"KRW"}}
   </script>
   <!-- SF Pro: system font on macOS/iOS, fallbacks for other platforms -->
-  <link rel="stylesheet" href="assets/app.css?v=20260424-10" />
-  <script type="module" src="assets/app.js?v=20260424-10"></script>
+  <link rel="stylesheet" href="assets/app.css?v=20260424-12" />
+  <script type="module" src="assets/app.js?v=20260424-12"></script>
 </head>
 <body>
 
@@ -292,17 +292,25 @@
 
 <!-- ═══════════════ 패치 노트 ═══════════════ -->
 <div id="page-patchnotes" class="page-section" role="tabpanel" aria-labelledby="nav-patchnotes" aria-hidden="true" hidden>
-  <div class="section-dark">
-    <div class="section-inner">
-      <div class="header">
-        <h1>패치 노트</h1>
-        <p>주요 업데이트와 기능 추가 기록입니다</p>
-      </div>
-      <div id="patchnotesContent">
-        <div class="state-message state-message-loading" role="status">
-          <span class="state-message-label">조회 중</span>
-          <span class="state-message-text">불러오는 중...</span>
-        </div>
+  <div class="warning-terminal patchnotes-terminal">
+    <div class="section-dark">
+      <div class="section-inner">
+        <section class="patch-hero">
+          <div class="caps patch-kicker">Release Log</div>
+          <h1>패치 노트</h1>
+        </section>
+        <section class="tm-sec patch-list">
+          <div class="tm-sec-head">
+            <span class="t">업데이트 로그</span>
+            <span class="src">data/patchnotes.json</span>
+          </div>
+          <div id="patchnotesContent" class="patch-list-body">
+            <div class="state-message state-message-loading" role="status">
+              <span class="state-message-label">조회 중</span>
+              <span class="state-message-text">불러오는 중...</span>
+            </div>
+          </div>
+        </section>
       </div>
     </div>
   </div>
