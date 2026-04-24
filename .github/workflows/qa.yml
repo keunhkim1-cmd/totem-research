@@ -1,0 +1,54 @@
+name: qa
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  python:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: actions/setup-python@v6
+        with:
+          python-version-file: .python-version
+          cache: pip
+          cache-dependency-path: |
+            requirements.txt
+            requirements-dev.txt
+            pyproject.toml
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -r requirements.txt -r requirements-dev.txt
+
+      - name: Install Playwright browser
+        run: python -m playwright install --with-deps chromium
+
+      - name: Ruff lint
+        run: python -m ruff check --output-format=github .
+
+      - name: Mypy leaf modules
+        run: python -m mypy
+
+      - name: Compile Python
+        run: python -m compileall -q lib api scripts tests serve.py
+
+      - name: Test without external network
+        run: python -m pytest -m "not external" --disable-socket --allow-hosts=127.0.0.1,localhost --record-mode=none --cov --cov-report=term-missing
+
+      - name: Validate Vercel config
+        run: python -m json.tool vercel.json
+
+      - name: Frontend static smoke
+        run: python scripts/check_frontend_smoke.py
+
+      - name: Frontend asset budget
+        run: python scripts/check_frontend_budget.py
