@@ -46,6 +46,18 @@ Required production checks:
    - no burst of `external_api_retry`
    - no unexpected `provider_rate_limit_exceeded`
 
+### Frontend Asset Budget
+
+After frontend edits, run:
+
+```bash
+python3 scripts/check_frontend_budget.py
+python3 scripts/check_frontend_smoke.py
+```
+
+This guards the static SPA against drifting back into a large single HTML file.
+See `FRONTEND_BUILD_ROI.md` for the current bundler decision record.
+
 ### Cache Hit/Miss Audit
 
 Set `CACHE_ACCESS_LOGS_ENABLED=true` briefly, then repeat the same endpoint calls.

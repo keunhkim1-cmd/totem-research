@@ -233,9 +233,15 @@ class Handler(http.server.SimpleHTTPRequestHandler):
         super().do_GET()
 
     def end_headers(self):
-        # 정적 JSON 데이터에 캐시 헤더 추가
+        # 정적 자산은 versioned URL(query string)로 참조하므로 길게 캐시한다.
         path = urllib.parse.urlparse(getattr(self, 'path', '')).path
-        if path.startswith('/data/') and path.endswith('.json'):
+        if path.startswith('/assets/'):
+            self.send_header('Cache-Control', 'public, max-age=31536000, immutable')
+        elif path in ('/', '/index.html'):
+            self.send_header('Cache-Control', 'public, max-age=0, must-revalidate')
+        elif path in ('/robots.txt', '/sitemap.xml'):
+            self.send_header('Cache-Control', 'public, max-age=3600')
+        elif path.startswith('/data/') and path.endswith('.json'):
             self.send_header('Cache-Control', 'public, max-age=3600')
         if not path.startswith('/api/'):
             send_security_headers(self, csp=STATIC_CSP)
