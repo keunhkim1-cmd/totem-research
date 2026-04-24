@@ -6,7 +6,6 @@ parse HTTP, call one of these functions, then shape the HTTP response.
 from lib.dart import search_disclosure
 from lib.dart_base import DART_SEARCH_OK_STATUSES, raise_for_status
 from lib.financial_api_security import validate_params
-from lib.financial_model import build_model
 from lib.krx import search_kind
 from lib.naver import (
     calc_thresholds,
@@ -95,4 +94,6 @@ def financial_model_payload(
         fs_div,
         years,
     )
+    from lib.financial_model import build_model
+
     return build_model(valid_corp_code, fs_div=valid_fs_div, years=valid_years)
