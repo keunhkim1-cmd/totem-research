@@ -679,6 +679,114 @@ select option { background: var(--surface2); }
   overflow-wrap: anywhere;
 }
 
+/* 오늘의 운세 — date-locked condition check */
+#page-fortune .fortune-terminal {
+  min-height: calc(100vh - 58px);
+  background: var(--tm-bg);
+}
+#page-fortune .patch-hero {
+  padding: 32px 16px 18px;
+  border-bottom: 1px solid var(--tm-hairline);
+}
+#page-fortune .patch-kicker {
+  color: var(--tm-text-mute);
+  font-size: 10px;
+}
+#page-fortune .patch-hero h1 {
+  font-family: var(--font-display);
+  font-size: 32px;
+  font-weight: 600;
+  color: var(--tm-text);
+  margin: 6px 0 8px;
+  letter-spacing: 0;
+  line-height: 1.1;
+}
+#page-fortune .fortune-panel {
+  margin: 0 16px 16px;
+  background: var(--tm-panel);
+  border: 1px solid var(--tm-hairline);
+  min-width: 0;
+}
+#page-fortune .fortune-panel .tm-sec-head {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+  padding: 11px 16px 9px;
+  font-family: var(--font-display);
+  font-size: 12px;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  border-bottom: 1px solid var(--tm-hairline);
+  min-width: 0;
+}
+#page-fortune .fortune-panel .tm-sec-head .t {
+  color: var(--tm-text);
+  font-weight: 500;
+  border-left: 2px solid var(--tm-accent);
+  padding-left: 10px;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+#page-fortune .fortune-panel .tm-sec-head .src {
+  margin-left: auto;
+  color: var(--tm-text-mute);
+  font-size: 10px;
+  font-family: var(--mono);
+  letter-spacing: 0.3px;
+  text-transform: none;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+#page-fortune .fortune-content {
+  padding: 0;
+  min-width: 0;
+}
+#page-fortune .fortune-list {
+  min-width: 0;
+}
+#page-fortune .fortune-row {
+  display: grid;
+  grid-template-columns: minmax(118px, 150px) minmax(0, 1fr);
+  align-items: start;
+  gap: 14px;
+  padding: 14px 16px;
+  border-bottom: 1px solid var(--tm-hairline-soft);
+  min-width: 0;
+}
+#page-fortune .fortune-row:last-child {
+  border-bottom: none;
+}
+#page-fortune .fortune-label {
+  color: var(--tm-accent);
+  font-family: var(--font-display);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 1px;
+  line-height: 1.45;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+#page-fortune .fortune-row p {
+  min-width: 0;
+  margin: 0;
+  color: var(--tm-text-dim);
+  font-size: 13px;
+  line-height: 1.65;
+  overflow-wrap: anywhere;
+  word-break: keep-all;
+}
+#page-fortune .fortune-note {
+  margin: 0;
+  padding: 12px 16px;
+  border-top: 1px solid var(--tm-hairline);
+  color: var(--tm-text-mute);
+  font-size: 11px;
+  line-height: 1.6;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
 .price-loading {
   text-align: center; padding: 20px; font-size: 14px; color: var(--text-muted);
   animation: pulse 1.5s ease-in-out infinite;
@@ -1937,6 +2045,24 @@ body:is(.is-warning-active, .is-terminal-active) .ticker-item::before {
   #page-patchnotes .patch-entry-date {
     justify-self: end;
   }
+  #page-fortune .patch-hero {
+    padding: 24px 12px 14px;
+  }
+  #page-fortune .patch-hero h1 {
+    font-size: 28px;
+  }
+  #page-fortune .fortune-panel {
+    margin-left: 12px;
+    margin-right: 12px;
+  }
+  #page-fortune .fortune-panel .tm-sec-head .src {
+    margin-left: 0;
+    flex-basis: 100%;
+  }
+  #page-fortune .fortune-row {
+    grid-template-columns: 1fr;
+    gap: 6px;
+  }
   #page-warning .tm-sym { flex-wrap: wrap; gap: 10px; }
   #page-warning .tm-sym .chips { order: 3; margin-left: 0; width: 100%; }
   #page-warning .tm-sym .px { margin-left: auto; }
@@ -1979,6 +2105,12 @@ body:is(.is-warning-active, .is-terminal-active) .ticker-item::before {
   }
   #page-patchnotes .patch-entry-head,
   #page-patchnotes .patch-list .tm-sec-head {
+    padding-left: 12px;
+    padding-right: 12px;
+  }
+  #page-fortune .fortune-panel .tm-sec-head,
+  #page-fortune .fortune-row,
+  #page-fortune .fortune-note {
     padding-left: 12px;
     padding-right: 12px;
   }
