@@ -31,6 +31,7 @@ python -m mypy
 python -m compileall -q lib api scripts tests serve.py
 python -m pytest -m "not external" --disable-socket --allow-hosts=127.0.0.1,localhost --record-mode=none --cov --cov-report=term-missing
 python -m json.tool vercel.json
+python scripts/sync_frontend_metadata.py --check
 python scripts/check_frontend_smoke.py
 python scripts/check_frontend_budget.py
 ```

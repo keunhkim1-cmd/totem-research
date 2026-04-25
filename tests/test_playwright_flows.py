@@ -141,6 +141,13 @@ def _stock_price_payload() -> dict[str, Any]:
             'thresh3': 84000,
             'cond3': True,
             'allMet': False,
+            'policy': {
+                't5Lookback': 5,
+                't5Multiplier': 1.45,
+                't15Lookback': 15,
+                't15Multiplier': 1.75,
+                'maxWindowDays': 15,
+            },
         },
         'prevClose': 83000,
         'high': 85000,
@@ -162,6 +169,18 @@ def test_empty_search_shows_inline_validation(local_server, page: Page):
 
     expect(page.locator('#searchResults')).to_contain_text('종목명을 입력하세요')
     expect(page.locator('#searchInput')).to_be_focused()
+
+
+@pytest.mark.e2e
+def test_secondary_tabs_render_from_split_modules(local_server, page: Page):
+    page.goto(local_server)
+
+    page.get_by_role('tab', name='오늘의 운세').click()
+    expect(page.locator('#fortuneContent .fortune-message')).to_be_visible()
+    expect(page.locator('#fortunePanelTitle')).to_contain_text('운세')
+
+    page.get_by_role('tab', name='패치 노트').click()
+    expect(page.locator('#patchnotesContent .patch-entry').first).to_be_visible()
 
 
 @pytest.mark.e2e

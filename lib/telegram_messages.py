@@ -3,6 +3,7 @@ import unicodedata
 from datetime import date
 
 from lib.holidays import add_trading_days, count_trading_days
+from lib.warning_policy import T5_LOOKBACK, T15_LOOKBACK
 
 
 def sd(d: date) -> str:
@@ -54,7 +55,10 @@ def build_warning_message(stock_name: str, warn: dict, thresholds: dict | None) 
         p1 = f"{thresholds['thresh1']:,}원"
         p2 = f"{thresholds['thresh2']:,}원"
         p3 = f"{thresholds['thresh3']:,}원"
-        lw = max(vlen('① T-5'), vlen('② T-15'), vlen('③ 고점')) + 1
+        l1 = f'① T-{T5_LOOKBACK}'
+        l2 = f'② T-{T15_LOOKBACK}'
+        l3 = '③ 고점'
+        lw = max(vlen(l1), vlen(l2), vlen(l3)) + 1
         pw_v = max(vlen(p1), vlen(p2), vlen(p3))
         sep = lw + 2 + pw_v + 3 + vlen('결과')
 
@@ -68,9 +72,9 @@ def build_warning_message(stock_name: str, warn: dict, thresholds: dict | None) 
             '',
             vpad_l('조건', lw) + '  ' + vpad_r('기준가', pw_v) + '   결과',
             '─' * sep,
-            row('① T-5', p1, ci(c1)),
-            row('② T-15', p2, ci(c2)),
-            row('③ 고점', p3, ci(c3)),
+            row(l1, p1, ci(c1)),
+            row(l2, p2, ci(c2)),
+            row(l3, p3, ci(c3)),
         ])
         lines.append(f'```\n{block}\n```')
         lines.append('')
@@ -93,7 +97,7 @@ def build_warning_message(stock_name: str, warn: dict, thresholds: dict | None) 
 
 
 def build_caution_message(d: dict) -> str:
-    """Build a caution/escalation Telegram message from lib.naver.caution_search."""
+    """Build a caution/escalation Telegram message from lib.usecases.caution_search_payload."""
     status = d.get('status')
     query = d.get('query', '')
     name = d.get('stockName', query)

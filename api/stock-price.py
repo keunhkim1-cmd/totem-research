@@ -1,27 +1,7 @@
-from http.server import BaseHTTPRequestHandler
-import urllib.parse, sys, os
+import os
+import sys
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-from lib.http_utils import (
-    api_success_payload,
-    log_exception,
-    send_api_error,
-    send_json_response,
-    send_options_response,
-)
-from lib.usecases import stock_price_payload
+from lib.api_routes import ROUTES_BY_PATH, make_handler
 
-class handler(BaseHTTPRequestHandler):
-    def do_OPTIONS(self):
-        send_options_response(self)
-
-    def do_GET(self):
-        qs   = urllib.parse.parse_qs(urllib.parse.urlparse(self.path).query)
-        try:
-            payload = stock_price_payload(qs.get('code', [''])[0])
-            send_json_response(self, 200, api_success_payload(payload))
-        except ValueError as e:
-            send_api_error(self, 400, 'VALIDATION_ERROR', str(e))
-        except Exception:
-            log_exception('api_request_failed', endpoint='stock-price')
-            send_api_error(self, 500, 'INTERNAL_ERROR', '서버 오류가 발생했습니다.')
+handler = make_handler(ROUTES_BY_PATH['/api/stock-price'])

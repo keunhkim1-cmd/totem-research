@@ -9,6 +9,7 @@ import urllib.request
 import pytest
 
 import serve
+from lib import usecases
 
 
 def _free_port() -> int:
@@ -44,27 +45,27 @@ def _get_json(url: str, *, headers: dict[str, str] | None = None) -> tuple[int, 
 
 def test_public_api_routes_return_success_envelopes(monkeypatch, local_api_server):
     monkeypatch.setattr(
-        serve,
+        usecases,
         'warning_search_payload',
         lambda name: {'query': name, 'results': [{'stockName': '삼성전자'}]},
     )
     monkeypatch.setattr(
-        serve,
+        usecases,
         'caution_search_payload',
         lambda name: {'stockName': name, 'status': 'not_caution'},
     )
     monkeypatch.setattr(
-        serve,
+        usecases,
         'stock_code_payload',
         lambda name: {'query': name, 'items': [{'code': '005930', 'name': name}]},
     )
     monkeypatch.setattr(
-        serve,
+        usecases,
         'stock_price_payload',
         lambda code: {'code': code, 'prices': [], 'thresholds': {'error': '데이터 부족'}},
     )
-    monkeypatch.setattr(serve, 'stock_overview_payload', lambda code: {'code': code})
-    monkeypatch.setattr(serve, 'dart_search_payload', lambda **kwargs: {'status': '013'})
+    monkeypatch.setattr(usecases, 'stock_overview_payload', lambda code: {'code': code})
+    monkeypatch.setattr(usecases, 'dart_search_payload', lambda **kwargs: {'status': '013'})
 
     routes = [
         '/api/warn-search?name=%EC%82%BC%EC%84%B1%EC%A0%84%EC%9E%90',
@@ -83,7 +84,7 @@ def test_public_api_routes_return_success_envelopes(monkeypatch, local_api_serve
 
 def test_public_api_validation_errors_use_error_envelope(monkeypatch, local_api_server):
     monkeypatch.setattr(
-        serve,
+        usecases,
         'stock_code_payload',
         lambda name: (_ for _ in ()).throw(ValueError('종목명을 입력하세요.')),
     )
@@ -99,7 +100,7 @@ def test_public_api_validation_errors_use_error_envelope(monkeypatch, local_api_
 def test_financial_model_requires_token_and_accepts_configured_token(monkeypatch, local_api_server):
     monkeypatch.setenv('FINANCIAL_MODEL_API_TOKEN', 'test-token')
     monkeypatch.setattr(
-        serve,
+        usecases,
         'financial_model_payload',
         lambda **kwargs: {'corp_code': kwargs['corp_code'], 'annual': [], 'quarterly': {}},
     )

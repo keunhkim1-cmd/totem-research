@@ -39,6 +39,7 @@ For frontend changes, also run:
 
 ```bash
 python -m playwright install chromium  # first local setup only
+python3 scripts/sync_frontend_metadata.py
 python3 scripts/check_frontend_smoke.py
 python3 scripts/check_frontend_budget.py
 python -m pytest tests/test_playwright_flows.py --disable-socket --allow-hosts=127.0.0.1,localhost

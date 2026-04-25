@@ -9,10 +9,14 @@
 
 import json, os
 from concurrent.futures import ThreadPoolExecutor
+from datetime import date
 
 from lib.cache import TTLCache
 from lib.dart_full import fetch_all
 from lib.http_utils import log_event, safe_exception_text
+
+QUARTERS = ('1Q', '2Q', '3Q', '4Q')
+ANNUAL_REPRT_CODE = '11011'
 
 _MAPPING_PATH = os.path.join(
     os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'data', 'account-mapping.json'
@@ -80,7 +84,7 @@ def _to_num(s):
         return None
     try:
         return float(str(s).replace(',', ''))
-    except ValueError, TypeError:
+    except (ValueError, TypeError):
         return None
 
 
@@ -253,6 +257,141 @@ def _cacheable_model_result(result: dict) -> bool:
     return False
 
 
+def _is_year_fully_cached(cache: dict, year: str) -> bool:
+    """해당 연도의 연간 + 4분기 모두 캐시에 있으면 True."""
+    if ('annual', year) not in cache:
+        return False
+    return all(('quarterly', f'{q}{year[2:]}') in cache for q in QUARTERS)
+
+
+def _resolve_settled_years(
+    year_list: list, end_year: int, cache: dict
+) -> tuple[dict, dict, list]:
+    """캐시에서 확정 연도 데이터 복원 → (annual, by_year_period, years_to_fetch).
+
+    가장 최근 연도(end_year)는 보고서 정정 가능성이 있어 확정으로 보지 않음.
+    """
+    prev_year = str(end_year)
+    annual: dict = {}
+    by_year_period: dict = {}
+    years_to_fetch: list = []
+    for y in year_list:
+        if y < prev_year and _is_year_fully_cached(cache, y):
+            annual[y] = cache[('annual', y)]
+            by_year_period[y] = {
+                q: cache[('quarterly', f'{q}{y[2:]}')] for q in QUARTERS
+            }
+        else:
+            years_to_fetch.append(y)
+    return annual, by_year_period, years_to_fetch
+
+
+def _fetch_missing_years(
+    corp_code: str,
+    fs_div: str,
+    year_list: list,
+    years_to_fetch: list,
+) -> tuple[dict, dict]:
+    """DART에서 미캐시 연도/보고서 병렬 호출 → (annual_partial, by_year_period_partial)."""
+    annual: dict = {}
+    by_year_period: dict = {}
+    if not years_to_fetch:
+        return annual, by_year_period
+
+    planned_calls = len(years_to_fetch) * len(REPRT_QUARTER)
+    warn_calls = _env_int('DART_FINANCIAL_WARN_CALLS_PER_REQUEST', 12, 1, 64)
+    max_workers = _env_int('DART_FINANCIAL_MAX_WORKERS', 2, 1, 4)
+    log_event(
+        'info',
+        'financial_dart_fetch_plan',
+        corp_code=corp_code,
+        fs_div=fs_div,
+        years_to_fetch=years_to_fetch,
+        planned_calls=planned_calls,
+        max_workers=max_workers,
+        cached_years=[y for y in year_list if y not in years_to_fetch],
+    )
+    if planned_calls >= warn_calls:
+        log_event(
+            'warning',
+            'financial_dart_fetch_burst',
+            corp_code=corp_code,
+            planned_calls=planned_calls,
+            threshold=warn_calls,
+        )
+
+    with ThreadPoolExecutor(max_workers=max_workers) as ex:
+        tasks = [
+            (y, reprt, ex.submit(_fetch_period_safe, corp_code, y, reprt, fs_div))
+            for y in years_to_fetch
+            for reprt in REPRT_QUARTER
+        ]
+        for y, reprt, fut in tasks:
+            resp = fut.result()
+            period = _extract_period(resp, fs_div) if resp.get('status') == '000' else {}
+            label = REPRT_QUARTER[reprt]
+            by_year_period.setdefault(y, {})[label] = period
+            if reprt == ANNUAL_REPRT_CODE and period:
+                annual[y] = _enrich_derived(dict(period))
+    return annual, by_year_period
+
+
+def _derive_quarterly(
+    year_list: list, years_to_fetch: list, by_year_period: dict
+) -> dict:
+    """캐시(이미 enrich 완료) + 새로 받은 보고서 → 분기별 단일값 dict."""
+    quarterly: dict = {}
+    for y in year_list:
+        if y not in years_to_fetch:
+            for q in QUARTERS:
+                quarterly[f'{q}{y[2:]}'] = by_year_period[y][q]
+            continue
+        single = _periods_to_quarterly(by_year_period.get(y, {}))
+        for q in QUARTERS:
+            quarterly[f'{q}{y[2:]}'] = _enrich_derived(dict(single[q]))
+    return quarterly
+
+
+def _enrich_yoy(year_list: list, annual: dict, quarterly: dict) -> None:
+    """매출 YoY를 in-place로 채운다 (연간: 직전년도 / 분기: 전년 동분기)."""
+    sorted_years = sorted(annual.keys())
+    for i, y in enumerate(sorted_years):
+        if i == 0:
+            annual[y]['revenue_yoy'] = None
+        else:
+            prev_y = sorted_years[i - 1]
+            annual[y]['revenue_yoy'] = yoy(
+                annual[y].get('revenue'), annual[prev_y].get('revenue')
+            )
+
+    for y in year_list:
+        prev_y = str(int(y) - 1)
+        for q in QUARTERS:
+            cur = quarterly.get(f'{q}{y[2:]}', {})
+            prev = quarterly.get(f'{q}{prev_y[2:]}', {})
+            cur['revenue_yoy'] = (
+                yoy(cur.get('revenue'), prev.get('revenue')) if prev else None
+            )
+
+
+def _collect_save_rows(
+    years_to_fetch: list, annual: dict, quarterly: dict
+) -> list:
+    """DART에서 새로 가져온 연도만 Supabase upsert 대상으로 모은다."""
+    rows: list = []
+    for y in years_to_fetch:
+        if y in annual:
+            rows.append({'period_type': 'annual', 'period_key': y, 'data': annual[y]})
+        for q in QUARTERS:
+            label = f'{q}{y[2:]}'
+            data = quarterly.get(label)
+            if data and any(v is not None for v in data.values()):
+                rows.append(
+                    {'period_type': 'quarterly', 'period_key': label, 'data': data}
+                )
+    return rows
+
+
 def build_model(corp_code: str, fs_div: str = 'CFS', years: int = 5) -> dict:
     """
     Args:
@@ -261,141 +400,37 @@ def build_model(corp_code: str, fs_div: str = 'CFS', years: int = 5) -> dict:
         years: 조회할 연수 (현재년-1 부터 역순)
     Returns:
         {
-          'meta': {corp_code, fs_div, years_requested, last_period},
+          'meta': {corp_code, fs_div, years, unsupported, cached_years, fetched_years},
           'annual': { '2020': {...}, '2021': {...}, ... },
           'quarterly': { '1Q23': {...}, '2Q23': {...}, ... }
         }
     """
-    from datetime import date
-
     end_year = date.today().year - 1
     start_year = end_year - years + 1
     year_list = [str(y) for y in range(start_year, end_year + 1)]
     result_cache_key = f'model:{corp_code}:{fs_div}:{years}:{end_year}'
+
     cached_result = _result_cache.get(result_cache_key)
     if cached_result is not None:
         log_event('info', 'financial_model_result_cache_hit',
                   corp_code=corp_code, fs_div=fs_div, years=years)
         return cached_result
 
-    # ── Supabase 캐시 로드 ──
     cache = _load_cache(corp_code, fs_div)
+    annual, by_year_period, years_to_fetch = _resolve_settled_years(
+        year_list, end_year, cache
+    )
+    fresh_annual, fresh_periods = _fetch_missing_years(
+        corp_code, fs_div, year_list, years_to_fetch
+    )
+    annual.update(fresh_annual)
+    for y, periods in fresh_periods.items():
+        by_year_period.setdefault(y, {}).update(periods)
 
-    # 확정 기간 판별: 전년도(end_year - 1) 이전은 변하지 않음
-    prev_year = str(end_year)  # 가장 최근 연도 (아직 보고서 업데이트 가능)
+    quarterly = _derive_quarterly(year_list, years_to_fetch, by_year_period)
+    _enrich_yoy(year_list, annual, quarterly)
 
-    def _is_settled(year: str) -> bool:
-        """전전년도 이전이면 확정 (보고서 수정 가능성 없음)"""
-        return year < prev_year
-
-    def _year_fully_cached(year: str) -> bool:
-        """해당 연도의 연간 + 4분기 모두 캐시에 있으면 True"""
-        if ('annual', year) not in cache:
-            return False
-        for q in ['1Q', '2Q', '3Q', '4Q']:
-            if ('quarterly', f'{q}{year[2:]}') not in cache:
-                return False
-        return True
-
-    annual = {}
-    by_year_period = {}
-    to_save = []  # Supabase에 저장할 새 데이터
-
-    # ── 연도별 처리: 캐시 히트 or DART 호출 ──
-    years_to_fetch = []
-    for y in year_list:
-        if _is_settled(y) and _year_fully_cached(y):
-            # 캐시에서 복원
-            annual[y] = cache[('annual', y)]
-            by_year_period[y] = {}
-            for q in ['1Q', '2Q', '3Q', '4Q']:
-                by_year_period[y][q] = cache[('quarterly', f'{q}{y[2:]}')]
-        else:
-            years_to_fetch.append(y)
-
-    # ── 캐시 미스 연도만 DART 병렬 호출 ──
-    if years_to_fetch:
-        tasks = []
-        planned_calls = len(years_to_fetch) * len(REPRT_QUARTER)
-        warn_calls = _env_int('DART_FINANCIAL_WARN_CALLS_PER_REQUEST', 12, 1, 64)
-        max_workers = _env_int('DART_FINANCIAL_MAX_WORKERS', 2, 1, 4)
-        log_event(
-            'info',
-            'financial_dart_fetch_plan',
-            corp_code=corp_code,
-            fs_div=fs_div,
-            years_to_fetch=years_to_fetch,
-            planned_calls=planned_calls,
-            max_workers=max_workers,
-            cached_years=[y for y in year_list if y not in years_to_fetch],
-        )
-        if planned_calls >= warn_calls:
-            log_event(
-                'warning',
-                'financial_dart_fetch_burst',
-                corp_code=corp_code,
-                planned_calls=planned_calls,
-                threshold=warn_calls,
-            )
-        with ThreadPoolExecutor(max_workers=max_workers) as ex:
-            for y in years_to_fetch:
-                for reprt in REPRT_QUARTER:
-                    tasks.append(
-                        (y, reprt, ex.submit(_fetch_period_safe, corp_code, y, reprt, fs_div))
-                    )
-
-            for y, reprt, fut in tasks:
-                resp = fut.result()
-                period = _extract_period(resp, fs_div) if resp.get('status') == '000' else {}
-                label = REPRT_QUARTER[reprt]
-                by_year_period.setdefault(y, {})[label] = period
-
-                if reprt == '11011' and period:
-                    annual[y] = _enrich_derived(dict(period))
-
-    # ── 분기 단일값 산출 (DART 호출된 연도만) ──
-    quarterly = {}
-    for y in year_list:
-        if y not in years_to_fetch:
-            # 캐시에서 복원된 분기 데이터 (이미 enrich 완료)
-            for q in ['1Q', '2Q', '3Q', '4Q']:
-                quarterly[f'{q}{y[2:]}'] = by_year_period[y][q]
-            continue
-        single = _periods_to_quarterly(by_year_period.get(y, {}))
-        for q in ['1Q', '2Q', '3Q', '4Q']:
-            label = f'{q}{y[2:]}'
-            quarterly[label] = _enrich_derived(dict(single[q]))
-
-    # ── 연간 YoY 계산 ──
-    sorted_years = sorted(annual.keys())
-    for i, y in enumerate(sorted_years):
-        if i == 0:
-            annual[y]['revenue_yoy'] = None
-        else:
-            prev_y = sorted_years[i - 1]
-            annual[y]['revenue_yoy'] = yoy(annual[y].get('revenue'), annual[prev_y].get('revenue'))
-
-    # ── 분기 YoY 계산 ──
-    for y in year_list:
-        prev_y = str(int(y) - 1)
-        for q in ['1Q', '2Q', '3Q', '4Q']:
-            cur_label = f'{q}{y[2:]}'
-            prev_label = f'{q}{prev_y[2:]}'
-            cur = quarterly.get(cur_label, {})
-            prev = quarterly.get(prev_label, {})
-            cur['revenue_yoy'] = yoy(cur.get('revenue'), prev.get('revenue')) if prev else None
-
-    # ── DART에서 가져온 데이터를 Supabase에 저장 ──
-    for y in years_to_fetch:
-        if y in annual:
-            to_save.append({'period_type': 'annual', 'period_key': y, 'data': annual[y]})
-        for q in ['1Q', '2Q', '3Q', '4Q']:
-            label = f'{q}{y[2:]}'
-            if label in quarterly and any(v is not None for v in quarterly[label].values()):
-                to_save.append(
-                    {'period_type': 'quarterly', 'period_key': label, 'data': quarterly[label]}
-                )
-    _save_cache(corp_code, fs_div, to_save)
+    _save_cache(corp_code, fs_div, _collect_save_rows(years_to_fetch, annual, quarterly))
 
     result = {
         'meta': {

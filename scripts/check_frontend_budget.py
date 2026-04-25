@@ -22,12 +22,25 @@ class AssetBudget:
 
 ASSETS = (
     AssetBudget("index.html", raw_limit=20 * 1024, gzip_limit=5 * 1024),
-    AssetBudget("assets/app.css", raw_limit=72 * 1024, gzip_limit=12 * 1024),
-    AssetBudget("assets/app.js", raw_limit=60 * 1024, gzip_limit=16 * 1024),
+    AssetBudget("assets/app.css", raw_limit=2 * 1024, gzip_limit=1 * 1024),
+    AssetBudget("assets/css/base.css", raw_limit=24 * 1024, gzip_limit=6 * 1024),
+    AssetBudget("assets/css/secondary-pages.css", raw_limit=12 * 1024, gzip_limit=4 * 1024),
+    AssetBudget("assets/css/terminal.css", raw_limit=32 * 1024, gzip_limit=8 * 1024),
+    AssetBudget("assets/css/about.css", raw_limit=12 * 1024, gzip_limit=4 * 1024),
+    AssetBudget("assets/css/responsive.css", raw_limit=12 * 1024, gzip_limit=4 * 1024),
+    AssetBudget("assets/app.js", raw_limit=12 * 1024, gzip_limit=4 * 1024),
+    AssetBudget("assets/app/state.js", raw_limit=4 * 1024, gzip_limit=1 * 1024),
+    AssetBudget("assets/app/dom_utils.js", raw_limit=8 * 1024, gzip_limit=3 * 1024),
+    AssetBudget("assets/app/calendar.js", raw_limit=2 * 1024, gzip_limit=1 * 1024),
+    AssetBudget("assets/app/warning_render.js", raw_limit=24 * 1024, gzip_limit=6 * 1024),
+    AssetBudget("assets/app/chart.js", raw_limit=12 * 1024, gzip_limit=4 * 1024),
+    AssetBudget("assets/app/search.js", raw_limit=20 * 1024, gzip_limit=5 * 1024),
+    AssetBudget("assets/secondary_pages.js", raw_limit=16 * 1024, gzip_limit=6 * 1024),
+    AssetBudget("assets/trading_calendar.js", raw_limit=8 * 1024, gzip_limit=3 * 1024),
 )
 
-TOTAL_RAW_LIMIT = 150 * 1024
-TOTAL_GZIP_LIMIT = 32 * 1024
+TOTAL_RAW_LIMIT = 200 * 1024
+TOTAL_GZIP_LIMIT = 48 * 1024
 
 
 def byte_size(n: int) -> str:

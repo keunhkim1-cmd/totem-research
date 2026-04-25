@@ -1,14 +1,22 @@
-"""네이버 금융 — 종목코드 검색 & 일별 주가 조회"""
+"""네이버 금융 — 종목코드 검색 & 일별 주가 조회 (어댑터 레이어).
+
+투자경고/지정예고 관련 오케스트레이션은 lib/usecases.py로 이전됨.
+"""
 import urllib.parse
-from concurrent.futures import ThreadPoolExecutor
-from datetime import date, datetime, timezone, timedelta
 from xml.etree import ElementTree as ET
 
 from lib.cache import TTLCache
 from lib.http_client import JSON_HEADERS, request_json, request_text
 from lib.timeouts import NAVER_CODE_TIMEOUT, NAVER_OVERVIEW_TIMEOUT, NAVER_PRICE_TIMEOUT
-
-KST = timezone(timedelta(hours=9))
+from lib.warning_policy import (
+    MAX_WINDOW_DAYS,
+    MIN_PRICE_DATA_DAYS,
+    POLICY,
+    T5_LOOKBACK,
+    T5_MULTIPLIER,
+    T15_LOOKBACK,
+    T15_MULTIPLIER,
+)
 
 HEADERS = {
     **JSON_HEADERS,
@@ -171,39 +179,36 @@ def fetch_stock_overview(code: str) -> dict:
 
 
 def calc_thresholds(prices: list) -> dict:
-    """시간순(오래된→최신) 가격 리스트 → 3가지 기준가 + 충족 여부
-    prices[-1]=최신(오늘), prices[-6]=5거래일 전, prices[-16]=15거래일 전"""
-    if len(prices) < 16:
-        return {'error': f'데이터 부족 ({len(prices)}일치, 최소 16일 필요)'}
+    """시간순(오래된→최신) 가격 리스트 → 3가지 기준가 + 충족 여부.
+
+    정책(lookback, multiplier, 고가 윈도우)은 lib.warning_policy에서 가져오며
+    응답에도 'policy' 필드로 동봉되어 클라이언트 라벨 렌더가 같은 값을 사용한다.
+    """
+    if len(prices) < MIN_PRICE_DATA_DAYS:
+        return {
+            'error': f'데이터 부족 ({len(prices)}일치, 최소 {MIN_PRICE_DATA_DAYS}일 필요)'
+        }
     t_close, t_date = prices[-1]['close'], prices[-1]['date']
-    t5_close, t5_date = prices[-6]['close'], prices[-6]['date']
-    t15_close, t15_date = prices[-16]['close'], prices[-16]['date']
-    recent15 = prices[-15:]
-    max15 = max(p['close'] for p in recent15)
-    max15_date = next(p['date'] for p in recent15 if p['close'] == max15)
-    thresh1 = round(t5_close * 1.45)
-    thresh2 = round(t15_close * 1.75)
-    thresh3 = max15
+    t5_close, t5_date = prices[-(T5_LOOKBACK + 1)]['close'], prices[-(T5_LOOKBACK + 1)]['date']
+    t15_close, t15_date = (
+        prices[-(T15_LOOKBACK + 1)]['close'],
+        prices[-(T15_LOOKBACK + 1)]['date'],
+    )
+    window = prices[-MAX_WINDOW_DAYS:]
+    max_close = max(p['close'] for p in window)
+    max_date = next(p['date'] for p in window if p['close'] == max_close)
+    thresh1 = round(t5_close * T5_MULTIPLIER)
+    thresh2 = round(t15_close * T15_MULTIPLIER)
+    thresh3 = max_close
     cond1, cond2, cond3 = t_close >= thresh1, t_close >= thresh2, t_close >= thresh3
     return {
         'tClose': t_close, 'tDate': t_date,
         't5Close': t5_close, 't5Date': t5_date, 'thresh1': thresh1, 'cond1': cond1,
         't15Close': t15_close, 't15Date': t15_date, 'thresh2': thresh2, 'cond2': cond2,
-        'max15': max15, 'max15Date': max15_date, 'thresh3': thresh3, 'cond3': cond3,
+        'max15': max_close, 'max15Date': max_date, 'thresh3': thresh3, 'cond3': cond3,
         'allMet': cond1 and cond2 and cond3,
+        'policy': POLICY,
     }
-
-
-# 시장명(한글/영문) → 네이버 fchart 지수 심볼
-def _market_to_index_symbol(market: str) -> str:
-    if not market:
-        return ''
-    m = market.upper()
-    if 'KOSDAQ' in m or '코스닥' in market:
-        return 'KOSDAQ'
-    if 'KOSPI' in m or '코스피' in market or '유가증권' in market:
-        return 'KOSPI'
-    return ''
 
 
 def calc_official_escalation(stock_prices: list, index_prices: list) -> dict:
@@ -291,125 +296,3 @@ def calc_official_escalation(stock_prices: list, index_prices: list) -> dict:
     }
 
 
-def caution_search(name: str) -> dict:
-    """투자주의 → 투자경고 격상 여부 점검 (웹 API).
-
-    활성 '투자경고 지정예고' 윈도우(예고일 + 10거래일 이내)가 있으면
-    공식 [1]/[2] 조건을 계산한다.
-
-    반환 status:
-      'ok'                — 활성 지정예고 + [1]/[2] 계산 완료
-      'non_price_reason'  — 오늘 지정은 있으나 활성 예고 없음 (소수계좌 등)
-      'not_caution'       — 투자주의 이력 자체 없음 또는 활성 이력 없음
-      'code_not_found'    — 네이버 종목코드 조회 실패
-      'price_error'       — 주가/지수 조회 실패 또는 데이터 부족
-    최상위 예외는 호출자(핸들러)에서 'error' 로 감쌈.
-    """
-    # lib.krx / lib.holidays 는 런타임에 import — 순환 import 회피
-    from lib.krx import search_kind_caution
-    from lib.holidays import add_trading_days, count_trading_days
-
-    today_kst = datetime.now(KST).date().isoformat()
-    name = (name or '').strip()
-    if not name:
-        return {'status': 'not_caution', 'query': '', 'todayKst': today_kst}
-
-    results = search_kind_caution(name)
-    if not results:
-        return {'status': 'not_caution', 'query': name, 'todayKst': today_kst}
-
-    warn = results[0]
-    today_date = datetime.now(KST).date()
-    entries = warn.get('entries', [])
-
-    # 가장 최근의 '투자경고 지정예고' 행 중 판단 윈도우(예고일 + 10거래일)가
-    # 아직 유효한 것을 찾는다. entries는 최신→과거 순 정렬.
-    active_notice = None
-    for e in entries:
-        if e.get('reason') != '투자경고 지정예고':
-            continue
-        try:
-            notice_date = date.fromisoformat(e['date'])
-        except ValueError:
-            continue
-        last_judgment = add_trading_days(notice_date, 10)
-        if last_judgment >= today_date:
-            first_judgment = add_trading_days(notice_date, 1)
-            # 오늘이 몇 번째 판단일인지 (예고일 포함 거래일수 − 1)
-            try:
-                elapsed = count_trading_days(notice_date, today_date) - 1
-            except Exception:
-                elapsed = 0
-            active_notice = {
-                'noticeDate': e['date'],
-                'firstJudgmentDate': first_judgment.isoformat(),
-                'lastJudgmentDate': last_judgment.isoformat(),
-                'judgmentDayIndex': max(0, elapsed),  # 0=예고 당일, 1=첫 판단일…
-                'judgmentWindowTotal': 10,
-            }
-            break
-
-    krx_market = warn.get('market', '')
-    latest_reason = warn.get('latestDesignationReason', '')
-    latest_date   = warn.get('latestDesignationDate', '')
-
-    base_fields = {
-        'query': name, 'todayKst': today_kst,
-        'stockName': warn['stockName'],
-        'latestDesignationDate': latest_date,
-        'designationReason': latest_reason,
-        'recent15dCount': warn.get('recent15dCount', 0),
-        'allDates': warn.get('allDates', []),
-        'entries': entries,
-        'krxMarket': krx_market,
-    }
-
-    # 활성 지정예고 없음 → 오늘 지정된 다른 사유가 있으면 안내, 없으면 not_caution
-    if not active_notice:
-        if latest_date == today_kst:
-            return {'status': 'non_price_reason', **base_fields}
-        return {'status': 'not_caution', **base_fields}
-
-    base_fields['activeNotice'] = active_notice
-
-    codes = stock_code(warn['stockName'])
-    if not codes:
-        return {'status': 'code_not_found', **base_fields}
-
-    code = codes[0]['code']
-    naver_market = codes[0].get('market', '')
-    idx_symbol = _market_to_index_symbol(krx_market or naver_market)
-
-    if not idx_symbol:
-        return {
-            'status': 'price_error', **base_fields,
-            'code': code, 'market': naver_market,
-            'errorMessage': f'시장 구분 판정 실패 ({krx_market or naver_market!r})',
-        }
-
-    try:
-        with ThreadPoolExecutor(max_workers=2) as pool:
-            price_future = pool.submit(fetch_prices, code, count=30)
-            index_future = pool.submit(fetch_index_prices, idx_symbol, count=30)
-            prices = price_future.result()
-            index_prices = index_future.result()
-    except Exception as e:
-        return {
-            'status': 'price_error', **base_fields,
-            'code': code, 'market': naver_market, 'indexSymbol': idx_symbol,
-            'errorMessage': str(e),
-        }
-
-    escalation = calc_official_escalation(prices, index_prices)
-    if 'error' in escalation:
-        return {
-            'status': 'price_error', **base_fields,
-            'code': code, 'market': naver_market, 'indexSymbol': idx_symbol,
-            'errorMessage': escalation['error'],
-        }
-
-    return {
-        'status': 'ok', **base_fields,
-        'code': code, 'market': naver_market, 'indexSymbol': idx_symbol,
-        'escalation': escalation,
-    }

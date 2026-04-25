@@ -5,12 +5,12 @@ from lib.http_utils import log_event, log_exception, safe_exception_text
 from lib.krx import search_kind
 from lib.naver import (
     calc_thresholds,
-    caution_search,
     fetch_prices,
     stock_code as naver_stock_code,
 )
 from lib.telegram_messages import build_caution_message, build_warning_message
 from lib.telegram_transport import send_markdown as tg_send, send_plain as tg_send_plain
+from lib.usecases import caution_search_payload
 from lib.validation import normalize_query
 
 
@@ -154,7 +154,7 @@ def do_caution(chat_id: int, query: str):
                   error=safe_exception_text(e))
 
     try:
-        result = caution_search(query)
+        result = caution_search_payload(query)
     except Exception as e:
         tg_send_plain(chat_id, f'❌ 조회 오류: {safe_exception_text(e)}')
         return

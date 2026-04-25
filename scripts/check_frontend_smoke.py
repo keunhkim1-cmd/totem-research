@@ -56,6 +56,10 @@ def hash_json_ld(html: str) -> str:
     return "sha256-" + base64.b64encode(digest).decode()
 
 
+def css_imports(css: str) -> list[tuple[str, str]]:
+    return re.findall(r'@import url\("\./css/([^"]+?\.css)\?([^"]+)"\);', css)
+
+
 def check() -> tuple[list[str], dict[str, object]]:
     failures: list[str] = []
     html = INDEX.read_text(encoding="utf-8")
@@ -168,12 +172,86 @@ def check() -> tuple[list[str], dict[str, object]]:
         add(failures, json_ld_hash in (ROOT / "vercel.json").read_text(encoding="utf-8"), "JSON-LD hash missing from vercel.json CSP")
 
     css = (ROOT / "assets/app.css").read_text(encoding="utf-8")
+    css_modules: list[str] = []
+    imports = css_imports(css)
+    add(failures, bool(imports), "app.css must import split CSS modules")
+    if stylesheets:
+        css_version = urlsplit(stylesheets[0]).query
+        for path, version in imports:
+            add(failures, version == css_version, f"CSS module version must match app.css: {path}")
+            module_path = ROOT / "assets/css" / path
+            add(failures, module_path.is_file(), f"CSS module is missing: assets/css/{path}")
+            if module_path.is_file():
+                css_modules.append(module_path.read_text(encoding="utf-8"))
+    css_bundle = css + "\n".join(css_modules)
     js = (ROOT / "assets/app.js").read_text(encoding="utf-8")
+    secondary_pages = ROOT / "assets/secondary_pages.js"
+    trading_calendar = ROOT / "assets/trading_calendar.js"
+    add(failures, secondary_pages.is_file(), "secondary pages module is missing")
+    add(failures, trading_calendar.is_file(), "trading calendar module is missing")
+    secondary_js = secondary_pages.read_text(encoding="utf-8") if secondary_pages.is_file() else ""
+    calendar_js = trading_calendar.read_text(encoding="utf-8") if trading_calendar.is_file() else ""
+
+    # 분할된 sub-modules (assets/app/*.js)
+    state_path = ROOT / "assets/app/state.js"
+    dom_utils_path = ROOT / "assets/app/dom_utils.js"
+    warning_render_path = ROOT / "assets/app/warning_render.js"
+    chart_path = ROOT / "assets/app/chart.js"
+    search_path = ROOT / "assets/app/search.js"
+    calendar_module_path = ROOT / "assets/app/calendar.js"
+    sub_module_paths = (
+        state_path, dom_utils_path, warning_render_path,
+        chart_path, search_path, calendar_module_path,
+    )
+    for path in sub_module_paths:
+        add(failures, path.is_file(), f"sub-module missing: {path.relative_to(ROOT)}")
+    state_js = state_path.read_text(encoding="utf-8") if state_path.is_file() else ""
+    dom_utils_js = dom_utils_path.read_text(encoding="utf-8") if dom_utils_path.is_file() else ""
+
     for marker in ("@media (max-width: 767px)", "@media (max-width: 480px)", "@media (prefers-reduced-motion: reduce)"):
-        add(failures, marker in css, f"missing CSS marker {marker}")
-    for marker in ("const appState", "async function fetchJson", "window.addEventListener('error'", "window.addEventListener('unhandledrejection'"):
-        add(failures, marker in js, f"missing JS marker {marker}")
-    add(failures, js.count("fetch(") == 1, "raw fetch() should only appear in fetchJson")
+        add(failures, marker in css_bundle, f"missing CSS marker {marker}")
+    # 부트 모듈은 글로벌 에러 핸들러만 책임
+    for marker in ("window.addEventListener('error'", "window.addEventListener('unhandledrejection'"):
+        add(failures, marker in js, f"missing JS marker {marker} in app.js")
+    # 상태/페치는 분할 모듈에 위치
+    add(failures, "export const appState" in state_js, "missing 'export const appState' in app/state.js")
+    add(failures, "export async function fetchJson" in dom_utils_js, "missing 'export async function fetchJson' in app/dom_utils.js")
+
+    # 모든 versioned import의 버전이 app.js의 모듈 스크립트 버전과 일치해야 함.
+    # urlsplit("?v=20260426-4").query → "v=20260426-4", 캡처는 prefix 없음 → 슬라이스로 정렬.
+    raw_version = urlsplit(module_scripts[0]).query if module_scripts else ""
+    expected_version = raw_version.removeprefix("v=") if raw_version else ""
+    js_versioned_import_re = re.compile(
+        r"""(?:from|import)\s+['"]\.{1,2}/[^'"]+?\.js\?v=([^'"]+)['"]"""
+    )
+    tracked_js_files = [
+        ("app.js", js),
+        ("secondary_pages.js", secondary_js),
+        ("trading_calendar.js", calendar_js),
+        *((p.relative_to(ROOT).as_posix(), p.read_text(encoding="utf-8"))
+          for p in sub_module_paths if p.is_file()),
+    ]
+    for label, source in tracked_js_files:
+        for match in js_versioned_import_re.finditer(source):
+            add(
+                failures,
+                match.group(1) == expected_version,
+                f"asset version mismatch in {label}: {match.group(0)} vs app.js={expected_version}",
+            )
+    add(failures, bool(js_versioned_import_re.search(js)), "app.js must import sub-modules with versioned URLs")
+
+    for marker in ("function renderFortune", "async function renderPatchNotes"):
+        add(failures, marker in secondary_js, f"missing secondary pages marker {marker}")
+    for marker in ("function addTradingDays", "function countTradingDays"):
+        add(failures, marker in calendar_js, f"missing trading calendar marker {marker}")
+
+    # 원시 fetch( 호출은 fetchJson 내부 1곳에서만 허용 — app.js와 sub-modules 통틀어 1번
+    fetch_count = (
+        js.count("fetch(")
+        + sum(p.read_text(encoding="utf-8").count("fetch(") for p in sub_module_paths if p.is_file())
+        + secondary_js.count("fetch(")
+    )
+    add(failures, fetch_count == 1, "raw fetch() should only appear in fetchJson")
     add(failures, "alert(" not in js, "blocking alert() should not be used for app errors")
 
     add(failures, (ROOT / "robots.txt").is_file(), "robots.txt is missing")

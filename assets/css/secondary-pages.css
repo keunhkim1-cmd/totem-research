@@ -1,0 +1,232 @@
+/* 패치 노트 — Terminal release log */
+#page-patchnotes .patchnotes-terminal {
+  min-height: calc(100vh - 58px);
+  background: var(--tm-bg);
+}
+#page-patchnotes .patch-hero {
+  padding: 32px 16px 18px;
+  border-bottom: 1px solid var(--tm-hairline);
+}
+#page-patchnotes .patch-kicker {
+  color: var(--tm-text-mute);
+  font-size: var(--fs-l1);
+}
+#page-patchnotes .patch-hero h1 {
+  font-family: var(--font-display);
+  font-size: var(--fs-d1);
+  font-weight: 600;
+  color: var(--tm-text);
+  margin: 6px 0 8px;
+  letter-spacing: -0.3px;
+  line-height: 1;
+}
+#page-patchnotes .patch-hero p,
+#page-fortune .patch-hero p {
+  max-width: 620px;
+  font-size: var(--fs-b2);
+  color: var(--tm-text-dim);
+  line-height: 1.45;
+  letter-spacing: -0.12px;
+}
+#page-patchnotes .patch-list {
+  margin: 0 16px 16px;
+  background: var(--tm-panel);
+  border: 1px solid var(--tm-hairline);
+}
+#page-patchnotes .patch-list .tm-sec-head {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+  padding: 11px 16px 9px;
+  font-family: var(--font-display);
+  font-size: var(--fs-b2);
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  border-bottom: 1px solid var(--tm-hairline);
+}
+#page-patchnotes .patch-list .tm-sec-head .t {
+  color: var(--tm-text);
+  font-weight: 500;
+  border-left: 2px solid var(--tm-accent);
+  padding-left: 10px;
+}
+#page-patchnotes .patch-list .tm-sec-head .src {
+  margin-left: auto;
+  color: var(--tm-text-mute);
+  font-size: var(--fs-l1);
+  font-family: var(--mono);
+  letter-spacing: 0.3px;
+  text-transform: none;
+}
+#page-patchnotes .patch-list-body {
+  padding: 0;
+}
+#page-patchnotes .patch-entry {
+  border-bottom: 1px solid var(--tm-hairline);
+  background: var(--tm-panel);
+}
+#page-patchnotes .patch-entry:last-child {
+  border-bottom: none;
+}
+#page-patchnotes .patch-entry-head {
+  display: grid;
+  grid-template-columns: max-content minmax(0, 1fr) max-content;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 16px 10px;
+  border-bottom: 1px solid var(--tm-hairline-soft);
+}
+#page-patchnotes .patch-entry-date {
+  font-family: var(--mono);
+  font-size: var(--fs-l1);
+  color: var(--tm-text-mute);
+  letter-spacing: 0.3px;
+  justify-self: end;
+  text-align: right;
+}
+#page-patchnotes .patch-entry-tag {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  justify-self: start;
+  width: max-content;
+  font-family: var(--font-display);
+  font-size: var(--fs-l1);
+  font-weight: 600;
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+  padding: 2px 8px;
+  border: 1px solid var(--tm-accent);
+  background: var(--tm-accent-soft);
+  color: var(--tm-accent);
+}
+#page-patchnotes .patch-entry-tag.fix {
+  border-color: var(--tm-up);
+  background: var(--tm-up-soft);
+  color: var(--tm-up);
+}
+#page-patchnotes .patch-entry-tag.improve {
+  border-color: var(--tm-amber);
+  background: var(--tm-amber-soft);
+  color: var(--tm-amber);
+}
+#page-patchnotes .patch-entry-tag.chore {
+  border-color: var(--tm-text-mute);
+  background: transparent;
+  color: var(--tm-text-mute);
+}
+#page-patchnotes .patch-entry-title {
+  min-width: 0;
+  color: var(--tm-text);
+  font-size: var(--fs-b2);
+  font-weight: 500;
+  line-height: 1.45;
+  overflow-wrap: anywhere;
+}
+#page-patchnotes .patch-entry-items {
+  list-style: none;
+  padding: 4px 0;
+  margin: 0;
+}
+#page-patchnotes .patch-entry-items li {
+  display: grid;
+  grid-template-columns: 44px minmax(0, 1fr);
+  gap: 12px;
+  padding: 8px 16px;
+  border-bottom: 1px solid var(--tm-hairline-soft);
+  color: var(--tm-text-dim);
+  font-size: var(--fs-b2);
+  line-height: 1.45;
+  letter-spacing: 0;
+}
+#page-patchnotes .patch-entry-items li:last-child {
+  border-bottom: none;
+}
+#page-patchnotes .patch-entry-items .k {
+  color: var(--tm-text-mute);
+  font-family: var(--mono);
+  font-size: var(--fs-l1);
+  font-variant-numeric: tabular-nums;
+}
+#page-patchnotes .patch-entry-items .v {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+/* 오늘의 운세 — date-locked condition check */
+#page-fortune .fortune-terminal {
+  min-height: calc(100vh - 58px);
+  background: var(--tm-bg);
+}
+#page-fortune .patch-hero {
+  padding: 32px 16px 18px;
+  border-bottom: 1px solid var(--tm-hairline);
+}
+#page-fortune .patch-kicker {
+  color: var(--tm-text-mute);
+  font-size: var(--fs-l1);
+}
+#page-fortune .patch-hero h1 {
+  font-family: var(--font-display);
+  font-size: var(--fs-d1);
+  font-weight: 600;
+  color: var(--tm-text);
+  margin: 6px 0 8px;
+  letter-spacing: -0.3px;
+  line-height: 1;
+}
+#page-fortune .fortune-panel {
+  margin: 0 16px 16px;
+  background: var(--tm-panel);
+  border: 1px solid var(--tm-hairline);
+  min-width: 0;
+}
+#page-fortune .fortune-panel .tm-sec-head {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+  padding: 11px 16px 9px;
+  font-family: var(--font-display);
+  font-size: var(--fs-b2);
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  border-bottom: 1px solid var(--tm-hairline);
+  min-width: 0;
+}
+#page-fortune .fortune-panel .tm-sec-head .t {
+  color: var(--tm-text);
+  font-weight: 500;
+  border-left: 2px solid var(--tm-accent);
+  padding-left: 10px;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+#page-fortune .fortune-panel .tm-sec-head .src {
+  margin-left: auto;
+  color: var(--tm-text-mute);
+  font-size: var(--fs-l1);
+  font-family: var(--mono);
+  letter-spacing: 0.3px;
+  text-transform: none;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+#page-fortune .fortune-content {
+  padding: 0;
+  min-width: 0;
+}
+#page-fortune .fortune-message {
+  margin: 0;
+  padding: 16px;
+  text-align: left;
+  color: var(--tm-text);
+  font-family: var(--font-text);
+  font-size: var(--fs-b2);
+  font-weight: 400;
+  line-height: 1.45;
+  letter-spacing: -0.12px;
+  word-break: keep-all;
+  overflow-wrap: anywhere;
+}

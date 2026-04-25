@@ -7,7 +7,6 @@
 import http.server
 import socketserver
 import os
-import json
 import urllib.parse
 
 DIRECTORY = os.path.dirname(os.path.abspath(__file__))
@@ -41,29 +40,15 @@ def _env_int(name: str, default: int) -> int:
 _load_local_env('.env.local')
 _load_local_env('.env')
 
-from lib.errors import DartError
-from lib.financial_api_security import auth_error, client_id, rate_limit_error
+from lib.api_routes import ROUTES_BY_PATH, dispatch
 from lib.http_utils import (
     STATIC_CSP,
-    api_error_payload,
-    api_success_payload,
-    send_json_headers,
     send_options_response,
     send_security_headers,
-)
-from lib.usecases import (
-    caution_search_payload,
-    dart_search_payload,
-    financial_model_payload,
-    stock_code_payload,
-    stock_overview_payload,
-    stock_price_payload,
-    warning_search_payload,
 )
 
 HOST = os.environ.get('HOST', '127.0.0.1')
 PORT = _env_int('PORT', 5173)
-FINANCIAL_ALLOWED_HEADERS = 'Authorization, X-API-Key, X-Financial-Model-Token, Content-Type'
 FORBIDDEN_PATH_PARTS = {
     '.env',
     '.git',
@@ -102,26 +87,11 @@ class Handler(http.server.SimpleHTTPRequestHandler):
     def log_message(self, fmt, *args):
         print(f'[{self.address_string()}] {fmt % args}')
 
-    def send_json(self, data, status=200, allow_headers=None, cache_control=None):
-        body = json.dumps(data, ensure_ascii=False).encode('utf-8')
-        self.send_response(status)
-        send_json_headers(self, allow_headers=allow_headers, cache_control=cache_control)
-        self.send_header('Content-Length', str(len(body)))
-        self.end_headers()
-        self.wfile.write(body)
-
-    def send_financial_json(self, data, status=200):
-        self.send_json(
-            data,
-            status,
-            allow_headers=FINANCIAL_ALLOWED_HEADERS,
-            cache_control='no-store',
-        )
-
     def do_OPTIONS(self):
         parsed = urllib.parse.urlparse(self.path)
-        if parsed.path == '/api/financial-model':
-            send_options_response(self, allow_headers=FINANCIAL_ALLOWED_HEADERS)
+        route = ROUTES_BY_PATH.get(parsed.path)
+        if route:
+            send_options_response(self, allow_headers=route.allow_headers)
             return
         if parsed.path.startswith('/api/'):
             send_options_response(self)
@@ -140,133 +110,10 @@ class Handler(http.server.SimpleHTTPRequestHandler):
             return
 
         parsed = urllib.parse.urlparse(self.path)
-        qs = urllib.parse.parse_qs(parsed.query)
-
-        if parsed.path == '/api/warn-search':
-            try:
-                self.send_json(api_success_payload(
-                    warning_search_payload(qs.get('name', [''])[0])))
-            except ValueError as e:
-                self.send_json(api_error_payload('VALIDATION_ERROR', str(e)), 400)
-            except Exception:
-                self.send_json(api_error_payload(
-                    'INTERNAL_ERROR',
-                    '서버 오류가 발생했습니다.',
-                ), 500)
-            return
-
-        if parsed.path == '/api/caution-search':
-            try:
-                self.send_json(api_success_payload(
-                    caution_search_payload(qs.get('name', [''])[0])))
-            except ValueError as e:
-                self.send_json(api_error_payload(
-                    'VALIDATION_ERROR',
-                    str(e),
-                    legacy_key='errorMessage',
-                    status_value='error',
-                ), 400)
-            except Exception:
-                self.send_json(api_error_payload(
-                    'INTERNAL_ERROR',
-                    '서버 오류가 발생했습니다.',
-                    legacy_key='errorMessage',
-                    status_value='error',
-                ), 500)
-            return
-
-        if parsed.path == '/api/stock-code':
-            try:
-                self.send_json(api_success_payload(
-                    stock_code_payload(qs.get('name', [''])[0])))
-            except ValueError as e:
-                self.send_json(api_error_payload('VALIDATION_ERROR', str(e)), 400)
-            except Exception:
-                self.send_json(api_error_payload(
-                    'INTERNAL_ERROR',
-                    '서버 오류가 발생했습니다.',
-                ), 500)
-            return
-
-        if parsed.path == '/api/stock-price':
-            try:
-                self.send_json(api_success_payload(
-                    stock_price_payload(qs.get('code', [''])[0])))
-            except ValueError as e:
-                self.send_json(api_error_payload('VALIDATION_ERROR', str(e)), 400)
-            except Exception:
-                self.send_json(api_error_payload(
-                    'INTERNAL_ERROR',
-                    '서버 오류가 발생했습니다.',
-                ), 500)
-            return
-
-        if parsed.path == '/api/stock-overview':
-            try:
-                self.send_json(api_success_payload(
-                    stock_overview_payload(qs.get('code', [''])[0])))
-            except ValueError as e:
-                self.send_json(api_error_payload('VALIDATION_ERROR', str(e)), 400)
-            except Exception:
-                self.send_json(api_error_payload(
-                    'INTERNAL_ERROR',
-                    '서버 오류가 발생했습니다.',
-                ), 500)
-            return
-
-        if parsed.path == '/api/dart-search':
-            try:
-                data = dart_search_payload(
-                    corp_code=qs.get('corp_code', [''])[0],
-                    bgn_de=qs.get('bgn_de', [''])[0],
-                    end_de=qs.get('end_de', [''])[0],
-                    page_no=qs.get('page_no', ['1'])[0],
-                    page_count=qs.get('page_count', ['20'])[0],
-                    pblntf_ty=qs.get('pblntf_ty', [''])[0],
-                )
-                self.send_json(api_success_payload(data))
-            except ValueError as e:
-                self.send_json(api_error_payload('VALIDATION_ERROR', str(e)), 400)
-            except DartError as e:
-                self.send_json(api_error_payload(
-                    e.code,
-                    e.message,
-                    details=e.details,
-                ), e.http_status)
-            except Exception:
-                self.send_json(api_error_payload(
-                    'INTERNAL_ERROR',
-                    '서버 오류가 발생했습니다.',
-                ), 500)
-            return
-
-        if parsed.path == '/api/financial-model':
-            auth = auth_error(self.headers)
-            if auth:
-                status, message = auth
-                code = 'ENDPOINT_NOT_CONFIGURED' if status == 503 else 'AUTH_REQUIRED'
-                self.send_financial_json(api_error_payload(code, message), status); return
-            limited = rate_limit_error(client_id(self.headers, getattr(self, 'client_address', None)))
-            if limited:
-                status, message = limited
-                self.send_financial_json(api_error_payload('RATE_LIMITED', message), status); return
-            try:
-                data = financial_model_payload(
-                    corp_code=qs.get('corp_code', [''])[0],
-                    fs_div=qs.get('fs_div', ['CFS'])[0],
-                    years=qs.get('years', ['5'])[0],
-                )
-                self.send_financial_json(api_success_payload(data))
-            except ValueError:
-                self.send_financial_json(api_error_payload(
-                    'VALIDATION_ERROR',
-                    '잘못된 파라미터 형식',
-                ), 400); return
-            except Exception:
-                self.send_financial_json(api_error_payload(
-                    'INTERNAL_ERROR',
-                    '서버 오류가 발생했습니다.',
-                ), 500)
+        route = ROUTES_BY_PATH.get(parsed.path)
+        if route:
+            qs = urllib.parse.parse_qs(parsed.query)
+            dispatch(self, route, qs)
             return
 
         super().do_GET()

@@ -46,6 +46,16 @@ When adding a new external API:
 7. Add `.env.example`, `SECURITY.md`, and `OPERATIONS.md` entries for new envs.
 8. Add unit tests with provider calls mocked behind the adapter boundary.
 
+## API Response Contract
+
+All JSON endpoints should return `ok: true` on success and `ok: false` with
+`errorInfo.code` and `errorInfo.message` on failure.
+
+Do not add new top-level legacy error fields. The only intentional
+`errorMessage` compatibility surface is `/api/caution-search`, including the
+matching local-server route in `serve.py`, while older caution clients finish
+migrating to `errorInfo.message`.
+
 ## DART Adapter Rules
 
 Use `lib/dart_base.py` for DART API key injection, URL construction, bytes/JSON
