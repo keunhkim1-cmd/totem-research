@@ -244,7 +244,7 @@ function fortuneIndex(dateKey, size) {
 
 function renderFortune() {
   const container = document.getElementById('fortuneContent');
-  const dateEl = document.getElementById('fortuneDate');
+  const titleEl = document.getElementById('fortunePanelTitle');
   if (!container) return;
   const dateInfo = getKstDateInfo();
   if (appState.fortune.dateKey === dateInfo.key && container.innerHTML) return;
@@ -255,7 +255,8 @@ function renderFortune() {
     ['운용역 메모', item.memo],
     ['피해야 할 행동', item.avoid],
   ];
-  if (dateEl) dateEl.textContent = `KST ${dateInfo.label}`;
+  const [, month, day] = dateInfo.key.split('-');
+  if (titleEl) titleEl.textContent = `${month}월 ${day}일 운세`;
   container.innerHTML = `
     <div class="fortune-list" role="list">
       ${rows.map(([label, text]) => `
