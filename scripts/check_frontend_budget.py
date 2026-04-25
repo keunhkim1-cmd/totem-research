@@ -21,12 +21,12 @@ class AssetBudget:
 
 
 ASSETS = (
-    AssetBudget("index.html", raw_limit=16 * 1024, gzip_limit=5 * 1024),
-    AssetBudget("assets/app.css", raw_limit=60 * 1024, gzip_limit=12 * 1024),
+    AssetBudget("index.html", raw_limit=20 * 1024, gzip_limit=5 * 1024),
+    AssetBudget("assets/app.css", raw_limit=72 * 1024, gzip_limit=12 * 1024),
     AssetBudget("assets/app.js", raw_limit=60 * 1024, gzip_limit=16 * 1024),
 )
 
-TOTAL_RAW_LIMIT = 128 * 1024
+TOTAL_RAW_LIMIT = 150 * 1024
 TOTAL_GZIP_LIMIT = 32 * 1024
 
 

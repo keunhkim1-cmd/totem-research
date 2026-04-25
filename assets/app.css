@@ -1805,7 +1805,7 @@ body:is(.is-warning-active, .is-terminal-active) .ticker-item::before {
   color: var(--tm-text-mute);
 }
 
-/* ─── TOTEME — Terminal About Page ─── */
+/* ─── TOTEM — Terminal About Page ─── */
 #page-about .about-terminal {
   min-height: calc(100vh - 58px);
   background: var(--tm-bg);

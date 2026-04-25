@@ -1,10 +1,10 @@
-# TOTEME · Logo System
+# TOTEM · Logo System
 
-The brand mark for `toteme / research` — a personal Korean equity research
+The brand mark for `totem / research` — a personal Korean equity research
 terminal. This document is the source of truth for logo usage, spacing, color,
 and code. When in doubt, refer here before introducing variations.
 
-![toteme / research hero](assets/logo-hero.svg)
+![totem / research hero](assets/logo-hero.svg)
 
 ---
 
@@ -17,11 +17,11 @@ exploration (see `logo-mockups.html`):
   from the segmented carving of a totem pole. Reads as "stack" and
   "structure" — appropriate for a tool that processes stacked time-series
   market data.
-- **Lockup (variant 01)** — `toteme / research` slash subtitle. The slash
+- **Lockup (variant 01)** — `totem / research` slash subtitle. The slash
   evokes a CLI / dev-tool register, and the secondary `research` tag makes the
   brand's purpose readable without a tagline.
 
-Final lockup: **`▤ toteme / research`** (mark + wordmark + slash + tag).
+Final lockup: **`▤ totem / research`** (mark + wordmark + slash + tag).
 
 ---
 
@@ -30,7 +30,7 @@ Final lockup: **`▤ toteme / research`** (mark + wordmark + slash + tag).
 ```
 ┌──────────┬────────────────┬───┬────────────┐
 │   MARK   │   WORDMARK     │ / │    TAG     │
-│ (4 bars) │   "toteme"     │   │ "research" │
+│ (4 bars) │   "totem"     │   │ "research" │
 └──────────┴────────────────┴───┴────────────┘
    center      baseline       baseline   baseline
 ```
@@ -38,7 +38,7 @@ Final lockup: **`▤ toteme / research`** (mark + wordmark + slash + tag).
 | Part | Element | Role |
 |------|---------|------|
 | Mark | 4 stacked bars | Iconic identifier; works alone as favicon |
-| Wordmark | `toteme` | Primary brand name, lowercase |
+| Wordmark | `totem` | Primary brand name, lowercase |
 | Separator | `/` | Soft divider, lighter weight |
 | Tag | `research` | Category/scope label, smaller and muted |
 
@@ -75,7 +75,7 @@ provided SVGs use `prefers-color-scheme` to flip automatically.
 
 Fallback stack: `'SF Pro Display','Helvetica Neue',Helvetica,Arial,sans-serif`.
 
-**Wordmark is always lowercase.** Never `TOTEME`, never title-case.
+**Wordmark is always lowercase.** Never `TOTEM`, never title-case.
 
 ---
 
@@ -116,7 +116,7 @@ separator + tag : var(--tm-text-mute) /* #7A7A7E */
 ### Alignment rules
 - Container: `display: inline-flex; align-items: baseline; line-height: 1`
 - Wordmark / separator / tag: **baseline-aligned** so the smaller `research`
-  sits at the bottom edge of `toteme`.
+  sits at the bottom edge of `totem`.
 - Mark: **`align-self: center`** — vertically centered against the wordmark
   cap-height, NOT baseline-aligned. (Baseline-aligning the mark would push it
   below the text.)
@@ -138,14 +138,14 @@ separator + tag : var(--tm-text-mute) /* #7A7A7E */
 
 ### HTML pattern
 ```html
-<a href="/" class="brand-lockup" aria-label="toteme / research">
+<a href="/" class="brand-lockup" aria-label="totem / research">
   <svg class="mark" viewBox="0 0 26 25" aria-hidden="true">
     <rect x="0" y="0"  width="26" height="4" rx="1.5"/>
     <rect x="4" y="7"  width="18" height="4" rx="1.5"/>
     <rect x="0" y="14" width="26" height="4" rx="1.5"/>
     <rect x="7" y="21" width="12" height="4" rx="1.5"/>
   </svg>
-  <span class="text">toteme</span>
+  <span class="text">totem</span>
   <span class="sep" aria-hidden="true">/</span>
   <span class="tag">research</span>
 </a>
@@ -156,7 +156,7 @@ separator + tag : var(--tm-text-mute) /* #7A7A7E */
 ## 7. Do's and Don'ts
 
 ### Do
-- Use lowercase `toteme` — always.
+- Use lowercase `totem` — always.
 - Keep the four-bar pattern with the exact width sequence (26/18/26/12).
 - Baseline-align the text spans so `research` sits at the bottom.
 - Center the mark vertically against the wordmark cap-height
@@ -167,7 +167,7 @@ separator + tag : var(--tm-text-mute) /* #7A7A7E */
   `app.css` and `app.js` in `index.html`).
 
 ### Don't
-- Don't use `TOTEME` in caps anywhere on the page (meta tags can stay caps).
+- Don't use `TOTEM` in caps anywhere on the page (meta tags can stay caps).
 - Don't replace bars with circles, triangles, or any other geometry.
 - Don't recolor the bars — they are monochromatic.
 - Don't separate the mark from the wordmark in primary brand placements
@@ -222,5 +222,5 @@ or from `favicon.svg` for square icon contexts.
 - **2026-04-25** — Final lockup applied site-wide. Eight variants explored;
   `bars mark` (#05) + `slash subtitle` (#01) selected. See commit
   `1f6831b` for the rebrand and `8898295` for the baseline-alignment fix.
-- **Pre-rebrand** — Brand was `Shamanism Research` / `TOTEME` (caps).
+- **Pre-rebrand** — Brand was `Shamanism Research` / `TOTEM` (caps).
   Replaced with the new lockup system.
