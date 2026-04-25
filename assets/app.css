@@ -579,7 +579,8 @@ select option { background: var(--surface2); }
   letter-spacing: 0;
   line-height: 1.1;
 }
-#page-patchnotes .patch-hero p {
+#page-patchnotes .patch-hero p,
+#page-fortune .patch-hero p {
   max-width: 620px;
   font-size: 13px;
   color: var(--tm-text-dim);
