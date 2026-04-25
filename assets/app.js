@@ -184,42 +184,24 @@ function switchPage(page, el) {
 document.body.classList.add('is-warning-active', 'is-terminal-active');
 
 const fortuneDeck = [
-  {
-    market: '소음이 조금 크게 들리는 날입니다. 첫 반응을 늦추고 숫자와 기분을 분리해 보세요.',
-    risk: '피로도가 높으면 작은 변화도 크게 보일 수 있습니다. 화면을 오래 붙잡고 있는지 먼저 확인하세요.',
-    memo: '관찰한 사실과 느낀 감정을 한 줄씩 나눠 적으면 생각의 온도가 내려갑니다.',
-    avoid: '확인하지 않은 이야기를 기준으로 오늘의 리듬을 바꾸기.',
-  },
-  {
-    market: '흐름보다 맥락이 잘 보이는 날입니다. 빠른 결론보다 차분한 비교가 어울립니다.',
-    risk: '일정이 촘촘할수록 실수 확률이 올라갑니다. 중요한 확인은 한 번 쉬고 다시 보세요.',
-    memo: '오늘의 좋은 기록은 짧고 건조한 문장입니다. 느낌표보다 근거를 남기는 쪽이 편합니다.',
-    avoid: '졸리거나 급한 상태에서 여러 화면을 동시에 열어두기.',
-  },
-  {
-    market: '분위기에 휩쓸리기 쉬운 날입니다. 크게 보이는 말일수록 출처와 시간을 따로 확인하세요.',
-    risk: '새로운 정보보다 오래된 가정이 더 위험할 수 있습니다. 이미 알고 있다고 여긴 부분을 점검하세요.',
-    memo: '메모의 첫 줄은 결론이 아니라 질문으로 시작해도 좋습니다. 오늘은 질문이 방향을 잡아줍니다.',
-    avoid: '짧은 문구 하나로 하루 전체의 판단을 단정하기.',
-  },
-  {
-    market: '숫자보다 사람들의 반응이 먼저 눈에 들어오는 날입니다. 반응과 사실을 같은 칸에 두지 마세요.',
-    risk: '집중력이 끊기면 같은 내용을 반복해서 확인하게 됩니다. 확인 횟수보다 확인 품질을 보세요.',
-    memo: '오늘의 메모는 세 줄이면 충분합니다. 본 것, 모르는 것, 내일 다시 볼 것을 나눠 적어보세요.',
-    avoid: '불안해서 새로고침을 반복하거나, 확인 전 알림에 바로 반응하기.',
-  },
-  {
-    market: '차분한 관찰이 잘 맞는 날입니다. 눈에 띄는 변화보다 반복되는 패턴을 천천히 보세요.',
-    risk: '확신이 강해질수록 놓치는 항목이 생깁니다. 반대 근거를 하나만 찾아보는 습관이 도움이 됩니다.',
-    memo: '운용역 메모: 오늘은 빠른 판단보다 깔끔한 정리가 더 남는 날. 기록의 형식을 먼저 맞춥니다.',
-    avoid: '기분이 좋다는 이유로 확인 절차를 줄이기.',
-  },
-  {
-    market: '정보의 양이 많아 보일 수 있습니다. 전부 해석하려 하기보다 오늘 볼 범위를 먼저 정하세요.',
-    risk: '컨디션이 흔들리면 문장이 공격적으로 읽힐 수 있습니다. 강한 표현은 한 번 더 부드럽게 번역하세요.',
-    memo: '운용역 메모: 새로움보다 일관성을 점검합니다. 같은 기준으로 다시 본 내용이 더 믿을 만합니다.',
-    avoid: '정리되지 않은 링크를 계속 열어두고 집중력을 쪼개기.',
-  },
+  '오늘은 물을 조심하세요.',
+  '뜻밖의 인연이 가까이 다가옵니다.',
+  '서두르지 않으면 좋은 소식이 들려옵니다.',
+  '말 한마디가 새로운 길을 엽니다.',
+  '오래된 약속이 오늘의 답을 가져옵니다.',
+  '낯선 길에서 익숙한 마음을 만나게 됩니다.',
+  '잠시 멈춰 서면 더 멀리 보입니다.',
+  '작은 친절이 큰 행운으로 돌아옵니다.',
+  '오늘 본 사소한 일이 내일의 단서가 됩니다.',
+  '잊고 있던 이름이 문득 떠오를 것입니다.',
+  '한 번 더 묻는 사람이 길을 찾습니다.',
+  '오늘은 동쪽으로 난 창을 한 번 열어 보세요.',
+  '소중한 인연을 만날지도 모릅니다.',
+  '오래 미뤄둔 답장이 마음을 가볍게 합니다.',
+  '예상치 못한 곳에서 작은 선물이 옵니다.',
+  '오늘은 침묵이 가장 좋은 대답입니다.',
+  '낡은 물건 하나가 새로운 의미를 얻습니다.',
+  '서쪽 하늘을 보면 마음이 정리됩니다.',
 ];
 
 function getKstDateInfo(now = new Date()) {
@@ -248,24 +230,12 @@ function renderFortune() {
   if (!container) return;
   const dateInfo = getKstDateInfo();
   if (appState.fortune.dateKey === dateInfo.key && container.innerHTML) return;
-  const item = fortuneDeck[fortuneIndex(dateInfo.key, fortuneDeck.length)];
-  const rows = [
-    ['오늘의 시장 감각', item.market],
-    ['리스크 체크', item.risk],
-    ['운용역 메모', item.memo],
-    ['피해야 할 행동', item.avoid],
-  ];
+  const message = fortuneDeck[fortuneIndex(dateInfo.key, fortuneDeck.length)];
   const [, month, day] = dateInfo.key.split('-');
   if (titleEl) titleEl.textContent = `${month}월 ${day}일 운세`;
   container.innerHTML = `
-    <div class="fortune-list" role="list">
-      ${rows.map(([label, text]) => `
-        <article class="fortune-row" role="listitem">
-          <div class="fortune-label">${escHtml(label)}</div>
-          <p>${escHtml(text)}</p>
-        </article>`).join('')}
-    </div>
-    <p class="fortune-note">재미용 컨디션 점검 문구입니다. 특정 자산이나 행동을 권하지 않습니다.</p>`;
+    <p class="fortune-message">${escHtml(message)}</p>
+    <p class="fortune-note">재미로 보는 한 줄 운세입니다.</p>`;
   appState.fortune.dateKey = dateInfo.key;
 }
 

@@ -767,39 +767,18 @@ select option { background: var(--surface2); }
   padding: 0;
   min-width: 0;
 }
-#page-fortune .fortune-list {
-  min-width: 0;
-}
-#page-fortune .fortune-row {
-  display: grid;
-  grid-template-columns: minmax(118px, 150px) minmax(0, 1fr);
-  align-items: start;
-  gap: 14px;
-  padding: 14px 16px;
-  border-bottom: 1px solid var(--tm-hairline-soft);
-  min-width: 0;
-}
-#page-fortune .fortune-row:last-child {
-  border-bottom: none;
-}
-#page-fortune .fortune-label {
-  color: var(--tm-accent);
-  font-family: var(--font-display);
-  font-size: 11px;
-  font-weight: 600;
-  letter-spacing: 1px;
-  line-height: 1.45;
-  min-width: 0;
-  overflow-wrap: anywhere;
-}
-#page-fortune .fortune-row p {
-  min-width: 0;
+#page-fortune .fortune-message {
   margin: 0;
-  color: var(--tm-text-dim);
-  font-size: 13px;
-  line-height: 1.65;
-  overflow-wrap: anywhere;
+  padding: 36px 24px;
+  text-align: center;
+  color: var(--tm-text);
+  font-family: var(--font-display);
+  font-size: 20px;
+  font-weight: 500;
+  line-height: 1.55;
+  letter-spacing: 0.2px;
   word-break: keep-all;
+  overflow-wrap: anywhere;
 }
 #page-fortune .fortune-note {
   margin: 0;
@@ -808,6 +787,7 @@ select option { background: var(--surface2); }
   color: var(--tm-text-mute);
   font-size: 11px;
   line-height: 1.6;
+  text-align: center;
   min-width: 0;
   overflow-wrap: anywhere;
 }
@@ -2125,9 +2105,9 @@ body:is(.is-warning-active, .is-terminal-active) .ticker-item::before {
     margin-left: 0;
     flex-basis: 100%;
   }
-  #page-fortune .fortune-row {
-    grid-template-columns: 1fr;
-    gap: 6px;
+  #page-fortune .fortune-message {
+    padding: 28px 16px;
+    font-size: 18px;
   }
   #page-warning .tm-sym { flex-wrap: wrap; gap: 10px; }
   #page-warning .tm-sym .chips { order: 3; margin-left: 0; width: 100%; }
@@ -2175,7 +2155,7 @@ body:is(.is-warning-active, .is-terminal-active) .ticker-item::before {
     padding-right: 12px;
   }
   #page-fortune .fortune-panel .tm-sec-head,
-  #page-fortune .fortune-row,
+  #page-fortune .fortune-message,
   #page-fortune .fortune-note {
     padding-left: 12px;
     padding-right: 12px;
