@@ -780,7 +780,7 @@ select option { background: var(--surface2); }
 #page-fortune .fortune-message {
   margin: 0;
   padding: 16px;
-  text-align: center;
+  text-align: left;
   color: var(--tm-text);
   font-family: var(--font-text);
   font-size: var(--fs-b2);
@@ -798,7 +798,7 @@ select option { background: var(--surface2); }
   font-size: var(--fs-b2);
   line-height: 1.45;
   letter-spacing: -0.12px;
-  text-align: center;
+  text-align: left;
   min-width: 0;
   overflow-wrap: anywhere;
 }
@@ -854,7 +854,7 @@ select option { background: var(--surface2); }
 .stage-text strong { color: var(--text); }
 
 .footnote {
-  text-align: center; font-size: var(--fs-b2); color: var(--text-muted); margin-top: 32px;
+  text-align: left; font-size: var(--fs-b2); color: var(--text-muted); margin-top: 32px;
   letter-spacing: -0.12px;
 }
 
