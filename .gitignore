@@ -16,5 +16,6 @@ htmlcov/
 .vercel
 .env*.local
 
-# Claude Code dev config
-.claude/
+# Claude Code dev config (keep shared slash commands)
+.claude/*
+!.claude/commands/
