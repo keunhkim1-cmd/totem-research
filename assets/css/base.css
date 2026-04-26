@@ -147,7 +147,7 @@ body {
   transition: color 0.2s;
 }
 .nav-title .brand-mark {
-  height: 22px;
+  height: 14px;
   width: auto;
   fill: currentColor;
   display: block;
@@ -155,20 +155,20 @@ body {
   align-self: center;
 }
 .nav-title .brand-text {
-  font-size: var(--fs-b1);
+  font-size: 18px;
   font-weight: 600;
   letter-spacing: -0.3px;
   line-height: 1;
   color: var(--text);
 }
 .nav-title .brand-sep {
-  font-size: var(--fs-b1);
-  font-weight: 400;
+  font-size: 18px;
+  font-weight: 300;
   line-height: 1;
   color: var(--text-muted);
 }
 .nav-title .brand-tag {
-  font-size: var(--fs-b2);
+  font-size: var(--fs-b1);
   font-weight: 400;
   letter-spacing: 0;
   line-height: 1;
@@ -179,17 +179,18 @@ body {
 .nav-item {
   flex: none;
   height: 50px;
-  padding: 0 14px;
+  padding: 0 14px 16px;
   font-family: var(--font-display);
   font-size: var(--fs-b2);
   font-weight: 500;
+  line-height: 1;
   color: var(--text-muted);
   letter-spacing: 0.8px;
   text-transform: uppercase;
   cursor: pointer;
   border: none; background: none;
   border-bottom: 2px solid transparent;
-  display: flex; align-items: center;
+  display: flex; align-items: flex-end;
   transition: color 0.2s;
 }
 .nav-item:hover { color: var(--text-secondary); }

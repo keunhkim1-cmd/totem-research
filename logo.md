@@ -108,10 +108,14 @@ separator + tag : var(--tm-text-mute) /* #7A7A7E */
 
 | Context         | Mark height | Wordmark | Sep | Tag | Gap | Mark→text |
 |-----------------|------------:|---------:|----:|----:|----:|----------:|
-| Nav bar (30px)  | 14px        | 13px     | 13px| 11px| 4px | 2px       |
-| About hero      | 26px        | 32px     | 32px| 16px| 6px | 4px       |
+| Nav bar (50px)  | 14px        | 18px     | 18px| 14px| 4px | 2px       |
+| About hero      | 22px        | 28px     | 28px| 14px| 6px | 4px       |
 | Standalone logo | 25px (svg)  | 26px     | 26px| 14px| (in svg) | (in svg) |
 | Hero showcase   | 45px        | 56px     | 56px| 24px| (in svg) | (in svg) |
+
+Mark / wordmark ratio is **~0.78** in nav and hero — the mark sits inside
+the wordmark cap-height, not above it. Preserve this ratio when rescaling
+either context.
 
 ### Alignment rules
 - Container: `display: inline-flex; align-items: baseline; line-height: 1`
@@ -164,7 +168,10 @@ separator + tag : var(--tm-text-mute) /* #7A7A7E */
 - Use `currentColor` on bars so the mark inherits its container's color.
 - Keep the separator weight 300 — visibly lighter than the wordmark.
 - Bust browser caches when changing CSS (`?v=YYYYMMDD-N` query string on
-  `app.css` and `app.js` in `index.html`).
+  `app.css` and `app.js` in `index.html`). When the CSS change is in a
+  file imported by `app.css` (e.g. `css/base.css`), bump **both** the
+  `@import` query in `app.css` AND the `app.css` query in `index.html` —
+  bumping only the outer one keeps the inner `@import` URL cached.
 
 ### Don't
 - Don't use `TOTEM` in caps anywhere on the page (meta tags can stay caps).
@@ -183,6 +190,11 @@ separator + tag : var(--tm-text-mute) /* #7A7A7E */
   `align-self: center` on the lockup so it keeps its content height and is
   centered in the parent. (Bit us in the nav-bar, where `.nav-inner` stretches
   children to 30px.)
+- Don't rescale nav-bar height without rescaling mark + wordmark together.
+  Keep mark/wordmark ≈ 0.78 (the hero ratio) so the mark sits inside the
+  wordmark cap-height. (Bit us in `d212d89`: bar 30→50px scaled wordmark
+  1.17× but mark 1.57×, so the mark dominated the lockup and the alignment
+  visually broke.)
 
 ---
 
