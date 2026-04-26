@@ -52,8 +52,7 @@ export function createSecondaryPageRenderers({
     const dateInfo = getKstDateInfo();
     if (appState.fortune.dateKey === dateInfo.key && container.innerHTML) return;
     const message = fortuneDeck[fortuneIndex(dateInfo.key, fortuneDeck.length)];
-    const [, month, day] = dateInfo.key.split('-');
-    if (titleEl) titleEl.textContent = `${month}월 ${day}일 운세`;
+    if (titleEl) titleEl.textContent = '행운이 함께하기를!';
     container.innerHTML = `
       <button type="button" class="fortune-cookie" aria-label="오늘의 운세 열기">🥠</button>`;
     appState.fortune.dateKey = dateInfo.key;
