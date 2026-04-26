@@ -161,16 +161,19 @@ def dispatch(handler, route: ApiRoute, qs: dict) -> None:
     )
 
 
-def make_handler(route: ApiRoute):
-    """``api/*.py``에서 한 줄로 사용할 BaseHTTPRequestHandler 서브클래스 생성."""
+class RouteHandler(BaseHTTPRequestHandler):
+    """``api/*.py`` shim의 베이스 클래스.
 
-    class handler(BaseHTTPRequestHandler):
-        def do_OPTIONS(self):
-            send_options_response(self, allow_headers=route.allow_headers)
+    Vercel ``@vercel/python`` 빌더는 정적 분석으로 ``class handler(...)``
+    선언을 찾으므로 각 api 파일은 이 클래스를 상속한 ``class handler``를
+    선언하고 클래스 변수 ``route``에 ``ROUTES_BY_PATH[...]``를 할당한다.
+    """
 
-        def do_GET(self):
-            qs = urllib.parse.parse_qs(urllib.parse.urlparse(self.path).query)
-            dispatch(self, route, qs)
+    route: ApiRoute  # 서브클래스가 반드시 설정
 
-    handler.__qualname__ = f'{route.endpoint}_handler'
-    return handler
+    def do_OPTIONS(self):
+        send_options_response(self, allow_headers=self.route.allow_headers)
+
+    def do_GET(self):
+        qs = urllib.parse.parse_qs(urllib.parse.urlparse(self.path).query)
+        dispatch(self, self.route, qs)

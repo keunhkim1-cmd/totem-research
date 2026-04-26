@@ -29,13 +29,19 @@ def test_legacy_key_errormessage_string_only_lives_in_route_registry():
 
 
 def test_api_handler_files_are_thin_shims():
-    """단순 GET 라우트의 api/*.py는 레지스트리 위임 외 로직이 없다."""
+    """단순 GET 라우트의 api/*.py는 레지스트리 위임 외 로직이 없다.
+
+    Vercel ``@vercel/python``이 정적 분석으로 ``class handler``를 검색하므로
+    각 파일은 명시적 ``class handler(RouteHandler):`` 선언을 가져야 한다.
+    """
     from lib.api_routes import ROUTES
 
     for route in ROUTES:
         path = ROOT / 'api' / f'{route.path.removeprefix("/api/")}.py'
         text = path.read_text(encoding='utf-8')
-        assert 'make_handler' in text, f'{path} should use make_handler'
+        assert 'class handler(RouteHandler)' in text, (
+            f'{path} must declare `class handler(RouteHandler):` for Vercel detection'
+        )
         assert f"ROUTES_BY_PATH['{route.path}']" in text, (
             f'{path} should bind via ROUTES_BY_PATH[{route.path!r}]'
         )
