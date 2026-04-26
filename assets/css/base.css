@@ -118,7 +118,7 @@ body {
   background: rgba(0,0,0,0.85);
   backdrop-filter: saturate(180%) blur(20px);
   -webkit-backdrop-filter: saturate(180%) blur(20px);
-  height: 30px;
+  height: 50px;
   border-bottom: 1px solid var(--border);
   position: sticky; top: 0; z-index: 100;
 }
@@ -141,13 +141,13 @@ body {
   padding: 0;
   border: none; background: none; cursor: pointer;
   display: inline-flex; align-items: baseline; gap: 4px;
-  align-self: center;     /* prevent parent's align-items:stretch from stretching to 30px */
-  font-size: var(--fs-b2);
+  align-self: center;     /* prevent parent's align-items:stretch from stretching to nav height */
+  font-size: var(--fs-b1);
   line-height: 1;
   transition: color 0.2s;
 }
 .nav-title .brand-mark {
-  height: 14px;
+  height: 22px;
   width: auto;
   fill: currentColor;
   display: block;
@@ -155,20 +155,20 @@ body {
   align-self: center;
 }
 .nav-title .brand-text {
-  font-size: var(--fs-b2);
+  font-size: var(--fs-b1);
   font-weight: 600;
   letter-spacing: -0.3px;
   line-height: 1;
   color: var(--text);
 }
 .nav-title .brand-sep {
-  font-size: var(--fs-b2);
+  font-size: var(--fs-b1);
   font-weight: 400;
   line-height: 1;
   color: var(--text-muted);
 }
 .nav-title .brand-tag {
-  font-size: var(--fs-l1);
+  font-size: var(--fs-b2);
   font-weight: 400;
   letter-spacing: 0;
   line-height: 1;
@@ -178,10 +178,10 @@ body {
 .nav-title.active .brand-text { color: var(--text); }
 .nav-item {
   flex: none;
-  height: 30px;
+  height: 50px;
   padding: 0 14px;
   font-family: var(--font-display);
-  font-size: var(--fs-l1);
+  font-size: var(--fs-b2);
   font-weight: 500;
   color: var(--text-muted);
   letter-spacing: 0.8px;
