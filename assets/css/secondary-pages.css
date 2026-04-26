@@ -5,7 +5,6 @@
 }
 #page-patchnotes .patch-hero {
   padding: 32px 16px 18px;
-  border-bottom: 1px solid var(--tm-hairline);
 }
 #page-patchnotes .patch-kicker {
   color: var(--tm-text-mute);
@@ -161,7 +160,6 @@
 }
 #page-fortune .patch-hero {
   padding: 32px 16px 18px;
-  border-bottom: 1px solid var(--tm-hairline);
 }
 #page-fortune .patch-kicker {
   color: var(--tm-text-mute);
@@ -192,6 +190,7 @@
   font-size: var(--fs-b2);
   letter-spacing: 1.5px;
   text-transform: uppercase;
+  border-bottom: 1px solid var(--tm-hairline);
   min-width: 0;
 }
 #page-fortune .fortune-panel .tm-sec-head .t {
