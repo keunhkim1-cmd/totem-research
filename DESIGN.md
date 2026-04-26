@@ -216,6 +216,9 @@ border: 1px solid var(--tm-up);    /* 1px 풀 색 보더 */
 3. **종목명, 결과 항목명, 강조 식별자?** → `14px / text / 500 / 0 / left`
 4. **그 외 본문, 테이블 셀, 일반 텍스트?** → `12px / text / 400 / -0.12px / left` ← **기본값**
 5. **대문자 섹션 라벨, 카드 타이틀?** → `12px / display / 500 / 1.5px / uppercase / left` (좌측 액센트 바 2px 권장)
+   - **마크업 분기** (시각 룰은 동일, 컨테이너 계층에 따라 마크업만 다름):
+     - 페이지 직속 카드(`.card` / `.info-card` 등 최상위 컨테이너)의 타이틀 → `<h2>` 또는 `<h3>` + 컨테이너 헤딩 룰
+     - 카드 *내부* sub-section (한 카드 안에 여러 섹션이 쌓일 때) → `<section class="tm-sec"><div class="tm-sec-head"><span class="t">…</span></div></section>`
 6. **칩, 배지, 작은 대문자 라벨, 테이블 th?** → `10px / display / 500~600 / 0.8px / uppercase`
 7. **숫자 정렬, 날짜, 출처 표기?** → `mono / 본문과 같은 사이즈 / 0 또는 0.3px`
 
