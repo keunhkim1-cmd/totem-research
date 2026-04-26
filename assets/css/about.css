@@ -4,13 +4,7 @@
   background: var(--tm-bg);
 }
 #page-about .about-hero {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(280px, 360px);
-  gap: 16px;
   padding: 32px 16px 16px;
-}
-#page-about .about-hero-copy {
-  min-width: 0;
 }
 #page-about .about-kicker {
   color: var(--tm-text-mute);
@@ -69,30 +63,6 @@
   font-size: var(--fs-b2);
   line-height: 1.45;
   letter-spacing: -0.12px;
-}
-#page-about .about-snapshot {
-  background: var(--tm-panel);
-  border: 1px solid var(--tm-hairline);
-  align-self: stretch;
-}
-#page-about .snap-row {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 16px;
-  padding: 12px 14px;
-  border-bottom: 1px solid var(--tm-hairline-soft);
-  min-height: 44px;
-}
-#page-about .snap-row:last-child {
-  border-bottom: none;
-}
-#page-about .snap-row strong {
-  color: var(--tm-text);
-  font-size: var(--fs-b2);
-  font-weight: 500;
-  text-align: right;
-  overflow-wrap: anywhere;
 }
 #page-about .about-terminal .tm-sec {
   margin: 0 16px 16px;

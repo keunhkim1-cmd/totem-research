@@ -11,7 +11,6 @@
 }
 @media (max-width: 767px) {
   #page-about .about-hero {
-    grid-template-columns: 1fr;
     padding: 24px 12px 14px;
   }
   #page-about .about-hero h1 {
@@ -107,14 +106,6 @@
   body:is(.is-warning-active, .is-terminal-active) .ticker-track { padding-left: 0; }
 }
 @media (max-width: 480px) {
-  #page-about .snap-row {
-    align-items: flex-start;
-    flex-direction: column;
-    gap: 4px;
-  }
-  #page-about .snap-row strong {
-    text-align: left;
-  }
   #page-about .about-disclaimer .tm-verdict {
     flex-wrap: wrap;
     padding: 12px;
