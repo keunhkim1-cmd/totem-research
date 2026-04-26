@@ -192,7 +192,6 @@
   font-size: var(--fs-b2);
   letter-spacing: 1.5px;
   text-transform: uppercase;
-  border-bottom: 1px solid var(--tm-hairline);
   min-width: 0;
 }
 #page-fortune .fortune-panel .tm-sec-head .t {
