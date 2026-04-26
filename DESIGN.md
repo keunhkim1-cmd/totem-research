@@ -212,6 +212,7 @@ border: 1px solid var(--tm-up);    /* 1px 풀 색 보더 */
 새 컴포넌트의 텍스트 사이즈를 정할 때:
 
 1. **페이지 헤더?** → `28px / display / 600 / -0.3px / left`
+   - **히어로 컨테이너 spacing**: 페이지 hero(`.about-hero`, `.patch-hero`, `.warning-terminal .header` 등)는 `padding: 32px 16px 18px` 만으로 첫 카드와의 간격을 만들 것. **`margin-bottom` 금지** — 첫 카드는 hero 바로 아래에 매달림. 일반 `.header` 같은 광범위 셀렉터에 `margin-bottom: 40px` 류의 전역 룰을 두면 페이지마다 간격이 어긋남(과거 incident: `base.css .header { margin-bottom: 40px }` 가 워닝에만 누수돼 hero→카드 간격이 18px vs 58px로 벌어짐).
 2. **그 페이지의 단 하나의 핵심 수치?** → `21px / display / 500 / -0.3px / right`
 3. **종목명, 결과 항목명, 강조 식별자?** → `14px / text / 500 / 0 / left`
 4. **그 외 본문, 테이블 셀, 일반 텍스트?** → `12px / text / 400 / -0.12px / left` ← **기본값**
@@ -262,6 +263,7 @@ border: 1px solid var(--tm-up);    /* 1px 풀 색 보더 */
 - `box-shadow` / drop-shadow / glow — 터미널은 flat
 - 그라디언트 배경 — Verdict 카드 1곳 외 금지
 - 카드 안에 카드 (중첩 박스) — 섹션 구분은 1px hairline 으로만
+- 페이지 hero에 `margin-bottom` — 간격은 hero `padding-bottom`만으로 (§11-1)
 - 신호 컬러를 배경 그라디언트나 큰 면적으로 사용 — 항상 §7 트라이어드 (soft bg + full color text + 1px border)
 
 **카피·아이콘**
