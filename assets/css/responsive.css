@@ -10,15 +10,18 @@
   #page-warning .tm-chart { height: 280px !important; }
 }
 @media (max-width: 767px) {
-  #page-about .about-hero {
-    padding: 24px 12px 14px;
+  .warning-terminal {
+    --tm-page-gutter: 12px;
+  }
+  .warning-terminal .header,
+  #page-about .about-hero,
+  #page-patchnotes .patch-hero,
+  #page-forecast .forecast-hero,
+  #page-fortune .patch-hero {
+    padding: 24px var(--tm-page-gutter) 14px;
   }
   #page-about .about-hero h1 {
     font-size: var(--fs-d1);
-  }
-  #page-about .about-terminal .tm-sec {
-    margin-left: 12px;
-    margin-right: 12px;
   }
   #page-about .about-terminal .tm-sec-head .src {
     margin-left: 0;
@@ -43,15 +46,8 @@
   #page-about .about-disclaimer .tm-verdict {
     align-items: flex-start;
   }
-  #page-patchnotes .patch-hero {
-    padding: 24px 12px 14px;
-  }
   #page-patchnotes .patch-hero h1 {
     font-size: var(--fs-d1);
-  }
-  #page-patchnotes .patch-list {
-    margin-left: 12px;
-    margin-right: 12px;
   }
   #page-patchnotes .patch-list .tm-sec-head .src {
     margin-left: 0;
@@ -66,15 +62,8 @@
   #page-patchnotes .patch-entry-date {
     justify-self: end;
   }
-  #page-forecast .forecast-hero {
-    padding: 24px 12px 14px;
-  }
   #page-forecast .forecast-hero h1 {
     font-size: var(--fs-d1);
-  }
-  #page-forecast .forecast-panel {
-    margin-left: 12px;
-    margin-right: 12px;
   }
   #page-forecast .forecast-refresh {
     margin-left: 0;
@@ -89,15 +78,8 @@
   #page-forecast .forecast-summary .tm-cell:last-child {
     border-bottom: none;
   }
-  #page-fortune .patch-hero {
-    padding: 24px 12px 14px;
-  }
   #page-fortune .patch-hero h1 {
     font-size: var(--fs-d1);
-  }
-  #page-fortune .fortune-panel {
-    margin-left: 12px;
-    margin-right: 12px;
   }
   #page-fortune .fortune-panel .tm-sec-head .src {
     margin-left: 0;
@@ -156,13 +138,6 @@
   #page-fortune .fortune-message {
     padding-left: 12px;
     padding-right: 12px;
-  }
-  .warning-terminal .header { padding: 24px 12px 18px; }
-  .warning-terminal .card,
-  .warning-terminal .stage-section,
-  .warning-terminal .result-card {
-    margin-left: 12px;
-    margin-right: 12px;
   }
   #page-warning .tm-sym { padding: 12px; }
   #page-warning .tm-sym .ticker { font-size: var(--fs-d2); }

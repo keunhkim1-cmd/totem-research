@@ -4,7 +4,7 @@
   background: var(--tm-bg);
 }
 #page-patchnotes .patch-hero {
-  padding: 32px 16px 18px;
+  padding: 32px var(--tm-page-gutter) 18px;
 }
 #page-patchnotes .patch-kicker {
   color: var(--tm-text-mute);
@@ -28,7 +28,7 @@
   letter-spacing: -0.12px;
 }
 #page-patchnotes .patch-list {
-  margin: 0 16px 16px;
+  margin: 0 var(--tm-page-gutter) var(--tm-card-gap);
   background: var(--tm-panel);
   border: 1px solid var(--tm-hairline);
 }
@@ -159,7 +159,7 @@
   background: var(--tm-bg);
 }
 #page-forecast .forecast-hero {
-  padding: 32px 16px 18px;
+  padding: 32px var(--tm-page-gutter) 18px;
 }
 #page-forecast .patch-kicker {
   color: var(--tm-text-mute);
@@ -188,7 +188,7 @@
   letter-spacing: 0;
 }
 #page-forecast .forecast-panel {
-  margin: 0 16px 16px;
+  margin: 0 var(--tm-page-gutter) var(--tm-card-gap);
   background: var(--tm-panel);
   border: 1px solid var(--tm-hairline);
   min-width: 0;
@@ -332,7 +332,7 @@
   background: var(--tm-bg);
 }
 #page-fortune .patch-hero {
-  padding: 32px 16px 18px;
+  padding: 32px var(--tm-page-gutter) 18px;
 }
 #page-fortune .patch-kicker {
   color: var(--tm-text-mute);
@@ -348,7 +348,7 @@
   line-height: 1;
 }
 #page-fortune .fortune-panel {
-  margin: 0 16px 16px;
+  margin: 0 var(--tm-page-gutter) var(--tm-card-gap);
   background: var(--tm-panel);
   border: 1px solid var(--tm-hairline);
   min-width: 0;

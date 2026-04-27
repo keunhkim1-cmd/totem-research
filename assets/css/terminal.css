@@ -4,6 +4,9 @@
    About and patch notes reuse this system below.
    ═══════════════════════════════════════════════════════════════ */
 .warning-terminal {
+  --tm-page-gutter: 16px;
+  --tm-card-gap: 16px;
+
   background: var(--tm-bg);
   color: var(--tm-text);
   font-family: var(--font-text);
@@ -19,6 +22,7 @@
 }
 .warning-terminal .section-inner {
   max-width: 1380px;
+  width: 100%;
   padding: 0;
 }
 /* Fill viewport on the warning page so the footnote sits at the bottom */
@@ -209,7 +213,7 @@
 }
 /* 헤더 섹션 — 터미널 간격 */
 .warning-terminal .header {
-  padding: 32px 16px 18px;
+  padding: 32px var(--tm-page-gutter) 18px;
   margin-bottom: 0;
   text-align: left;
 }
@@ -230,7 +234,7 @@
 /* 검색 카드·info-card padding 조정 */
 .warning-terminal .card {
   padding: 14px 16px;
-  margin: 0 16px 16px;
+  margin: 0 var(--tm-page-gutter) var(--tm-card-gap);
 }
 .warning-terminal .card h2 {
   font-family: var(--font-display);
@@ -253,10 +257,49 @@
   margin-left: 8px;
 }
 .warning-terminal .stage-section {
-  margin: 0 16px 16px;
+  margin: 0 var(--tm-page-gutter) var(--tm-card-gap);
 }
 .warning-terminal .result-card {
-  margin: 0 16px 16px;
+  margin: 0 var(--tm-page-gutter) var(--tm-card-gap);
+}
+.warning-terminal .server-notice,
+.warning-terminal .price-card {
+  margin: 0 var(--tm-page-gutter) var(--tm-card-gap);
+}
+.warning-terminal .tm-strip {
+  display: grid;
+  min-width: 0;
+}
+.warning-terminal .tm-strip .tm-cell {
+  min-width: 0;
+  padding: 14px 16px;
+  border-right: 1px solid var(--tm-hairline);
+}
+.warning-terminal .tm-strip .tm-cell:last-child {
+  border-right: none;
+}
+.warning-terminal .tm-strip .l {
+  font-family: var(--font-display);
+  font-size: var(--fs-l1);
+  font-weight: 500;
+  color: var(--tm-text-mute);
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+  margin-bottom: 6px;
+}
+.warning-terminal .tm-strip .v {
+  font-size: var(--fs-b1);
+  font-weight: 500;
+  color: var(--tm-text);
+  line-height: 1.45;
+  overflow-wrap: anywhere;
+}
+.warning-terminal .tm-strip .s {
+  font-family: var(--mono);
+  font-size: var(--fs-l1);
+  color: var(--tm-text-mute);
+  margin-top: 5px;
+  overflow-wrap: anywhere;
 }
 /* ─── §0 Section Head ─── */
 #page-warning .tm-sec {

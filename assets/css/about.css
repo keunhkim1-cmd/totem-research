@@ -4,7 +4,7 @@
   background: var(--tm-bg);
 }
 #page-about .about-hero {
-  padding: 32px 16px 16px;
+  padding: 32px var(--tm-page-gutter) 18px;
 }
 #page-about .about-kicker {
   color: var(--tm-text-mute);
@@ -65,7 +65,7 @@
   letter-spacing: -0.12px;
 }
 #page-about .about-terminal .tm-sec {
-  margin: 0 16px 16px;
+  margin: 0 var(--tm-page-gutter) var(--tm-card-gap);
   background: var(--tm-panel);
   border: 1px solid var(--tm-hairline);
 }
@@ -212,4 +212,3 @@
   margin-top: 4px;
   overflow-wrap: anywhere;
 }
-
