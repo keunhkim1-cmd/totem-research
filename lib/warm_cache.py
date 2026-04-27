@@ -7,6 +7,7 @@ from lib.durable_cache import delete, enabled as durable_cache_enabled, set_json
 from lib.http_utils import log_event, safe_exception_text
 from lib.krx import search_kind, search_kind_caution
 from lib.naver import fetch_index_prices, fetch_prices, stock_code
+from lib.usecases import market_alert_forecast_payload
 
 
 LOCK_KEY = 'cron:warm-cache:lock'
@@ -62,6 +63,7 @@ def warm_cache() -> list[dict]:
     tasks = [
         ('krx-warning-risky', lambda: {'items': len(search_kind(''))}),
         ('krx-caution', lambda: {'items': len(search_kind_caution(''))}),
+        ('market-alert-forecast', lambda: market_alert_forecast_payload()['summary']),
         ('naver-code-samsung', lambda: {'items': len(stock_code('삼성전자'))}),
         ('naver-price-samsung', lambda: {'items': len(fetch_prices('005930', count=30))}),
         ('naver-index-kospi', lambda: {'items': len(fetch_index_prices('KOSPI', count=30))}),

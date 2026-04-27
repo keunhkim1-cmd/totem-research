@@ -1,5 +1,5 @@
 // DOM/네트워크 유틸. 외부에서 사용하는 작은 헬퍼들.
-import { appState } from './state.js?v=20260426-6';
+import { appState } from './state.js?v=20260427-1';
 
 export function escHtml(s) {
   const d = document.createElement('div');

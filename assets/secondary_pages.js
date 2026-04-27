@@ -26,6 +26,7 @@ const fortuneDeck = [
 ];
 
 export function createSecondaryPageRenderers({
+  apiErrorMessage,
   appState,
   escHtml,
   fetchJson,
@@ -58,6 +59,143 @@ export function createSecondaryPageRenderers({
         }
       }, stepMs);
     }, { once: true });
+  }
+
+  function forecastSummaryHtml(data) {
+    const summary = data.summary || {};
+    const generated = data.generatedAt ? String(data.generatedAt).replace('T', ' ') : '—';
+    const cells = [
+      ['기준일', data.todayKst || '—', generated],
+      ['경보', summary.alert || 0, '공개 조건 충족'],
+      ['주의보', summary.watch || 0, '활성 지정예고'],
+      ['확인 필요', summary.needsReview || 0, '코드·가격·내부요건'],
+    ];
+    return cells.map(([label, value, sub]) => `
+      <div class="tm-cell">
+        <div class="l">${escHtml(label)}</div>
+        <div class="v">${escHtml(value)}</div>
+        <div class="s">${escHtml(sub)}</div>
+      </div>`).join('');
+  }
+
+  function forecastErrorsHtml(errors) {
+    if (!Array.isArray(errors) || errors.length === 0) return '';
+    const message = errors.map(error => error?.message || String(error)).filter(Boolean).join(' · ');
+    if (!message) return '';
+    return `
+      <div class="state-message state-message-error forecast-source-error" role="alert">
+        <span class="state-message-label">${escHtml('확인 필요')}</span>
+        <span class="state-message-text">${escHtml(message)}</span>
+      </div>`;
+  }
+
+  function forecastSignalText(item) {
+    if (item.calcStatus === 'calculated') {
+      const escalation = item.escalation || {};
+      const headline = escalation.headline || {};
+      const sets = Array.isArray(escalation.sets) ? escalation.sets : [];
+      if (item.level === 'alert') {
+        const matched = sets[headline.matchedSet] || {};
+        return `${matched.label || '공개 가격조건'} 충족`;
+      }
+      return '공개 가격조건 미충족';
+    }
+    return item.calcDetail || item.calcStatusLabel || '확인 필요';
+  }
+
+  function renderForecastRows(items) {
+    if (!Array.isArray(items) || items.length === 0) {
+      return `
+        <table class="tm-tbl forecast-table">
+          <tbody>
+            <tr class="state-row"><td>${escHtml('활성 투자경고 지정예고 후보가 없습니다.')}</td></tr>
+          </tbody>
+        </table>`;
+    }
+    const rows = items.map((item) => {
+      const levelClass = item.level === 'alert' ? 'alert' : 'watch';
+      const code = item.code ? ` · ${item.code}` : '';
+      const market = item.market || item.krxMarket || '시장 미확인';
+      const windowText = `${item.firstJudgmentDate || '—'} ~ ${item.lastJudgmentDate || '—'}`;
+      const dayText = `D${item.judgmentDayIndex || 0}/${item.judgmentWindowTotal || 10}`;
+      return `
+        <tr class="forecast-row forecast-row-${levelClass}">
+          <td><span class="forecast-level ${levelClass}">${escHtml(item.levelLabel || '주의보')}</span></td>
+          <td>
+            <div class="forecast-stock">${escHtml(item.stockName || '—')}</div>
+            <div class="forecast-meta">${escHtml(market + code)}</div>
+          </td>
+          <td>
+            <div class="forecast-window">${escHtml(windowText)}</div>
+            <div class="forecast-meta">${escHtml(dayText)}</div>
+          </td>
+          <td>
+            <div class="forecast-signal">${escHtml(forecastSignalText(item))}</div>
+            <div class="forecast-meta">${escHtml(item.calcStatusLabel || '')}</div>
+          </td>
+          <td><button type="button" class="forecast-check" data-stock="${escHtml(item.stockName || '')}">점검</button></td>
+        </tr>`;
+    }).join('');
+    return `
+      <table class="tm-tbl forecast-table">
+        <thead>
+          <tr>
+            <th>예보</th>
+            <th>종목</th>
+            <th>판단 기간</th>
+            <th>조건</th>
+            <th>동작</th>
+          </tr>
+        </thead>
+        <tbody>${rows}</tbody>
+      </table>`;
+  }
+
+  function bindForecastChecks(container) {
+    container.querySelectorAll('.forecast-check').forEach(button => {
+      button.addEventListener('click', () => {
+        window.dispatchEvent(new CustomEvent('totem:forecast-check', {
+          detail: { stockName: button.dataset.stock || '' },
+        }));
+      });
+    });
+  }
+
+  async function renderMarketForecast(options = {}) {
+    const force = Boolean(options.force);
+    const summaryEl = document.getElementById('forecastSummary');
+    const container = document.getElementById('forecastContent');
+    if (!container || !summaryEl) return;
+    if (appState.forecast.loaded && !force) return;
+    if (appState.serverBase === null) {
+      summaryEl.innerHTML = '';
+      setElementState(container, '로컬 서버 실행 후 예보를 조회할 수 있습니다.', 'empty');
+      return;
+    }
+
+    summaryEl.innerHTML = '';
+    setElementState(container, '시장경보 예보를 불러오는 중...', 'loading');
+    try {
+      const data = await fetchJson('/api/market-alert-forecast', { cache: 'no-cache' });
+      const error = apiErrorMessage(data);
+      if (error) {
+        throw new Error(error);
+      }
+      const sourceErrors = Array.isArray(data.errors) ? data.errors : [];
+      const items = Array.isArray(data.items) ? data.items : [];
+      if (sourceErrors.length > 0 && items.length === 0) {
+        throw new Error(sourceErrors[0]?.message || '예보 원천 데이터를 확인할 수 없습니다.');
+      }
+      appState.forecast.loaded = true;
+      appState.forecast.items = items;
+      summaryEl.innerHTML = forecastSummaryHtml(data);
+      container.innerHTML = forecastErrorsHtml(sourceErrors) + renderForecastRows(appState.forecast.items);
+      bindForecastChecks(container);
+    } catch (e) {
+      appState.forecast.loaded = false;
+      summaryEl.innerHTML = '';
+      setElementState(container, `시장경보 예보를 불러올 수 없습니다: ${e.message}`, 'error');
+    }
   }
 
   async function renderPatchNotes() {
@@ -93,5 +231,5 @@ export function createSecondaryPageRenderers({
     }
   }
 
-  return { renderFortune, renderPatchNotes };
+  return { renderFortune, renderMarketForecast, renderPatchNotes };
 }

@@ -23,8 +23,8 @@
   <script type="application/ld+json">
 {"@context":"https://schema.org","@type":"WebApplication","name":"TOTEM","alternateName":"투자경고 계산기","url":"https://totem-research.vercel.app/","applicationCategory":"FinanceApplication","operatingSystem":"Web","inLanguage":"ko-KR","description":"KRX 투자경고·투자위험 종목의 지정 여부, 기준가, 해제 예정일을 점검하는 한국 주식 리서치 도구입니다.","isAccessibleForFree":true,"offers":{"@type":"Offer","price":"0","priceCurrency":"KRW"}}
   </script>
-  <link rel="stylesheet" href="assets/app.css?v=20260426-108" />
-  <script type="module" src="assets/app.js?v=20260426-102"></script>
+  <link rel="stylesheet" href="assets/app.css?v=20260427-1" />
+  <script type="module" src="assets/app.js?v=20260427-1"></script>
 </head>
 <body>
 
@@ -40,6 +40,7 @@
       <span class="brand-text">totem</span>
     </button>
     <button class="nav-item active" id="nav-warning" type="button" role="tab" data-page="warning" aria-controls="page-warning" aria-selected="true" aria-current="page">투자경고 계산기</button>
+    <button class="nav-item" id="nav-forecast" type="button" role="tab" data-page="forecast" aria-controls="page-forecast" aria-selected="false" tabindex="-1">시장 경보 예보(개발중)</button>
     <button class="nav-item" id="nav-fortune" type="button" role="tab" data-page="fortune" aria-controls="page-fortune" aria-selected="false" tabindex="-1">오늘의 운세</button>
     <button class="nav-item" id="nav-patchnotes" type="button" role="tab" data-page="patchnotes" aria-controls="page-patchnotes" aria-selected="false" tabindex="-1">패치 노트</button>
   </div>
@@ -270,6 +271,29 @@
     </div>
   </div>
 
+  </div>
+</div>
+
+<div id="page-forecast" class="page-section" role="tabpanel" aria-labelledby="nav-forecast" aria-hidden="true" hidden>
+  <div class="warning-terminal forecast-terminal">
+    <div class="section-dark">
+      <div class="section-inner">
+        <section class="patch-hero forecast-hero" aria-labelledby="forecastTitle">
+          <div class="caps patch-kicker">Market Alert Forecast</div>
+          <h1 id="forecastTitle">시장경보 예보</h1>
+          <p>KRX 투자경고 지정예고 후보를 경보와 주의보로 정리합니다.</p>
+        </section>
+
+        <section class="tm-sec forecast-panel" aria-labelledby="forecastPanelTitle">
+          <div class="tm-sec-head">
+            <span class="t" id="forecastPanelTitle">오늘의 예보</span>
+            <button class="forecast-refresh" id="forecastRefreshBtn" type="button">refresh</button>
+          </div>
+          <div class="tm-strip forecast-summary" id="forecastSummary"></div>
+          <div class="forecast-content" id="forecastContent" aria-live="polite"></div>
+        </section>
+      </div>
+    </div>
   </div>
 </div>
 

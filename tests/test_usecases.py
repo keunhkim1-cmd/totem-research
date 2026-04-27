@@ -166,5 +166,194 @@ class CautionSearchPayloadTests(unittest.TestCase):
         self.assertEqual(usecases._market_to_index_symbol('UNKNOWN'), '')
 
 
+class MarketAlertForecastPayloadTests(unittest.TestCase):
+    def _warn(self, name: str, notice: str, reason: str = '투자경고 지정예고'):
+        return {
+            'stockName': name,
+            'latestDesignationDate': notice,
+            'latestDesignationReason': reason,
+            'recent15dCount': 1,
+            'allDates': [notice],
+            'entries': [{'date': notice, 'reason': reason}],
+            'market': 'KOSPI',
+        }
+
+    def test_forecast_filters_active_notices_and_excludes_current_warning(self):
+        today = date(2026, 4, 24)
+        notice = '2026-04-23'
+
+        def codes(name):
+            return [{'code': '000001' if name == '경보종목' else '000002', 'name': name, 'market': 'KOSPI'}]
+
+        def prices(code, count=30):
+            close = 1 if code == '000001' else 2
+            return [{'date': '2026-04-24', 'close': close} for _ in range(16)]
+
+        def escalation(stock_prices, index_prices):
+            if stock_prices[-1]['close'] == 1:
+                return {
+                    'headline': {'verdict': 'strong', 'matchedSet': 0},
+                    'sets': [{'label': '단기급등', 'allMet': True}],
+                }
+            return {
+                'headline': {'verdict': 'none', 'matchedSet': None},
+                'sets': [{'label': '단기급등', 'allMet': False}],
+            }
+
+        rows = [
+            self._warn('경보종목', notice),
+            self._warn('주의종목', notice),
+            self._warn('현재경고', notice),
+        ]
+        with (
+            patch.object(usecases, '_today_kst_date', return_value=today),
+            patch.object(usecases, 'search_kind', return_value=[{
+                'stockName': '현재경고',
+                'level': '투자경고',
+                'designationDate': notice,
+            }]),
+            patch.object(usecases, 'search_kind_caution', return_value=rows),
+            patch.object(usecases, 'stock_code', side_effect=codes),
+            patch.object(usecases, 'fetch_prices', side_effect=prices),
+            patch.object(usecases, 'fetch_index_prices', return_value=[{'date': '2026-04-24', 'close': 1.0} for _ in range(16)]),
+            patch.object(usecases, 'calc_official_escalation', side_effect=escalation),
+        ):
+            payload = usecases.market_alert_forecast_payload()
+
+        self.assertEqual(payload['summary']['total'], 2)
+        self.assertEqual(payload['summary']['alert'], 1)
+        self.assertEqual(payload['summary']['watch'], 1)
+        self.assertEqual(payload['summary']['excludedCurrentWarning'], 1)
+        self.assertEqual(payload['items'][0]['stockName'], '경보종목')
+        self.assertEqual(payload['items'][0]['levelLabel'], '경보')
+
+    def test_forecast_keeps_released_warning_history_as_candidate(self):
+        today = date(2026, 4, 24)
+        warn = self._warn('재예고종목', '2026-04-23')
+        released_prices = [
+            {'date': f'2026-04-{day:02d}', 'close': 100}
+            for day in range(1, 21)
+        ]
+
+        with (
+            patch.object(usecases, '_today_kst_date', return_value=today),
+            patch.object(usecases, 'search_kind', return_value=[{
+                'stockName': '재예고종목',
+                'level': '투자경고',
+                'designationDate': '2026-03-02',
+            }]),
+            patch.object(usecases, 'search_kind_caution', return_value=[warn]),
+            patch.object(usecases, 'stock_code', return_value=[{
+                'code': '000004',
+                'name': '재예고종목',
+                'market': 'KOSPI',
+            }]),
+            patch.object(usecases, 'fetch_prices', return_value=released_prices),
+            patch.object(usecases, 'fetch_index_prices', return_value=[
+                {'date': '2026-04-20', 'close': 1.0}
+                for _ in range(16)
+            ]),
+            patch.object(usecases, 'calc_official_escalation', return_value={
+                'headline': {'verdict': 'none', 'matchedSet': None},
+                'sets': [{'label': '단기급등', 'allMet': False}],
+            }),
+        ):
+            payload = usecases.market_alert_forecast_payload()
+
+        self.assertEqual(payload['summary']['excludedCurrentWarning'], 0)
+        self.assertEqual(payload['summary']['total'], 1)
+        self.assertEqual(payload['items'][0]['stockName'], '재예고종목')
+
+    def test_forecast_caution_fetch_failure_surfaces_error(self):
+        today = date(2026, 4, 24)
+        with (
+            patch.object(usecases, '_today_kst_date', return_value=today),
+            patch.object(usecases, 'search_kind_caution', side_effect=RuntimeError('krx down')),
+            patch.object(usecases, 'search_kind') as search_kind,
+        ):
+            payload = usecases.market_alert_forecast_payload()
+
+        self.assertEqual(payload['summary']['total'], 0)
+        self.assertEqual(payload['items'], [])
+        self.assertEqual(payload['errors'][0]['source'], 'krx-caution')
+        self.assertIn('krx down', payload['errors'][0]['message'])
+        search_kind.assert_not_called()
+
+    def test_forecast_warning_fetch_failure_surfaces_error(self):
+        today = date(2026, 4, 24)
+        warn = self._warn('조회오류후보', '2026-04-23')
+        with (
+            patch.object(usecases, '_today_kst_date', return_value=today),
+            patch.object(usecases, 'search_kind_caution', return_value=[warn]),
+            patch.object(usecases, 'search_kind', side_effect=RuntimeError('warning down')),
+            patch.object(usecases, 'stock_code', return_value=[{
+                'code': '000005',
+                'name': '조회오류후보',
+                'market': 'KOSPI',
+            }]),
+            patch.object(usecases, 'fetch_prices', return_value=[
+                {'date': f'2026-04-{day:02d}', 'close': 100}
+                for day in range(1, 21)
+            ]),
+            patch.object(usecases, 'fetch_index_prices', return_value=[
+                {'date': '2026-04-20', 'close': 1.0}
+                for _ in range(16)
+            ]),
+            patch.object(usecases, 'calc_official_escalation', return_value={
+                'headline': {'verdict': 'none', 'matchedSet': None},
+                'sets': [{'label': '단기급등', 'allMet': False}],
+            }),
+        ):
+            payload = usecases.market_alert_forecast_payload()
+
+        self.assertEqual(payload['summary']['total'], 1)
+        self.assertEqual(payload['errors'][0]['source'], 'krx-warning')
+        self.assertIn('warning down', payload['errors'][0]['message'])
+
+    def test_forecast_marks_internal_review_reason_without_price_calls(self):
+        today = date(2026, 4, 24)
+        warn = self._warn('불건전종목', '2026-04-23', '투자경고 지정예고 · 단기상승·불건전요건')
+        with (
+            patch.object(usecases, '_today_kst_date', return_value=today),
+            patch.object(usecases, 'search_kind', return_value=[]),
+            patch.object(usecases, 'search_kind_caution', return_value=[warn]),
+            patch.object(usecases, 'stock_code') as stock_code,
+        ):
+            payload = usecases.market_alert_forecast_payload()
+
+        self.assertEqual(payload['summary']['needsReview'], 1)
+        self.assertEqual(payload['items'][0]['calcStatus'], 'needs_review')
+        stock_code.assert_not_called()
+
+    def test_forecast_price_failure_is_watch_needs_review(self):
+        today = date(2026, 4, 24)
+        warn = self._warn('가격오류', '2026-04-23')
+        with (
+            patch.object(usecases, '_today_kst_date', return_value=today),
+            patch.object(usecases, 'search_kind', return_value=[]),
+            patch.object(usecases, 'search_kind_caution', return_value=[warn]),
+            patch.object(usecases, 'stock_code', return_value=[{'code': '000003', 'name': '가격오류', 'market': 'KOSPI'}]),
+            patch.object(usecases, 'fetch_prices', side_effect=RuntimeError('timeout')),
+            patch.object(usecases, 'fetch_index_prices', return_value=[{'date': '2026-04-24', 'close': 1.0} for _ in range(16)]),
+        ):
+            payload = usecases.market_alert_forecast_payload()
+
+        self.assertEqual(payload['summary']['watch'], 1)
+        self.assertEqual(payload['items'][0]['calcStatus'], 'needs_review')
+        self.assertIn('timeout', payload['items'][0]['calcDetail'])
+
+    def test_forecast_ignores_expired_notice(self):
+        today = date(2026, 4, 24)
+        warn = self._warn('만료종목', '2026-03-01')
+        with (
+            patch.object(usecases, '_today_kst_date', return_value=today),
+            patch.object(usecases, 'search_kind', return_value=[]),
+            patch.object(usecases, 'search_kind_caution', return_value=[warn]),
+        ):
+            payload = usecases.market_alert_forecast_payload()
+
+        self.assertEqual(payload['summary']['total'], 0)
+
+
 if __name__ == '__main__':
     unittest.main()

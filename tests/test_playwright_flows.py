@@ -185,6 +185,117 @@ def test_secondary_tabs_render_from_split_modules(local_server, page: Page):
 
 
 @pytest.mark.e2e
+def test_market_alert_forecast_tab_renders_and_checks_stock(local_server, page: Page):
+    page.route(
+        '**/api/market-alert-forecast',
+        lambda route: _fulfill_json(
+            route,
+            {
+                'ok': True,
+                'todayKst': '2026-04-26',
+                'generatedAt': '2026-04-26T09:10:00+09:00',
+                'summary': {
+                    'total': 2,
+                    'alert': 1,
+                    'watch': 1,
+                    'calculated': 1,
+                    'needsReview': 1,
+                    'excludedCurrentWarning': 0,
+                },
+                'items': [
+                    {
+                        'level': 'alert',
+                        'levelLabel': '경보',
+                        'stockName': '테스트전자',
+                        'code': '005930',
+                        'market': 'KOSPI',
+                        'noticeDate': '2026-04-24',
+                        'firstJudgmentDate': '2026-04-27',
+                        'lastJudgmentDate': '2026-05-11',
+                        'judgmentDayIndex': 0,
+                        'judgmentWindowTotal': 10,
+                        'calcStatus': 'calculated',
+                        'calcStatusLabel': '계산 완료',
+                        'escalation': {
+                            'headline': {'verdict': 'strong', 'matchedSet': 0},
+                            'sets': [{'label': '단기급등', 'allMet': True}],
+                        },
+                    },
+                    {
+                        'level': 'watch',
+                        'levelLabel': '주의보',
+                        'stockName': '확인필요',
+                        'market': 'KOSDAQ',
+                        'noticeDate': '2026-04-24',
+                        'firstJudgmentDate': '2026-04-27',
+                        'lastJudgmentDate': '2026-05-11',
+                        'judgmentDayIndex': 0,
+                        'judgmentWindowTotal': 10,
+                        'calcStatus': 'needs_review',
+                        'calcStatusLabel': '확인 필요',
+                        'calcDetail': 'KRX 내부 감시 데이터가 필요한 지정예고 유형입니다.',
+                    },
+                ],
+                'errors': [],
+            },
+        ),
+    )
+    page.route('**/api/warn-search?*', lambda route: _fulfill_json(route, {'ok': True, 'results': []}))
+    page.route(
+        '**/api/caution-search?*',
+        lambda route: _fulfill_json(route, {'ok': True, 'status': 'not_caution'}),
+    )
+
+    page.goto(local_server)
+    page.get_by_role('tab', name='시장 경보 예보(개발중)').click()
+
+    expect(page.locator('#forecastSummary')).to_contain_text('경보')
+    expect(page.locator('#forecastContent')).to_contain_text('테스트전자')
+    expect(page.locator('#forecastContent')).to_contain_text('단기급등 충족')
+    expect(page.locator('#forecastContent')).to_contain_text('확인 필요')
+
+    page.locator('#forecastContent .forecast-check').first.click()
+    expect(page.locator('#nav-warning')).to_have_attribute('aria-selected', 'true')
+    expect(page.locator('#searchInput')).to_have_value('테스트전자')
+    expect(page.locator('#searchResults')).to_contain_text('현재 투자경고/투자주의가 아님')
+
+
+@pytest.mark.e2e
+def test_market_alert_forecast_tab_surfaces_source_error(local_server, page: Page):
+    page.route(
+        '**/api/market-alert-forecast',
+        lambda route: _fulfill_json(
+            route,
+            {
+                'ok': True,
+                'todayKst': '2026-04-26',
+                'generatedAt': '2026-04-26T09:10:00+09:00',
+                'summary': {
+                    'total': 0,
+                    'alert': 0,
+                    'watch': 0,
+                    'calculated': 0,
+                    'needsReview': 0,
+                    'excludedCurrentWarning': 0,
+                },
+                'items': [],
+                'errors': [{
+                    'source': 'krx-caution',
+                    'message': 'KRX 투자주의/지정예고 조회 실패: timeout',
+                }],
+            },
+        ),
+    )
+
+    page.goto(local_server)
+    page.get_by_role('tab', name='시장 경보 예보(개발중)').click()
+
+    expect(page.locator('#forecastContent')).to_contain_text('시장경보 예보를 불러올 수 없습니다')
+    expect(page.locator('#forecastContent')).to_contain_text('KRX 투자주의/지정예고 조회 실패')
+    expect(page.locator('#forecastContent')).not_to_contain_text('활성 투자경고 지정예고 후보가 없습니다')
+
+
+@pytest.mark.e2e
 def test_warning_search_renders_price_thresholds_and_chart(local_server, page: Page):
     _route_stock_dependencies(page)
     page.route(

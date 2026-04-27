@@ -1,15 +1,16 @@
 // 앱 부트스트랩 — 모듈 결합 + 이벤트 와이어 + 초기화.
-import { createSecondaryPageRenderers } from './secondary_pages.js?v=20260426-102';
-import { appState } from './app/state.js?v=20260426-102';
+import { createSecondaryPageRenderers } from './secondary_pages.js?v=20260427-1';
+import { appState } from './app/state.js?v=20260427-1';
 import {
+  apiErrorMessage,
   escHtml,
   fetchJson,
   hideSearchResults,
   setElementState,
   showRuntimeError,
-} from './app/dom_utils.js?v=20260426-102';
-import { toDateStr } from './app/calendar.js?v=20260426-102';
-import { doSearch, selectResult } from './app/search.js?v=20260426-102';
+} from './app/dom_utils.js?v=20260427-1';
+import { toDateStr } from './app/calendar.js?v=20260427-1';
+import { doSearch, selectResult } from './app/search.js?v=20260427-1';
 
 // ────────────────────────────────────────────────
 // 전역 에러 핸들러
@@ -29,9 +30,10 @@ appState.holidaysReady = fetchJson('/data/holidays.json')
   .catch(e => console.warn('공휴일 데이터 로드 실패, 주말만 판정합니다:', e));
 
 // ────────────────────────────────────────────────
-// 페이지 전환 (about / warning / fortune / patchnotes)
+// 페이지 전환 (about / warning / forecast / fortune / patchnotes)
 // ────────────────────────────────────────────────
-const { renderFortune, renderPatchNotes } = createSecondaryPageRenderers({
+const { renderFortune, renderMarketForecast, renderPatchNotes } = createSecondaryPageRenderers({
+  apiErrorMessage,
   appState,
   escHtml,
   fetchJson,
@@ -61,8 +63,9 @@ function switchPage(page, el) {
   });
 
   document.body.classList.toggle('is-warning-active', page === 'warning');
-  document.body.classList.toggle('is-terminal-active', page === 'warning' || page === 'about' || page === 'fortune' || page === 'patchnotes');
+  document.body.classList.toggle('is-terminal-active', page === 'warning' || page === 'about' || page === 'forecast' || page === 'fortune' || page === 'patchnotes');
   if (page !== 'warning') hideSearchResults();
+  if (page === 'forecast') renderMarketForecast();
   if (page === 'fortune') renderFortune();
   if (page === 'patchnotes') renderPatchNotes();
 }
@@ -111,6 +114,22 @@ document.getElementById('searchResults').addEventListener('click', (e) => {
   if (item && item.dataset.idx != null) {
     selectResult(appState.search.results[item.dataset.idx]);
   }
+});
+
+const forecastRefreshBtn = document.getElementById('forecastRefreshBtn');
+if (forecastRefreshBtn) {
+  forecastRefreshBtn.addEventListener('click', () => renderMarketForecast({ force: true }));
+}
+
+window.addEventListener('totem:forecast-check', event => {
+  const stockName = event.detail?.stockName || '';
+  if (!stockName) return;
+  const input = document.getElementById('searchInput');
+  const warningNav = document.getElementById('nav-warning');
+  input.value = stockName;
+  switchPage('warning', warningNav);
+  input.focus();
+  doSearch();
 });
 
 // 외부 클릭 시 검색 결과 닫기

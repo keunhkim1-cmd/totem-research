@@ -53,6 +53,11 @@ ROUTES: tuple[ApiRoute, ...] = (
         status_value='error',
     ),
     ApiRoute(
+        path='/api/market-alert-forecast',
+        endpoint='market-alert-forecast',
+        payload=lambda qs: usecases.market_alert_forecast_payload(),
+    ),
+    ApiRoute(
         path='/api/stock-code',
         endpoint='stock-code',
         payload=lambda qs: usecases.stock_code_payload(_q(qs, 'name')),

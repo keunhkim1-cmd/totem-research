@@ -112,6 +112,13 @@
         { "key": "Cache-Control", "value": "public, max-age=0, must-revalidate" },
         { "key": "Vercel-CDN-Cache-Control", "value": "public, max-age=120, stale-while-revalidate=60" }
       ]
+    },
+    {
+      "source": "/api/market-alert-forecast",
+      "headers": [
+        { "key": "Cache-Control", "value": "public, max-age=0, must-revalidate" },
+        { "key": "Vercel-CDN-Cache-Control", "value": "public, max-age=120, stale-while-revalidate=300" }
+      ]
     }
   ],
   "functions": {
@@ -121,6 +128,7 @@
     "api/stock-overview.py": { "maxDuration": 20 },
     "api/warn-search.py": { "maxDuration": 20 },
     "api/caution-search.py": { "maxDuration": 30 },
+    "api/market-alert-forecast.py": { "maxDuration": 60 },
     "api/stock-price.py": { "maxDuration": 20 },
     "api/dart-search.py": { "maxDuration": 20 },
     "api/cache-bust.py": { "maxDuration": 10 },

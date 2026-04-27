@@ -240,7 +240,11 @@ def check() -> tuple[list[str], dict[str, object]]:
             )
     add(failures, bool(js_versioned_import_re.search(js)), "app.js must import sub-modules with versioned URLs")
 
-    for marker in ("function renderFortune", "async function renderPatchNotes"):
+    for marker in (
+        "function renderFortune",
+        "async function renderMarketForecast",
+        "async function renderPatchNotes",
+    ):
         add(failures, marker in secondary_js, f"missing secondary pages marker {marker}")
     for marker in ("function addTradingDays", "function countTradingDays"):
         add(failures, marker in calendar_js, f"missing trading calendar marker {marker}")

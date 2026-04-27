@@ -153,6 +153,151 @@
   overflow-wrap: anywhere;
 }
 
+/* 시장경보 예보 — KRX designation forecast */
+#page-forecast .forecast-terminal {
+  min-height: calc(100vh - 58px);
+  background: var(--tm-bg);
+}
+#page-forecast .forecast-hero {
+  padding: 32px 16px 18px;
+}
+#page-forecast .patch-kicker {
+  color: var(--tm-text-mute);
+  font-size: var(--fs-l1);
+}
+#page-forecast .forecast-hero h1 {
+  font-family: var(--font-display);
+  font-size: var(--fs-d1);
+  font-weight: var(--fw-semi);
+  color: var(--tm-text);
+  margin: 6px 0 8px;
+  letter-spacing: 0;
+  line-height: 1;
+}
+#page-forecast .forecast-hero p {
+  max-width: 620px;
+  font-size: var(--fs-b2);
+  color: var(--tm-text-dim);
+  line-height: 1.45;
+  letter-spacing: 0;
+}
+#page-forecast .forecast-panel {
+  margin: 0 16px 16px;
+  background: var(--tm-panel);
+  border: 1px solid var(--tm-hairline);
+  min-width: 0;
+}
+#page-forecast .forecast-panel .tm-sec-head {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+  padding: 11px 16px 9px;
+  font-family: var(--font-display);
+  font-size: var(--fs-b2);
+  letter-spacing: 0;
+  text-transform: uppercase;
+  border-bottom: 1px solid var(--tm-hairline);
+  min-width: 0;
+}
+#page-forecast .forecast-panel .tm-sec-head .t {
+  color: var(--tm-text);
+  font-weight: var(--fw-med);
+  border-left: 2px solid var(--tm-accent);
+  padding-left: 10px;
+}
+#page-forecast .forecast-refresh,
+#page-forecast .forecast-check {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 30px;
+  border: 1px solid var(--tm-hairline);
+  background: var(--tm-elev);
+  color: var(--tm-text);
+  font-family: var(--font-display);
+  font-size: var(--fs-l1);
+  font-weight: var(--fw-semi);
+  letter-spacing: 0;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+#page-forecast .forecast-refresh {
+  margin-left: auto;
+  padding: 0 10px;
+}
+#page-forecast .forecast-check {
+  width: 54px;
+  padding: 0 8px;
+}
+#page-forecast .forecast-refresh:hover,
+#page-forecast .forecast-check:hover {
+  border-color: var(--tm-accent);
+}
+#page-forecast .forecast-summary {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  border-bottom: 1px solid var(--tm-hairline);
+}
+#page-forecast .forecast-summary .tm-cell:last-child {
+  border-right: none;
+}
+#page-forecast .forecast-content {
+  min-width: 0;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+#page-forecast .forecast-table {
+  width: 100%;
+  min-width: 760px;
+}
+#page-forecast .forecast-table th,
+#page-forecast .forecast-table td {
+  vertical-align: top;
+}
+#page-forecast .forecast-table th:last-child,
+#page-forecast .forecast-table td:last-child {
+  width: 72px;
+  text-align: right;
+}
+#page-forecast .forecast-stock,
+#page-forecast .forecast-signal,
+#page-forecast .forecast-window {
+  color: var(--tm-text);
+  font-size: var(--fs-b2);
+  font-weight: var(--fw-med);
+  line-height: 1.45;
+  letter-spacing: 0;
+  overflow-wrap: anywhere;
+}
+#page-forecast .forecast-meta {
+  margin-top: 2px;
+  color: var(--tm-text-mute);
+  font-family: var(--mono);
+  font-size: var(--fs-l1);
+  line-height: 1.45;
+  letter-spacing: 0;
+}
+#page-forecast .forecast-level {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 46px;
+  padding: 3px 8px;
+  border: 1px solid var(--tm-amber);
+  background: var(--tm-amber-soft);
+  color: var(--tm-amber);
+  font-family: var(--font-display);
+  font-size: var(--fs-l1);
+  font-weight: var(--fw-semi);
+  line-height: 1.2;
+  letter-spacing: 0;
+}
+#page-forecast .forecast-level.alert {
+  border-color: var(--tm-up);
+  background: var(--tm-up-soft);
+  color: var(--tm-up);
+}
+
 /* 오늘의 운세 — date-locked condition check */
 #page-fortune .fortune-terminal {
   min-height: calc(100vh - 58px);

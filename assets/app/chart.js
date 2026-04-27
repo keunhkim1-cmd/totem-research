@@ -5,9 +5,9 @@ import {
   fetchJson,
   fmt,
   safeStockCode,
-} from './dom_utils.js?v=20260426-6';
-import { appState, isCurrentChart } from './state.js?v=20260426-6';
-import { renderChartLegend } from './warning_render.js?v=20260426-6';
+} from './dom_utils.js?v=20260427-1';
+import { appState, isCurrentChart } from './state.js?v=20260427-1';
+import { renderChartLegend } from './warning_render.js?v=20260427-1';
 
 // 경고 탭 인라인 SVG 차트 — NAVER 일별 주가 + 3개 임계선
 // TV 무료 embed는 한국 소형주 차트 렌더가 막혀 AAPL로 fallback되므로 사용하지 않음.

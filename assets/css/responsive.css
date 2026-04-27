@@ -66,6 +66,29 @@
   #page-patchnotes .patch-entry-date {
     justify-self: end;
   }
+  #page-forecast .forecast-hero {
+    padding: 24px 12px 14px;
+  }
+  #page-forecast .forecast-hero h1 {
+    font-size: var(--fs-d1);
+  }
+  #page-forecast .forecast-panel {
+    margin-left: 12px;
+    margin-right: 12px;
+  }
+  #page-forecast .forecast-refresh {
+    margin-left: 0;
+  }
+  #page-forecast .forecast-summary {
+    grid-template-columns: 1fr;
+  }
+  #page-forecast .forecast-summary .tm-cell {
+    border-right: none;
+    border-bottom: 1px solid var(--tm-hairline);
+  }
+  #page-forecast .forecast-summary .tm-cell:last-child {
+    border-bottom: none;
+  }
   #page-fortune .patch-hero {
     padding: 24px 12px 14px;
   }
@@ -119,6 +142,15 @@
   #page-patchnotes .patch-list .tm-sec-head {
     padding-left: 12px;
     padding-right: 12px;
+  }
+  #page-forecast .forecast-panel .tm-sec-head {
+    padding-left: 12px;
+    padding-right: 12px;
+  }
+  #page-forecast .forecast-table th,
+  #page-forecast .forecast-table td {
+    padding-left: 10px;
+    padding-right: 10px;
   }
   #page-fortune .fortune-panel .tm-sec-head,
   #page-fortune .fortune-message {

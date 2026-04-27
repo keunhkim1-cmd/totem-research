@@ -56,6 +56,11 @@ def test_public_api_routes_return_success_envelopes(monkeypatch, local_api_serve
     )
     monkeypatch.setattr(
         usecases,
+        'market_alert_forecast_payload',
+        lambda: {'todayKst': '2026-04-26', 'summary': {'total': 0}, 'items': [], 'errors': []},
+    )
+    monkeypatch.setattr(
+        usecases,
         'stock_code_payload',
         lambda name: {'query': name, 'items': [{'code': '005930', 'name': name}]},
     )
@@ -70,6 +75,7 @@ def test_public_api_routes_return_success_envelopes(monkeypatch, local_api_serve
     routes = [
         '/api/warn-search?name=%EC%82%BC%EC%84%B1%EC%A0%84%EC%9E%90',
         '/api/caution-search?name=%EC%82%BC%EC%84%B1%EC%A0%84%EC%9E%90',
+        '/api/market-alert-forecast',
         '/api/stock-code?name=%EC%82%BC%EC%84%B1%EC%A0%84%EC%9E%90',
         '/api/stock-price?code=005930',
         '/api/stock-overview?code=005930',

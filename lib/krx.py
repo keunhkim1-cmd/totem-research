@@ -87,7 +87,7 @@ def parse_kind_html(html: str, level_name: str) -> list:
     return results
 
 
-def search_kind(stock_name: str) -> list:
+def search_kind(stock_name: str, *, raise_on_error: bool = False) -> list:
     all_results = []
 
     # 투자경고/투자위험 두 페이지를 병렬 조회
@@ -103,6 +103,8 @@ def search_kind(stock_name: str) -> list:
             log_event(
                 'warning', 'krx_kind_fetch_failed', menu_index=idx, error=safe_exception_text(e)
             )
+            if raise_on_error:
+                raise
             return []
 
     with ThreadPoolExecutor(max_workers=2) as pool:
@@ -123,7 +125,7 @@ def search_kind(stock_name: str) -> list:
     return deduped
 
 
-def search_kind_caution(stock_name: str) -> list:
+def search_kind_caution(stock_name: str, *, raise_on_error: bool = False) -> list:
     """투자주의(menuIndex=1) 페이지에서 stock_name 부분일치 종목의 지정 이력 집계.
 
     반환 각 항목:
@@ -139,6 +141,8 @@ def search_kind_caution(stock_name: str) -> list:
         html = fetch_kind_page('1', days_back=21, page_size=1000)
     except Exception as e:
         log_event('warning', 'krx_caution_fetch_failed', error=safe_exception_text(e))
+        if raise_on_error:
+            raise
         return []
 
     # rows_by_stock[name] = [(date_str, reason, market), ...]
