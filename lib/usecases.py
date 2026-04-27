@@ -12,6 +12,7 @@ from lib.forecast_policy import FORECAST_POLICY, build_forecast_signal
 from lib.holidays import count_trading_days, is_trading_day
 from lib.http_utils import safe_exception_text
 from lib.krx import search_kind, search_kind_caution
+from lib.http_client import ExternalAPIError
 from lib.naver import (
     calc_official_escalation,
     calc_thresholds,
@@ -266,6 +267,15 @@ def _forecast_source_error(source: str, message: str, *, stock_name: str = '') -
     return error
 
 
+def _forecast_source_error_message(prefix: str, exc: Exception) -> str:
+    if isinstance(exc, ExternalAPIError) and exc.provider == 'krx' and exc.status == 403:
+        return (
+            f'{prefix}: KRX KIND가 배포 서버 조회를 일시적으로 제한했습니다. '
+            '잠시 후 새로고침하면 재시도합니다.'
+        )
+    return f'{prefix}: {safe_exception_text(exc)}'
+
+
 def _warning_history_still_active(row: dict, today_date: date) -> tuple[bool, dict | None]:
     stock_name = row.get('stockName', '')
     designation = row.get('designationDate', '')
@@ -409,7 +419,7 @@ def market_alert_forecast_payload() -> dict:
     except Exception as e:
         errors.append(_forecast_source_error(
             'krx-caution',
-            f'KRX 투자주의/지정예고 조회 실패: {safe_exception_text(e)}',
+            _forecast_source_error_message('KRX 투자주의/지정예고 조회 실패', e),
         ))
         caution_rows = []
 
@@ -429,7 +439,7 @@ def market_alert_forecast_payload() -> dict:
         warning_rows = []
         errors.append(_forecast_source_error(
             'krx-warning',
-            f'KRX 투자경고/위험 조회 실패: {safe_exception_text(e)}',
+            _forecast_source_error_message('KRX 투자경고/위험 조회 실패', e),
         ))
     current_warning_names, warning_status_errors = _current_warning_candidate_names(
         warning_rows,

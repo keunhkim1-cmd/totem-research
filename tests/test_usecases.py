@@ -290,6 +290,28 @@ class MarketAlertForecastPayloadTests(unittest.TestCase):
         self.assertIn('krx down', payload['errors'][0]['message'])
         search_kind.assert_not_called()
 
+    def test_forecast_caution_krx_403_uses_user_safe_message(self):
+        today = date(2026, 4, 24)
+        error = usecases.ExternalAPIError(
+            'krx HTTP 403 while requesting https://kind.krx.co.kr/blocked',
+            provider='krx',
+            status=403,
+            url='https://kind.krx.co.kr/blocked',
+        )
+        with (
+            patch.object(usecases, '_today_kst_date', return_value=today),
+            patch.object(usecases, 'search_kind_caution', side_effect=error),
+            patch.object(usecases, 'search_kind') as search_kind,
+        ):
+            payload = usecases.market_alert_forecast_payload()
+
+        self.assertEqual(payload['summary']['total'], 0)
+        self.assertEqual(payload['items'], [])
+        self.assertEqual(payload['errors'][0]['source'], 'krx-caution')
+        self.assertIn('배포 서버 조회를 일시적으로 제한', payload['errors'][0]['message'])
+        self.assertNotIn('https://kind.krx.co.kr', payload['errors'][0]['message'])
+        search_kind.assert_not_called()
+
     def test_forecast_warning_fetch_failure_surfaces_error(self):
         today = date(2026, 4, 24)
         warn = self._warn('조회오류후보', '2026-04-23')

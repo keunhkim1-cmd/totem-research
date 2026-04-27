@@ -1,7 +1,6 @@
 """KRX KIND 투자경고/위험 종목 검색"""
 
 import urllib.parse, re
-from concurrent.futures import ThreadPoolExecutor
 from datetime import date, timedelta
 
 from lib.cache import TTLCache
@@ -49,7 +48,7 @@ def fetch_kind_page(
                 f'https://kind.krx.co.kr/investwarn/investattentwarnrisky.do?{params}',
                 headers=HEADERS,
                 timeout=KRX_KIND_TIMEOUT,
-                retries=1,
+                retries=2,
                 encoding='utf-8',
                 errors='replace',
             )
@@ -90,7 +89,6 @@ def parse_kind_html(html: str, level_name: str) -> list:
 def search_kind(stock_name: str, *, raise_on_error: bool = False) -> list:
     all_results = []
 
-    # 투자경고/투자위험 두 페이지를 병렬 조회
     def _fetch_level(args):
         idx, level = args
         try:
@@ -107,8 +105,9 @@ def search_kind(stock_name: str, *, raise_on_error: bool = False) -> list:
                 raise
             return []
 
-    with ThreadPoolExecutor(max_workers=2) as pool:
-        results_list = list(pool.map(_fetch_level, [('2', '투자경고'), ('3', '투자위험')]))
+    # KRX KIND can intermittently reject tightly parallel Vercel-origin calls.
+    # Two small sequential requests are slower by milliseconds but much gentler.
+    results_list = [_fetch_level(args) for args in [('2', '투자경고'), ('3', '투자위험')]]
 
     for rows in results_list:
         all_results.extend(rows)

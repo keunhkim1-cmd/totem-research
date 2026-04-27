@@ -291,8 +291,11 @@ def test_market_alert_forecast_tab_surfaces_source_error(local_server, page: Pag
     page.goto(local_server)
     page.get_by_role('tab', name='투자경고 예보 (개발중)').click()
 
-    expect(page.locator('#forecastContent')).to_contain_text('투자경고 예보를 불러올 수 없습니다')
     expect(page.locator('#forecastContent')).to_contain_text('KRX 투자주의/지정예고 조회 실패')
+    expect(page.locator('#forecastContent')).to_contain_text(
+        'KRX 원천 조회가 일시적으로 제한되어 예보 후보를 확인할 수 없습니다'
+    )
+    expect(page.locator('#forecastContent')).not_to_contain_text('투자경고 예보를 불러올 수 없습니다')
     expect(page.locator('#forecastContent')).not_to_contain_text('활성 투자경고 지정예고 후보가 없습니다')
 
 

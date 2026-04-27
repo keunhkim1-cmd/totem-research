@@ -14,18 +14,30 @@ from lib.http_utils import log_event, redact_url, safe_exception_text
 from lib.retry import NonRetryableError, RetryableError, retry
 
 
-DEFAULT_USER_AGENT = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7)'
+DEFAULT_USER_AGENT = (
+    'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) '
+    'AppleWebKit/537.36 (KHTML, like Gecko) '
+    'Chrome/125.0.0.0 Safari/537.36'
+)
 
 JSON_HEADERS = {
     'Accept': 'application/json',
     'User-Agent': DEFAULT_USER_AGENT,
 }
 BROWSER_HEADERS = {
-    'Accept': 'text/html,application/xhtml+xml',
+    'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+    'Accept-Language': 'ko-KR,ko;q=0.9,en-US;q=0.8,en;q=0.7',
+    'Cache-Control': 'no-cache',
+    'Pragma': 'no-cache',
     'User-Agent': DEFAULT_USER_AGENT,
 }
 
 TRANSIENT_HTTP_STATUSES = frozenset({408, 425, 429, 500, 502, 503, 504})
+PROVIDER_TRANSIENT_HTTP_STATUSES = {
+    # KIND occasionally returns edge/WAF 403s from Vercel even when the same
+    # request succeeds moments later. Treat it as retryable for KRX only.
+    'krx': frozenset({403}),
+}
 
 
 class ExternalAPIError(RuntimeError):
@@ -72,7 +84,8 @@ def _error_from_http_error(provider: str, err: urllib.error.HTTPError, secret_qu
     safe_url = redact_url(err.geturl(), secret_query_keys)
     retry_after = _retry_after_seconds(err.headers)
     message = f'{provider} HTTP {err.code} while requesting {safe_url}'
-    if err.code in TRANSIENT_HTTP_STATUSES:
+    provider_transient = PROVIDER_TRANSIENT_HTTP_STATUSES.get(provider, frozenset())
+    if err.code in TRANSIENT_HTTP_STATUSES or err.code in provider_transient:
         return RetryableHTTPError(
             message,
             provider=provider,

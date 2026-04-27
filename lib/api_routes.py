@@ -33,6 +33,7 @@ class ApiRoute:
     legacy_key: str = 'error'
     status_value: str | None = None
     dart_errors: bool = False
+    cache_control: str | None = None
 
 
 def _q(qs: dict, key: str, default: str = '') -> str:
@@ -56,6 +57,7 @@ ROUTES: tuple[ApiRoute, ...] = (
         path='/api/market-alert-forecast',
         endpoint='market-alert-forecast',
         payload=lambda qs: usecases.market_alert_forecast_payload(),
+        cache_control='no-store',
     ),
     ApiRoute(
         path='/api/stock-code',
@@ -98,6 +100,7 @@ def _send_error(handler, route: ApiRoute, status: int, code: str, message: str, 
         message,
         legacy_key=route.legacy_key,
         status_value=route.status_value,
+        cache_control=route.cache_control,
         **extra,
     )
 
@@ -121,7 +124,7 @@ def dispatch(handler, route: ApiRoute, qs: dict) -> None:
         _send_error(handler, route, 500, 'INTERNAL_ERROR', '서버 오류가 발생했습니다.')
         return
 
-    send_json_response(handler, 200, api_success_payload(data))
+    send_json_response(handler, 200, api_success_payload(data), cache_control=route.cache_control)
 
 
 class RouteHandler(BaseHTTPRequestHandler):

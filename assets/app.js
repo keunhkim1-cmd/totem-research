@@ -1,6 +1,6 @@
 // 앱 부트스트랩 — 모듈 결합 + 이벤트 와이어 + 초기화.
-import { createSecondaryPageRenderers } from './secondary_pages.js?v=20260427-4';
-import { appState } from './app/state.js?v=20260427-4';
+import { createSecondaryPageRenderers } from './secondary_pages.js?v=20260427-5';
+import { appState } from './app/state.js?v=20260427-5';
 import {
   apiErrorMessage,
   escHtml,
@@ -8,9 +8,9 @@ import {
   hideSearchResults,
   setElementState,
   showRuntimeError,
-} from './app/dom_utils.js?v=20260427-4';
-import { toDateStr } from './app/calendar.js?v=20260427-4';
-import { doSearch, selectResult } from './app/search.js?v=20260427-4';
+} from './app/dom_utils.js?v=20260427-5';
+import { toDateStr } from './app/calendar.js?v=20260427-5';
+import { doSearch, selectResult } from './app/search.js?v=20260427-5';
 
 // ────────────────────────────────────────────────
 // 전역 에러 핸들러

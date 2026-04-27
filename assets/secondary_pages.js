@@ -122,12 +122,15 @@ export function createSecondaryPageRenderers({
     return `<div class="forecast-scorebar" aria-hidden="true"><span style="width:${score}%"></span></div>`;
   }
 
-  function renderForecastRows(items) {
+  function renderForecastRows(items, hasSourceErrors = false) {
     if (!Array.isArray(items) || items.length === 0) {
+      const message = hasSourceErrors
+        ? 'KRX 원천 조회가 일시적으로 제한되어 예보 후보를 확인할 수 없습니다.'
+        : '활성 투자경고 지정예고 후보가 없습니다.';
       return `
         <table class="tm-tbl forecast-table">
           <tbody>
-            <tr class="state-row"><td>${escHtml('활성 투자경고 지정예고 후보가 없습니다.')}</td></tr>
+            <tr class="state-row"><td>${escHtml(message)}</td></tr>
           </tbody>
         </table>`;
     }
@@ -203,13 +206,11 @@ export function createSecondaryPageRenderers({
       }
       const sourceErrors = Array.isArray(data.errors) ? data.errors : [];
       const items = Array.isArray(data.items) ? data.items : [];
-      if (sourceErrors.length > 0 && items.length === 0) {
-        throw new Error(sourceErrors[0]?.message || '예보 원천 데이터를 확인할 수 없습니다.');
-      }
       appState.forecast.loaded = true;
       appState.forecast.items = items;
       summaryEl.innerHTML = forecastSummaryHtml(data);
-      container.innerHTML = forecastErrorsHtml(sourceErrors) + renderForecastRows(appState.forecast.items);
+      container.innerHTML = forecastErrorsHtml(sourceErrors) +
+        renderForecastRows(appState.forecast.items, sourceErrors.length > 0);
       bindForecastChecks(container);
     } catch (e) {
       appState.forecast.loaded = false;
