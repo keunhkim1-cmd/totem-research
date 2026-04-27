@@ -857,6 +857,11 @@
   color: var(--tm-ok);
   border-left-color: var(--tm-ok);
 }
+.warning-terminal .overall-status.soft {
+  background: var(--tm-amber-soft);
+  color: var(--tm-amber);
+  border-left-color: var(--tm-amber);
+}
 .warning-terminal .state-message,
 .warning-terminal .price-error,
 .warning-terminal .result-empty {
@@ -885,4 +890,3 @@
 .warning-terminal .state-message-loading {
   color: var(--tm-text-mute);
 }
-

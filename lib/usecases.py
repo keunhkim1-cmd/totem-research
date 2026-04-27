@@ -8,7 +8,8 @@ from datetime import date, datetime, timedelta, timezone
 
 from lib.dart import search_disclosure
 from lib.dart_base import DART_SEARCH_OK_STATUSES, raise_for_status
-from lib.holidays import add_trading_days, count_trading_days
+from lib.forecast_policy import FORECAST_POLICY, build_forecast_signal
+from lib.holidays import count_trading_days, is_trading_day
 from lib.http_utils import safe_exception_text
 from lib.krx import search_kind, search_kind_caution
 from lib.naver import (
@@ -44,6 +45,19 @@ INTERNAL_REVIEW_REASON_KEYWORDS = (
 )
 
 
+def _nth_trading_day_inclusive(start: date, n: int) -> date:
+    if n < 1:
+        raise ValueError('n must be >= 1')
+    cur = start
+    count = 0
+    while True:
+        if is_trading_day(cur):
+            count += 1
+            if count == n:
+                return cur
+        cur += timedelta(days=1)
+
+
 def _market_to_index_symbol(market: str) -> str:
     """시장명(한글/영문) → 네이버 fchart 지수 심볼."""
     if not market:
@@ -69,21 +83,25 @@ def _active_warning_notice(entries: list, today_date: date) -> dict | None:
             notice_date = date.fromisoformat(entry['date'])
         except (KeyError, TypeError, ValueError):
             continue
-        last_judgment = add_trading_days(notice_date, 10)
+        first_judgment = _nth_trading_day_inclusive(notice_date, 1)
+        last_judgment = _nth_trading_day_inclusive(notice_date, 10)
         if last_judgment < today_date:
             continue
-        first_judgment = add_trading_days(notice_date, 1)
-        try:
-            elapsed = count_trading_days(notice_date, today_date) - 1
-        except Exception:
+        if today_date < first_judgment:
             elapsed = 0
+        else:
+            try:
+                elapsed = count_trading_days(first_judgment, today_date)
+            except Exception:
+                elapsed = 0
         return {
             'noticeDate': entry['date'],
             'noticeReason': str(entry.get('reason', '')),
             'firstJudgmentDate': first_judgment.isoformat(),
             'lastJudgmentDate': last_judgment.isoformat(),
-            'judgmentDayIndex': max(0, elapsed),
+            'judgmentDayIndex': max(0, min(10, elapsed)),
             'judgmentWindowTotal': 10,
+            'judgmentWindowRule': '지정예고일 포함 10거래일',
         }
     return None
 
@@ -194,6 +212,7 @@ def caution_search_payload(raw_name: str) -> dict:
         'status': 'ok', **base_fields,
         'code': code, 'market': naver_market, 'indexSymbol': idx_symbol,
         'escalation': escalation,
+        'forecastSignal': build_forecast_signal(escalation),
     }
 
 
@@ -220,11 +239,19 @@ def _forecast_base_item(warn: dict, active_notice: dict) -> dict:
 
 def _forecast_needs_review(item: dict, detail: str) -> dict:
     item.update({
-        'level': 'watch',
-        'levelLabel': '주의보',
+        'level': 'review',
+        'levelLabel': '확인',
         'calcStatus': 'needs_review',
         'calcStatusLabel': '확인 필요',
         'calcDetail': detail,
+        'riskScore': 0,
+        'forecastSignal': {
+            'riskLevel': 'review',
+            'riskLabel': '확인 필요',
+            'riskScore': 0,
+            'primarySignal': detail,
+            'remainingText': '공개 데이터만으로 자동 판단 불가',
+        },
     })
     return item
 
@@ -357,13 +384,15 @@ def _forecast_item_from_notice(warn: dict, active_notice: dict) -> dict:
     if 'error' in escalation:
         return _forecast_needs_review(item, escalation['error'])
 
-    headline = escalation.get('headline', {})
-    if headline.get('verdict') == 'strong':
-        item.update({'level': 'alert', 'levelLabel': '경보'})
+    signal = build_forecast_signal(escalation)
     item.update({
+        'level': signal.get('level', 'watch'),
+        'levelLabel': signal.get('levelLabel', '주의보'),
+        'riskScore': signal.get('riskScore', 0),
         'calcStatus': 'calculated',
-        'calcStatusLabel': '계산 완료',
+        'calcStatusLabel': signal.get('riskLabel', '계산 완료'),
         'escalation': escalation,
+        'forecastSignal': signal,
     })
     return item
 
@@ -428,31 +457,43 @@ def market_alert_forecast_payload() -> dict:
                 items.append(future.result())
             except Exception as e:
                 items.append({
-                    'level': 'watch',
-                    'levelLabel': '주의보',
+                    'level': 'review',
+                    'levelLabel': '확인',
                     'stockName': '',
+                    'riskScore': 0,
                     'calcStatus': 'needs_review',
                     'calcStatusLabel': '확인 필요',
                     'calcDetail': str(e),
+                    'forecastSignal': {
+                        'riskLevel': 'review',
+                        'riskLabel': '확인 필요',
+                        'riskScore': 0,
+                        'primarySignal': str(e),
+                        'remainingText': '공개 데이터만으로 자동 판단 불가',
+                    },
                 })
 
-    level_rank = {'alert': 0, 'watch': 1}
+    level_rank = {'alert': 0, 'near': 1, 'watch': 2, 'review': 3}
     items.sort(key=lambda item: (
         level_rank.get(item.get('level'), 9),
+        -int(item.get('riskScore', 0) or 0),
         item.get('lastJudgmentDate', ''),
         item.get('stockName', ''),
     ))
     summary = {
         'total': len(items),
         'alert': sum(1 for item in items if item.get('level') == 'alert'),
+        'near': sum(1 for item in items if item.get('level') == 'near'),
         'watch': sum(1 for item in items if item.get('level') == 'watch'),
         'calculated': sum(1 for item in items if item.get('calcStatus') == 'calculated'),
         'needsReview': sum(1 for item in items if item.get('calcStatus') == 'needs_review'),
         'excludedCurrentWarning': excluded_current_warning,
     }
+    summary['highRisk'] = summary['alert'] + summary['near']
     return {
         'todayKst': today_kst,
         'generatedAt': generated_at,
+        'policy': FORECAST_POLICY,
         'summary': summary,
         'items': items,
         'errors': errors,

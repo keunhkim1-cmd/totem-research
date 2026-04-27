@@ -153,7 +153,7 @@
   overflow-wrap: anywhere;
 }
 
-/* 시장경보 예보 — KRX designation forecast */
+/* 투자경고 예보 — KRX designation forecast */
 #page-forecast .forecast-terminal {
   min-height: calc(100vh - 58px);
   background: var(--tm-bg);
@@ -173,6 +173,12 @@
   margin: 6px 0 8px;
   letter-spacing: 0;
   line-height: 1;
+}
+#page-forecast .forecast-dev-tag {
+  color: var(--tm-amber);
+  font-size: var(--fs-b2);
+  font-weight: var(--fw-med);
+  vertical-align: middle;
 }
 #page-forecast .forecast-hero p {
   max-width: 620px;
@@ -296,6 +302,28 @@
   border-color: var(--tm-up);
   background: var(--tm-up-soft);
   color: var(--tm-up);
+}
+#page-forecast .forecast-level.near {
+  border-color: var(--tm-amber);
+  background: rgba(255, 159, 10, 0.18);
+  color: var(--tm-amber);
+}
+#page-forecast .forecast-level.review {
+  border-color: var(--tm-text-mute);
+  background: rgba(142, 142, 147, 0.14);
+  color: var(--tm-text-dim);
+}
+#page-forecast .forecast-scorebar {
+  width: min(180px, 100%);
+  height: 3px;
+  margin-top: 7px;
+  background: var(--tm-elev);
+  overflow: hidden;
+}
+#page-forecast .forecast-scorebar span {
+  display: block;
+  height: 100%;
+  background: var(--tm-up);
 }
 
 /* 오늘의 운세 — date-locked condition check */

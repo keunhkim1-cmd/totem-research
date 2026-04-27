@@ -67,8 +67,8 @@ export function createSecondaryPageRenderers({
     const cells = [
       ['기준일', data.todayKst || '—', generated],
       ['경보', summary.alert || 0, '공개 조건 충족'],
-      ['주의보', summary.watch || 0, '활성 지정예고'],
-      ['확인 필요', summary.needsReview || 0, '코드·가격·내부요건'],
+      ['근접', summary.near || 0, '고위험 후보'],
+      ['관찰', summary.watch || 0, `확인 필요 ${summary.needsReview || 0}`],
     ];
     return cells.map(([label, value, sub]) => `
       <div class="tm-cell">
@@ -90,6 +90,8 @@ export function createSecondaryPageRenderers({
   }
 
   function forecastSignalText(item) {
+    const signal = item.forecastSignal || {};
+    if (signal.primarySignal) return signal.primarySignal;
     if (item.calcStatus === 'calculated') {
       const escalation = item.escalation || {};
       const headline = escalation.headline || {};
@@ -103,6 +105,23 @@ export function createSecondaryPageRenderers({
     return item.calcDetail || item.calcStatusLabel || '확인 필요';
   }
 
+  function forecastSignalMeta(item) {
+    const signal = item.forecastSignal || {};
+    const parts = [];
+    const score = Number(signal.riskScore ?? item.riskScore);
+    if (Number.isFinite(score) && score > 0) parts.push(`risk ${Math.max(0, Math.min(100, Math.round(score)))}`);
+    if (signal.remainingText) parts.push(signal.remainingText);
+    return parts.join(' · ') || item.calcStatusLabel || '';
+  }
+
+  function forecastScoreHtml(item) {
+    if (item.calcStatus !== 'calculated') return '';
+    const signal = item.forecastSignal || {};
+    const raw = Number(signal.riskScore ?? item.riskScore ?? 0);
+    const score = Number.isFinite(raw) ? Math.max(0, Math.min(100, Math.round(raw))) : 0;
+    return `<div class="forecast-scorebar" aria-hidden="true"><span style="width:${score}%"></span></div>`;
+  }
+
   function renderForecastRows(items) {
     if (!Array.isArray(items) || items.length === 0) {
       return `
@@ -113,11 +132,11 @@ export function createSecondaryPageRenderers({
         </table>`;
     }
     const rows = items.map((item) => {
-      const levelClass = item.level === 'alert' ? 'alert' : 'watch';
+      const levelClass = ['alert', 'near', 'review'].includes(item.level) ? item.level : 'watch';
       const code = item.code ? ` · ${item.code}` : '';
       const market = item.market || item.krxMarket || '시장 미확인';
       const windowText = `${item.firstJudgmentDate || '—'} ~ ${item.lastJudgmentDate || '—'}`;
-      const dayText = `D${item.judgmentDayIndex || 0}/${item.judgmentWindowTotal || 10}`;
+      const dayText = `판단 ${item.judgmentDayIndex || 0}/${item.judgmentWindowTotal || 10}`;
       return `
         <tr class="forecast-row forecast-row-${levelClass}">
           <td><span class="forecast-level ${levelClass}">${escHtml(item.levelLabel || '주의보')}</span></td>
@@ -131,7 +150,8 @@ export function createSecondaryPageRenderers({
           </td>
           <td>
             <div class="forecast-signal">${escHtml(forecastSignalText(item))}</div>
-            <div class="forecast-meta">${escHtml(item.calcStatusLabel || '')}</div>
+            <div class="forecast-meta">${escHtml(forecastSignalMeta(item))}</div>
+            ${forecastScoreHtml(item)}
           </td>
           <td><button type="button" class="forecast-check" data-stock="${escHtml(item.stockName || '')}">점검</button></td>
         </tr>`;
@@ -143,7 +163,7 @@ export function createSecondaryPageRenderers({
             <th>예보</th>
             <th>종목</th>
             <th>판단 기간</th>
-            <th>조건</th>
+            <th>근접도</th>
             <th>동작</th>
           </tr>
         </thead>
@@ -174,7 +194,7 @@ export function createSecondaryPageRenderers({
     }
 
     summaryEl.innerHTML = '';
-    setElementState(container, '시장경보 예보를 불러오는 중...', 'loading');
+    setElementState(container, '투자경고 예보를 불러오는 중...', 'loading');
     try {
       const data = await fetchJson('/api/market-alert-forecast', { cache: 'no-cache' });
       const error = apiErrorMessage(data);
@@ -194,7 +214,7 @@ export function createSecondaryPageRenderers({
     } catch (e) {
       appState.forecast.loaded = false;
       summaryEl.innerHTML = '';
-      setElementState(container, `시장경보 예보를 불러올 수 없습니다: ${e.message}`, 'error');
+      setElementState(container, `투자경고 예보를 불러올 수 없습니다: ${e.message}`, 'error');
     }
   }
 

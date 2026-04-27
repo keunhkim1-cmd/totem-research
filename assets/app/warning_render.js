@@ -4,8 +4,8 @@ import {
   fmt,
   stateMessageHtml,
   showSearchMessage,
-} from './dom_utils.js?v=20260427-1';
-import { countTradingDays } from './calendar.js?v=20260427-1';
+} from './dom_utils.js?v=20260427-4';
+import { countTradingDays } from './calendar.js?v=20260427-4';
 
 export function hideWarningCards() {
   const rc = document.getElementById('resultCard');
@@ -91,6 +91,9 @@ export function renderCaution(d) {
     const matched = e.sets[h.matchedSet];
     verdict.classList.add('keep');
     verdict.textContent = `→ 투자경고 지정 예상 · ${matched.label} 충족`;
+  } else if (d.forecastSignal?.riskLevel === 'near') {
+    verdict.classList.add('soft');
+    verdict.textContent = `→ 투자경고 지정 근접 · ${d.forecastSignal.remainingText || '공개 가격조건 근접'}`;
   } else {
     verdict.classList.add('release');
     verdict.textContent = '→ 투자경고 지정 미해당';

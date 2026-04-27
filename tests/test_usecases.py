@@ -165,6 +165,17 @@ class CautionSearchPayloadTests(unittest.TestCase):
         self.assertEqual(usecases._market_to_index_symbol(''), '')
         self.assertEqual(usecases._market_to_index_symbol('UNKNOWN'), '')
 
+    def test_active_warning_notice_uses_notice_date_as_judgment_day_one(self):
+        notice = usecases._active_warning_notice(
+            [{'date': '2026-04-24', 'reason': '투자경고 지정예고'}],
+            date(2026, 4, 24),
+        )
+
+        self.assertEqual(notice['firstJudgmentDate'], '2026-04-24')
+        self.assertEqual(notice['lastJudgmentDate'], '2026-05-11')
+        self.assertEqual(notice['judgmentDayIndex'], 1)
+        self.assertEqual(notice['judgmentWindowRule'], '지정예고일 포함 10거래일')
+
 
 class MarketAlertForecastPayloadTests(unittest.TestCase):
     def _warn(self, name: str, notice: str, reason: str = '투자경고 지정예고'):
@@ -325,7 +336,7 @@ class MarketAlertForecastPayloadTests(unittest.TestCase):
         self.assertEqual(payload['items'][0]['calcStatus'], 'needs_review')
         stock_code.assert_not_called()
 
-    def test_forecast_price_failure_is_watch_needs_review(self):
+    def test_forecast_price_failure_is_review_needs_review(self):
         today = date(2026, 4, 24)
         warn = self._warn('가격오류', '2026-04-23')
         with (
@@ -338,7 +349,8 @@ class MarketAlertForecastPayloadTests(unittest.TestCase):
         ):
             payload = usecases.market_alert_forecast_payload()
 
-        self.assertEqual(payload['summary']['watch'], 1)
+        self.assertEqual(payload['summary']['needsReview'], 1)
+        self.assertEqual(payload['items'][0]['level'], 'review')
         self.assertEqual(payload['items'][0]['calcStatus'], 'needs_review')
         self.assertIn('timeout', payload['items'][0]['calcDetail'])
 

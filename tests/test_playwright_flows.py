@@ -247,8 +247,9 @@ def test_market_alert_forecast_tab_renders_and_checks_stock(local_server, page: 
     )
 
     page.goto(local_server)
-    page.get_by_role('tab', name='시장 경보 예보(개발중)').click()
+    page.get_by_role('tab', name='투자경고 예보 (개발중)').click()
 
+    expect(page.locator('#forecastTitle')).to_contain_text('(개발중)')
     expect(page.locator('#forecastSummary')).to_contain_text('경보')
     expect(page.locator('#forecastContent')).to_contain_text('테스트전자')
     expect(page.locator('#forecastContent')).to_contain_text('단기급등 충족')
@@ -288,9 +289,9 @@ def test_market_alert_forecast_tab_surfaces_source_error(local_server, page: Pag
     )
 
     page.goto(local_server)
-    page.get_by_role('tab', name='시장 경보 예보(개발중)').click()
+    page.get_by_role('tab', name='투자경고 예보 (개발중)').click()
 
-    expect(page.locator('#forecastContent')).to_contain_text('시장경보 예보를 불러올 수 없습니다')
+    expect(page.locator('#forecastContent')).to_contain_text('투자경고 예보를 불러올 수 없습니다')
     expect(page.locator('#forecastContent')).to_contain_text('KRX 투자주의/지정예고 조회 실패')
     expect(page.locator('#forecastContent')).not_to_contain_text('활성 투자경고 지정예고 후보가 없습니다')
 
