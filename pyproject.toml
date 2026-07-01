@@ -1,7 +1,7 @@
 [project]
 name = "app"
 version = "0.1.0"
-dependencies = [ "supabase==2.28.3" ]
+dependencies = [ "supabase==2.31.0" ]
 requires-python = "~=3.14.0"
 
 [project.optional-dependencies]
